@@ -1,12 +1,5 @@
 # MarkdownNotes
 
-Copyright (c) 2019 Tobias Zeising, tobias.zeising@aditu.de  
-https://www.aditu.de  
-Licensed under the GPLv3 license
-Source and Copyright Logo: [creativenerds.co.uk](https://creativenerds.co.uk/freebies/80-free-wildlife-icons-the-best-ever-animal-icon-set/)
-
-## about
-
 MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by using markdown syntax.
 
 ![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_1.jpg "MarkdownNote Screenshot")
@@ -32,6 +25,10 @@ MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by
 ![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_3.jpg "MarkdownNote Screenshot")
 
 ## credits
+
+Copyright (c) 2019 Tobias Zeising, tobias.zeising@aditu.de  
+https://www.aditu.de  
+Licensed under the GPLv3 license
 
 Special thanks to the great programmers of this libraries which will be used:
 
