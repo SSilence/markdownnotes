@@ -5,17 +5,19 @@ https://www.aditu.de
 Licensed under the GPLv3 license
 Source and Copyright Logo: [creativenerds.co.uk](https://creativenerds.co.uk/freebies/80-free-wildlife-icons-the-best-ever-animal-icon-set/)
 
-## ABOUT
+## about
 
 MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by using markdown syntax.
 
-## REQUIREMENTS
+![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_1.jpg "MarkdownNote Screenshot")
+
+## requirements
 
 * PHP Webspace (just 4 a small backend script, runs everywhere with PHP5+)
 * all modern Browsers and on Internet Explorer 11+
 * mobile Browsers
 
-## INSTALLATION 
+## installation 
 
 1. Download latest stable release ZIP file from https://github.com/SSilence/markdownnotes/releases and unzip
 2. Upload all files of this folder (IMPORTANT: also upload the invisible .htaccess files)
@@ -23,7 +25,13 @@ MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by
 4. If you are using MarkdownNotes on a subpath (e.g. http://example.com/markdownnotes) then add in .htaccess the line ``RewriteBase /markdownnotes/`` and add in index.html ``<base href="/markdownnotes">``
 5. MarkdownNotes saves all data in files in the data dir. No database is necessary.
 
-## CREDITS
+## screenshots
+
+![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_2.jpg "MarkdownNote Screenshot")
+
+![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_3.jpg "MarkdownNote Screenshot")
+
+## credits
 
 Special thanks to the great programmers of this libraries which will be used:
 
