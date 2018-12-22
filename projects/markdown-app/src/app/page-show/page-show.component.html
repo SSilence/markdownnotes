@@ -1,0 +1,8 @@
+<span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
+<app-alert-error [error]="error"></app-alert-error>
+<div *ngIf="page" class="page">
+    <button class="btn btn-outline" [routerLink]="['/page', 'edit', page.id]">edit</button>
+    <clr-icon [attr.shape]="page.icon" size="28"> </clr-icon>
+    <h1>{{page.title}}</h1>
+    <div class="markdown-formatted" [innerHtml]="page.content | markdown | bookmarks | async" *ngIf="page.content"></div>
+</div>

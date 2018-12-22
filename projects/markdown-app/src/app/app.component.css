@@ -1,0 +1,14 @@
+.logo {
+    width:32px;
+    height:32px;
+    margin-right:10px;
+}
+
+.sidenav {
+    padding-top:20px;
+    overflow:scroll;
+}
+
+.nav-link {
+    cursor: pointer;
+}

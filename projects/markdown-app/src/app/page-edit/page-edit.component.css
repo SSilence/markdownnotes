@@ -1,0 +1,40 @@
+input {
+    margin-top:10px;
+    margin-bottom:20px;
+    font-size:1.5em;
+    margin-left:60px;
+    width:90%;
+}
+
+.selectedIcon {
+    position: absolute;
+}
+
+.selectIcon  {
+    cursor: pointer;
+    margin:2px;
+}
+
+.parent {
+    margin-top:10px;
+    margin-bottom:10px;
+    border-radius: .125rem;
+    border: 1px solid #d7d7d7;
+    background-color: #fff;
+    padding:15px;
+    display:inline-block;
+}
+
+.parent span {
+    display:block;
+    float:left;
+    margin-right:10px;
+}
+
+.clr-form {
+    padding-left:0;
+}
+
+.success {
+    color:#2f8400;
+}

@@ -1,0 +1,18 @@
+h1 {
+    margin-top:0;
+    margin-bottom:20px;
+    margin-left:35px;
+}
+
+button {
+    float:right;
+}
+
+.page {
+    position: relative;
+}
+
+clr-icon {
+    position: absolute;
+    top:9px;
+}

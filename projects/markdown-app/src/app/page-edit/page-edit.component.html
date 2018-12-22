@@ -1,0 +1,57 @@
+<span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
+<app-alert-error [error]="error"></app-alert-error>
+<div *ngIf="page">
+    <form class="clr-form">
+        <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><clr-icon [attr.shape]="page.icon" size="24"></clr-icon></button>
+        
+        <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page.title">
+
+        <lib-markdown-editor [(content)]="page.content"></lib-markdown-editor>
+
+        <div class="parent">
+            <span>Parent Page:</span>
+            <select  name="options" [(ngModel)]="page.parent">
+                <option [ngValue]="null">no parent</option>
+                <option [ngValue]="page" *ngFor="let page of flattenPages()" [innerHtml]="flattenPageTitle(page)"></option>
+            </select>        
+        </div>
+    </form>
+
+    <button class="btn btn-primary" (click)="save(true)">save</button> 
+    <button class="btn" (click)="save(false)" [ngClass]="{'btn-success-outline': success, 'btn-outline': !success}">save without show</button> 
+    <button class="btn btn-link" [routerLink]="['/page', page.id]" *ngIf="page.id">cancel</button>
+    <button class="btn btn-link" [routerLink]="['/']" *ngIf="!page.id">cancel</button>
+
+    <button class="btn btn-danger-outline" (click)="showDeleteConfirmation=true" style="float:right" *ngIf="page.id">delete</button>
+
+    <div *ngIf="success" class="success">page successfully saved</div>
+</div>
+
+
+<div class="modal" *ngIf="showDeleteConfirmation">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Really delete this page?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" type="button" (click)="showDeleteConfirmation=false">Cancel</button>
+                <button class="btn btn-danger" type="button" (click)="delete()">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal selectIconDialog" *ngIf="selectIconDialog">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-body">
+                <clr-icon class="selectIcon" [attr.shape]="icon" size="24" *ngFor="let icon of iconService.icons" (click)="page.icon = icon; selectIconDialog=false"></clr-icon>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" type="button" (click)="selectIconDialog=false">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" aria-hidden="true" *ngIf="showDeleteConfirmation || selectIconDialog"></div>

@@ -1,0 +1,30 @@
+<clr-main-container>
+    <clr-header class="header-6">
+        <div class="branding">
+            <a class="nav-link" [routerLink]="['/']">
+                <img class="logo" src="assets/logo.png">
+                <span class="title">MarkdownNotes</span>
+            </a>
+        </div>
+        <div class="header-nav">
+            <a class="nav-link nav-text" (click)="add()">add page</a>
+        </div>
+        <div class="header-actions">
+            <a class="nav-link nav-icon" [routerLink]="['/filelist']">
+                <clr-icon shape="upload-cloud"></clr-icon>
+            </a>
+        </div>
+    </clr-header>
+    
+    <div class="content-container">
+        <main class="content-area">
+            <router-outlet></router-outlet>
+        </main>
+        <nav class="sidenav" [clr-nav-level]="1">
+            <section class="sidenav-content">
+                <span class="spinner spinner-inline" *ngIf="loading">Loading Pages...</span>
+                <app-page-tree [pages]="pages" [active]="active" *ngIf="!loading"></app-page-tree>
+            </section>
+        </nav>
+    </div>
+</clr-main-container>

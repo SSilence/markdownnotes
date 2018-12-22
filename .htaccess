@@ -1,0 +1,6 @@
+RewriteEngine On
+# RewriteBase /notes/
+RewriteRule ^api/(.*)$ backend.php [L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.html [QSA,L]

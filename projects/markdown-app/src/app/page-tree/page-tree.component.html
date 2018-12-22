@@ -1,0 +1,7 @@
+<clr-tree>
+    <clr-tree-node *clrRecursiveFor="let page of pages; getChildren: getChildren" [clrExpanded]="!page.parent">
+        <button [routerLink]="['page', page.id]" class="clr-treenode-link" [class.active]="page.id==active">
+            <clr-icon [attr.shape]="page.icon"></clr-icon> {{page.title}}
+        </button>
+    </clr-tree-node>
+</clr-tree>
