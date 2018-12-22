@@ -40,4 +40,4 @@ Special thanks to the great programmers of this libraries which will be used:
 * ngx-clipboard: https://github.com/maxisam/ngx-clipboard
 * ngx-file-drop: https://github.com/georgipeltekov/ngx-file-drop
 
-Icon Source: https://creativenerds.co.uk/freebies/80-free-wildlife-icons-the-best-ever-animal-icon-set/
+Icon Source (design by Freepik.com): https://creativenerds.co.uk/freebies/80-free-wildlife-icons-the-best-ever-animal-icon-set/
