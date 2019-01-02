@@ -4,6 +4,13 @@ define("CONFIG_DATA_PATH", __DIR__ . "/data/pages/");
 define("CONFIG_FILES_PATH", __DIR__ . "/data/files/");
 define("CONFIG_META_SEPARATOR", "------------------------------------");
 
+if (!file_exists(CONFIG_DATA_PATH)) {
+    mkdir(CONFIG_DATA_PATH, 0777);
+}
+
+if (!file_exists(CONFIG_FILES_PATH)) {
+    mkdir(CONFIG_FILES_PATH, 0777);
+}
 
 function endsWith($haystack, $needle) {
     $length = strlen($needle);
