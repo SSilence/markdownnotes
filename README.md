@@ -2,13 +2,13 @@
 
 MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by using markdown syntax.
 
-![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_1.jpg "MarkdownNote Screenshot")
+![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_1.jpg "MarkdownNotes Screenshot")
 
 ## requirements
 
-* PHP Webspace (just 4 a small backend script, runs everywhere with PHP5+) or Docker
-* all modern Browsers and on Internet Explorer 11+
-* mobile Browsers
+* PHP webspace (just 4 a small backend script, runs everywhere with PHP5+) or Docker
+* all modern browsers or Internet Explorer 11+
+* mobile browsers
 
 ## installation
 
@@ -28,9 +28,9 @@ MarkdownNotes notes and files will be saved in your given path. Just replace ``/
 
 ## screenshots
 
-![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_2.jpg "MarkdownNote Screenshot")
+![MarkdownNotes Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_2.jpg "MarkdownNotes Screenshot")
 
-![MarkdownNote Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_3.jpg "MarkdownNote Screenshot")
+![MarkdownNotes Screenshot](https://github.com/SSilence/markdownnotes/raw/master/screenshot_3.jpg "MarkdownNotes Screenshot")
 
 ## credits
 
