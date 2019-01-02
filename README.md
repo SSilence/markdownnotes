@@ -22,9 +22,9 @@ MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by
 
 Start the [MarkdownNotes docker image](https://hub.docker.com/r/ssilence/markdownnotes) with:
 ```
-docker run -v /path/on/your/system/markdownnotesdata:/var/www/html/data -p 80:80 ssilence/markdownnotes:latest
+docker run -v /yourpath:/var/www/html/data -p 80:80 ssilence/markdownnotes:latest
 ```
-MarkdownNotes notes and files will be saved in your given path. Just replace ``/path/on/your/system/markdownnotesdata`` with target data dir on your system.
+MarkdownNotes notes and files will be saved in your given path. Just replace ``/yourpath`` with target data dir on your system.
 
 ## screenshots
 
