@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Page } from './shared/page';
 import { BackendService } from './shared/backend.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { map, filter, tap, first, retry, retryWhen, delayWhen, delay } from 'rxjs/operators';
-import { timer } from 'rxjs';
+import { map, filter, tap, first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -36,11 +35,7 @@ export class AppComponent implements OnInit {
             });
         });
         this.backendService.pagesChanged.subscribe(pages => this.pages = pages.map(p => ({...p})))
-        this.backendService.getAllPages()
-            .pipe(
-                retryWhen(errors => errors.pipe(delay(5000)))
-            )
-            .subscribe(() => this.loading = false);
+        this.backendService.getAllPages().subscribe(() => this.loading = false);
     }
 
     add() {
