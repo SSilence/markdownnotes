@@ -21,9 +21,22 @@
             "assets": [
               "projects/markdown-app/src/favicon.ico",
               "projects/markdown-app/src/assets",
-              { "glob": "backend.php", "input": "./", "output": "./" },
-              { "glob": ".htaccess", "input": "./", "output": "./" },
-              { "glob": "**/*", "input": "./data", "output": "./data" }
+              {
+                "glob": "backend.php",
+                "input": "./",
+                "output": "./"
+              },
+              {
+                "glob": ".htaccess",
+                "input": "./",
+                "output": "./"
+              },
+              {
+                "glob": "**/*",
+                "input": "./data",
+                "output": "./data"
+              },
+              "projects/markdown-app/src/manifest.json"
             ],
             "styles": [
               "node_modules/@clr/icons/clr-icons.min.css",
@@ -62,7 +75,8 @@
                   "maximumWarning": "2mb",
                   "maximumError": "5mb"
                 }
-              ]
+              ],
+              "serviceWorker": true
             }
           }
         },
@@ -96,7 +110,8 @@
             "scripts": [],
             "assets": [
               "projects/markdown-app/src/favicon.ico",
-              "projects/markdown-app/src/assets"
+              "projects/markdown-app/src/assets",
+              "projects/markdown-app/src/manifest.json"
             ]
           }
         },

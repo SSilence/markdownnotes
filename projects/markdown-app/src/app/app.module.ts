@@ -22,6 +22,8 @@ import { FileSizePipe } from './shared/file-size.pipe';
 import { FileDropModule } from 'ngx-file-drop';
 import { ClipboardModule } from 'ngx-clipboard';
 import { BookmakrsPipe } from './shared/bookmarks.pipe';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -46,7 +48,8 @@ import { BookmakrsPipe } from './shared/bookmarks.pipe';
     FormsModule,
     FileDropModule,
     ClipboardModule,
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes),
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
     BackendService,
