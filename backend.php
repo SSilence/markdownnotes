@@ -119,7 +119,7 @@ function writePage($id, $title, $icon, $content) {
 }
 
 
-// save page (title, icon, parent (select) in file header; if oldname => handle rename and update children)
+// add/edit page
 router('POST', '/page$', function() {
     $data = body();
     
@@ -135,12 +135,12 @@ router('POST', '/page$', function() {
     writePage($id, $title, $icon, $content);
 });
 
-// delete site (error with existing childrens)
+// delete page
 router('DELETE', '/page/(?<id>.+)$', function($params) {
     @unlink(toFilename($params['id']));
 });
 
-// get all sites (as nested tree)
+// get all pages
 router('GET', '/page$', function() {
     $pages = array();
     foreach (scandir(CONFIG_DATA_PATH) as $file) {
@@ -153,7 +153,7 @@ router('GET', '/page$', function() {
     json($pages);
 });
 
-// get one site
+// get one sipagete
 router('GET', '/page/(?<id>.+)$', function($params) {
     $page = readPageById($params['id']);
     if ($page === false) {

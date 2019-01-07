@@ -7,7 +7,7 @@ MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by
 ## requirements
 
 * PHP webspace (just 4 a small backend script, runs everywhere with PHP5+) or Docker
-* all modern browsers or Internet Explorer 11+
+* all modern browsers
 * mobile browsers
 
 ## installation
