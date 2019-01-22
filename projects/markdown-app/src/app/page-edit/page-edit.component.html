@@ -1,7 +1,7 @@
 <span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
 <app-alert-error [error]="error"></app-alert-error>
 <div *ngIf="page">
-    <form class="clr-form">
+    <div>
         <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><clr-icon [attr.shape]="page.icon" size="24"></clr-icon></button>
         
         <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page.title">
@@ -15,7 +15,7 @@
                 <option [ngValue]="page" *ngFor="let page of flattenPages()" [innerHtml]="flattenPageTitle(page)"></option>
             </select>        
         </div>
-    </form>
+    </div>
 
     <button class="btn btn-primary" (click)="save(true)">save</button> 
     <button class="btn" (click)="save(false)" [ngClass]="{'btn-success-outline': success, 'btn-outline': !success}">save without show</button> 
