@@ -43,6 +43,8 @@ export class PasswordsComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.entries = [];
+        this.hash = "none";
+        this.page = null;
     }
 
     add() {
@@ -54,11 +56,11 @@ export class PasswordsComponent implements OnInit, OnDestroy {
     }
 
     random(index: number) {
-        this.entries[index].password = Array(20)
+        this.entries[index].password = this.encryptPassword(Array(20)
             .fill("123456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz")
             .map(x => x[Math.floor(Math.random() * x.length)])
-            .join('');
-        this.entries[index].passwordShow = true;
+            .join(''));
+            this.entries[index].passwordShow = true;
     }
 
     clipboard(index: number) {

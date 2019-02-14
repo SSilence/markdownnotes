@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as aesjs from 'aes-js/index.js';
 import * as sha from 'jssha/src/sha.js';
+import * as CryptoJS from 'crypto-js/crypto-js.js';
 
 @Injectable()
 export class AesService {
@@ -8,6 +9,29 @@ export class AesService {
     static readonly SALT: string = 'alijlkjfuhewqlfijhgiwqkb';
 
     encrypt(text: string, password: string): string {
+        return this.cryptojsEncrypt(this.aesjsEncrypt(text, password), password);
+    }
+
+    decrypt(secret: string, password: string): string {
+        return this.aesjsDecrypt(this.cryptojsDecrypt(secret, password), password);
+    }
+
+    cryptojsEncrypt(text: string, password: string): string {
+        if (!text) {
+            return "";
+        }
+        return CryptoJS.AES.encrypt(text, password).toString();
+    }
+
+    cryptojsDecrypt(secret: string, password: string): string {
+        if (!secret) {
+            return "";
+        }
+        var bytes = CryptoJS.AES.decrypt(secret, password);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    }
+
+    aesjsEncrypt(text: string, password: string): string {
         let key = this.key(password);
         let textBytes = aesjs.utils.utf8.toBytes(text);
         let aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
@@ -15,7 +39,7 @@ export class AesService {
         return aesjs.utils.hex.fromBytes(encryptedBytes);
     }
 
-    decrypt(secret: string, password: string): string {
+    aesjsDecrypt(secret: string, password: string): string {
         let key = this.key(password);
         let encryptedBytes = aesjs.utils.hex.toBytes(secret);
         let aesCtr = new aesjs.ModeOfOperation.ctr(key, new aesjs.Counter(5));
