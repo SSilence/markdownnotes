@@ -45,7 +45,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     ngAfterViewInit() {
         setTimeout(() => {
             this.passw.first.nativeElement.focus();
-        }, 0)
+        }, 400);
     }
 
     ngOnDestroy() {
