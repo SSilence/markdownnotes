@@ -3,6 +3,7 @@ import { BackendService } from '../shared/backend.service';
 import { Page } from '../shared/page';
 import { AesService } from '../shared/aes.service';
 import { ClipboardService } from 'ngx-clipboard'
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-passwords',
@@ -89,7 +90,7 @@ export class PasswordsComponent implements OnInit, OnDestroy {
             () => {
                 this.success = true;
                 this.askPassword = false;
-                setTimeout(() => this.success = false, 3000)
+                timer(3000).subscribe(() => this.success = false);
             },
             error => {
                 this.askPassword = false;

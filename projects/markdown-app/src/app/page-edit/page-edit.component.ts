@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Page } from '../shared/page';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BackendService } from '../shared/backend.service';
-import { switchMap, map, tap, filter, toArray, reduce, concatMap, take } from 'rxjs/operators';
-import { of, concat, merge, from, Observable, timer } from 'rxjs';
+import { switchMap, map, tap } from 'rxjs/operators';
+import { of, timer } from 'rxjs';
 import { IconService } from '../shared/icon.service';
 
 @Component({
