@@ -29,4 +29,10 @@ export class AesService {
         return new Uint8Array(sha512.getHash("ARRAYBUFFER")).slice(0,32);
     }
 
+    sha512(text: string): string {
+        let sha512 = new sha("SHA-512", "TEXT");
+        sha512.update(text + AesService.SALT);
+        return sha512.getHash("HEX");
+    }
+
 }

@@ -4,6 +4,7 @@ import { Page } from '../shared/page';
 import { AesService } from '../shared/aes.service';
 import { ClipboardService } from 'ngx-clipboard'
 import { timer } from 'rxjs';
+import * as sha from 'jssha/src/sha.js';
 
 @Component({
   selector: 'app-passwords',
@@ -19,6 +20,7 @@ export class PasswordsComponent implements OnInit, OnDestroy {
     entryToDelete: number = null;
     askPassword = false;
     success = false;
+    hash: string = "none";
 
     constructor(private backendService: BackendService,
         private aesService: AesService,
@@ -60,7 +62,7 @@ export class PasswordsComponent implements OnInit, OnDestroy {
     }
 
     clipboard(index: number) {
-        this._clipboardService.copyFromContent(this.entries[index].password);
+        this._clipboardService.copyFromContent(this.decryptPassword(this.entries[index].password));
     }
 
     unlock(password: string) {
@@ -68,9 +70,27 @@ export class PasswordsComponent implements OnInit, OnDestroy {
         let decrypted = this.aesService.decrypt(this.page.content, password);
         try {
             this.entries = JSON.parse(decrypted);
+            this.hash = this.aesService.sha512(password);
         } catch(e) {
             this.error = "decrypt error";
         }
+    }
+
+    decryptPassword(password: string): string {
+        if (!password) {
+            return null;
+        }
+        return this.aesService.decrypt(password, this.hash);
+    }
+
+    encryptPassword(password: string): string {
+        return this.aesService.encrypt(password, this.hash);
+    }
+
+    reencryptPassword(entry: PasswordEntry, newpassword: string): PasswordEntry {
+        let decryptedPassword = this.decryptPassword(entry.password);
+        entry.password = this.aesService.encrypt(decryptedPassword, newpassword);
+        return entry;
     }
 
     save(password: string, password2: string) {
@@ -83,7 +103,11 @@ export class PasswordsComponent implements OnInit, OnDestroy {
             this.pwerror = "passwords are not equals";
             return;
         }
-        let json = JSON.stringify(this.entries.map(e => new PasswordEntry().fromOther(e)));
+        let hash = this.aesService.sha512(password);
+        let toSave = this.entries
+            .map(e => new PasswordEntry().fromOther(e))
+            .map(e => this.reencryptPassword(e, hash));
+        let json = JSON.stringify(toSave);
         let content = this.aesService.encrypt(json, password);
         this.page.content = content;
         this.backendService.savePasswordPage(this.page).subscribe(
