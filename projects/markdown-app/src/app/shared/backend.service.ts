@@ -10,6 +10,8 @@ import { FileDto } from './file-dto';
 @Injectable()
 export class BackendService {
 
+    static readonly PASSWORD_PAGE_ID: string = 'password_page_storage';
+
     static readonly ID_SEPARATOR: string = '___';
     static readonly BASE_URL: string = 'api/';
 
@@ -23,6 +25,7 @@ export class BackendService {
     getAllPages(): Observable<Page[]> {
         return this.http.get<PageDto[]>(BackendService.BASE_URL + 'page')
                         .pipe(
+                            map(pagedtos => pagedtos.filter(dto => dto.id !== BackendService.PASSWORD_PAGE_ID )),
                             map(pagedtos => pagedtos.sort((p1, p2) => p1.id.localeCompare(p2.id)).map(pagedto => new Page(pagedto))),
                             map(pages => this.convertToNestedTree(pages)),
                             tap(pages => this.pages = pages),
@@ -96,6 +99,18 @@ export class BackendService {
 
     getFileAsString(file: string): Observable<string> {
         return this.http.get<string>(file, {responseType: 'text' as 'json'});
+    }
+
+    getPasswordPage(): Observable<Page> {
+        return this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + BackendService.PASSWORD_PAGE_ID).pipe(
+            map(pagedto => new Page(pagedto))
+        );
+    }
+
+    savePasswordPage(page: Page): Observable<void> {
+        page.id = BackendService.PASSWORD_PAGE_ID
+        page.title = BackendService.PASSWORD_PAGE_ID;
+        return this.http.post<void>(BackendService.BASE_URL + 'page', new PageDto(page));
     }
 
     private findPage(pages: Page[], page: Page): Page {

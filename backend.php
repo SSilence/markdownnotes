@@ -91,7 +91,7 @@ function toFilename($id) {
 }
 
 function readPageByFilename($filename) {
-    $content = file_get_contents($filename);
+    $content = @file_get_contents($filename);
     if ($content === false) {
         return false;
     }
@@ -153,7 +153,7 @@ router('GET', '/page$', function() {
     json($pages);
 });
 
-// get one sipagete
+// get one page
 router('GET', '/page/(?<id>.+)$', function($params) {
     $page = readPageById($params['id']);
     if ($page === false) {

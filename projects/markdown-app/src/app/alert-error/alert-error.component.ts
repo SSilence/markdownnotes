@@ -9,4 +9,20 @@ export class AlertErrorComponent {
 
     @Input() error: any = null;
 
+    getErrorMessage(): string {
+        if (this.error && this.error.error) {
+            if (typeof this.error.error === "string") {
+                return this.error.error;
+            } else {
+                JSON.stringify(this.error.error);                
+            }
+        }
+
+        if (typeof this.error === "string") {
+            return this.error;
+        }
+
+        return JSON.stringify(this.error);
+    }
+
 }

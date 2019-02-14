@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Page } from './shared/page';
 import { BackendService } from './shared/backend.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
-import { map, filter, tap, first } from 'rxjs/operators';
+import { filter, first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',

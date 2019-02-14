@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { BackendService } from './shared/backend.service';
+import { AesService } from './shared/aes.service';
 import { MarkdownEditorComponent, MarkdownPipe } from 'markdown-lib';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PageTreeComponent } from './page-tree/page-tree.component';
@@ -22,6 +23,7 @@ import { FileSizePipe } from './shared/file-size.pipe';
 import { FileDropModule } from 'ngx-file-drop';
 import { ClipboardModule } from 'ngx-clipboard';
 import { BookmakrsPipe } from './shared/bookmarks.pipe';
+import { PasswordsComponent } from './passwords/passwords.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +37,8 @@ import { BookmakrsPipe } from './shared/bookmarks.pipe';
     PageEditComponent,
     HomeComponent,
     AlertErrorComponent,
-    FilesComponent
+    FilesComponent,
+    PasswordsComponent
   ],
   imports: [
     BrowserModule,
@@ -50,6 +53,7 @@ import { BookmakrsPipe } from './shared/bookmarks.pipe';
   ],
   providers: [
     BackendService,
+    AesService,
     IconService,
     MarkdownPipe,
     FileSizePipe,

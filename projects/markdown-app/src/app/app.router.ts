@@ -3,6 +3,7 @@ import { HomeComponent } from './home/home.component';
 import { PageShowComponent } from './page-show/page-show.component';
 import { PageEditComponent } from './page-edit/page-edit.component';
 import { FilesComponent } from './files/files.component';
+import { PasswordsComponent } from './passwords/passwords.component';
 
 export const routes: Routes = [
       {
@@ -24,5 +25,9 @@ export const routes: Routes = [
       {
         path: 'filelist',
         component: FilesComponent
+      },
+      {
+        path: 'passwords',
+        component: PasswordsComponent
       }
 ];
