@@ -1,17 +1,18 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, ViewChild } from '@angular/core';
 import { BackendService } from '../shared/backend.service';
 import { Page } from '../shared/page';
 import { AesService } from '../shared/aes.service';
 import { ClipboardService } from 'ngx-clipboard'
 import { timer } from 'rxjs';
-import * as sha from 'jssha/src/sha.js';
 
 @Component({
   selector: 'app-passwords',
   templateUrl: './passwords.component.html',
   styleUrls: ['./passwords.component.css']
 })
-export class PasswordsComponent implements OnInit, OnDestroy {
+export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
+    
+    @ViewChildren('passw') passw;
     
     page: Page = null;
     error: any = null;
@@ -38,7 +39,13 @@ export class PasswordsComponent implements OnInit, OnDestroy {
                     this.error = error;
                 }
             }
-        )
+        );
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.passw.first.nativeElement.focus();
+        }, 0)
     }
 
     ngOnDestroy() {
@@ -69,8 +76,8 @@ export class PasswordsComponent implements OnInit, OnDestroy {
 
     unlock(password: string) {
         this.error = null;
-        let decrypted = this.aesService.decrypt(this.page.content, password);
         try {
+            let decrypted = this.aesService.decrypt(this.page.content, password);
             this.entries = JSON.parse(decrypted);
             this.hash = this.aesService.sha512(password);
         } catch(e) {
