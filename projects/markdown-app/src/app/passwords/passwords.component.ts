@@ -78,7 +78,15 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.error = null;
         try {
             let decrypted = this.aesService.decrypt(this.page.content, password);
-            this.entries = JSON.parse(decrypted);
+            this.entries = JSON.parse(decrypted).sort((p1, p2) => {
+                if (!p1.service) {
+                    return -1;
+                } else if (!p2.service) {
+                    return 1;
+                } else {
+                    return p1.service.localeCompare(p2.service);
+                }
+            });
             this.hash = this.aesService.sha512(password);
         } catch(e) {
             this.error = "decrypt error";
