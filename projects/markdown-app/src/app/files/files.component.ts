@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { BackendService } from '../shared/backend.service';
 import { FileDto } from '../shared/file-dto';
 import { Observable } from 'rxjs';
-import { UploadFile, UploadEvent, FileSystemFileEntry } from 'ngx-file-drop';
+import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { tap } from 'rxjs/operators';
 
 @Component({
@@ -11,8 +11,6 @@ import { tap } from 'rxjs/operators';
   styleUrls: ['./files.component.css']
 })
 export class FilesComponent implements OnInit {
-
-    @ViewChild('addFiles') addFiles;
 
     files$: Observable<FileDto[]> = null;
     error: any = null;
@@ -25,8 +23,8 @@ export class FilesComponent implements OnInit {
         this.files$ = this.backendService.getAllFiles();
     }
 
-    public dropped(event: UploadEvent) {
-        for (const droppedFile of event.files) {
+    public dropped(files: NgxFileDropEntry[]) {
+        for (const droppedFile of files) {
             if (!droppedFile.fileEntry.isFile) {
                 continue;
             }
@@ -52,23 +50,5 @@ export class FilesComponent implements OnInit {
             () => { this.fileToDelete = null; },
             error => { this.error = error; (this.fileToDelete as any).loading = false; }
         );
-    }
-
-    onFilesAdded() {
-        const files: File[] = this.addFiles.nativeElement.files;
-        for (const droppedFile of files) {
-            const file: File = droppedFile;
-            const fakeFileEntry: FileSystemFileEntry = {
-                name: file.name,
-                isDirectory: false,
-                isFile: true,
-                file: (callback: (filea: File) => void): void => {
-                    callback(file);
-                }
-            };
-            const toUpload: UploadFile = new UploadFile(fakeFileEntry.name, fakeFileEntry);
-            this.dropped(new UploadEvent([toUpload]));
-            this.addFiles.nativeElement.files = null;
-        }
     }
 }

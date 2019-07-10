@@ -20,7 +20,7 @@ import { IconService } from './shared/icon.service';
 import { AlertErrorComponent } from './alert-error/alert-error.component';
 import { FilesComponent } from './files/files.component';
 import { FileSizePipe } from './shared/file-size.pipe';
-import { FileDropModule } from 'ngx-file-drop';
+import { NgxFileDropModule } from 'ngx-file-drop';
 import { ClipboardModule } from 'ngx-clipboard';
 import { BookmakrsPipe } from './shared/bookmarks.pipe';
 import { PasswordsComponent } from './passwords/passwords.component';
@@ -47,7 +47,7 @@ import { PasswordsComponent } from './passwords/passwords.component';
     HttpModule,
     HttpClientModule,
     FormsModule,
-    FileDropModule,
+    NgxFileDropModule,
     ClipboardModule,
     RouterModule.forRoot(routes)
   ],

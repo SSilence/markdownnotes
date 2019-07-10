@@ -1,7 +1,11 @@
 <h1>Files</h1>
 <span class="spinner spinner-inline" *ngIf="!files$">Loading...</span>
 <app-alert-error [error]="error"></app-alert-error>
-<file-drop headertext="Drop files here" (onFileDrop)="dropped($event)" customstyle="filedrop" (click)="addFiles.click()"></file-drop>
+<ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)">
+    <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+        <button type="button" (click)="openFileSelector()">Browse Files</button>
+    </ng-template>
+</ngx-file-drop>
 <div class="progress loop" *ngIf="uploading"><progress></progress></div>
 
 <table class="table" *ngIf="files$">
@@ -23,8 +27,6 @@
       </tr>
   </tbody>
 </table>
-
-<input type="file" (change)="onFilesAdded()" multiple [hidden]="true" #addFiles>
 
 <div class="modal" *ngIf="fileToDelete">
     <div class="modal-dialog" role="dialog" aria-hidden="true">
