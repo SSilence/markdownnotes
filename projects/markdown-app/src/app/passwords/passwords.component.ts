@@ -81,7 +81,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     random(index: number) {
-        this.entries[index].password = this.encryptPassword(Array(20)
+        this.getEntries()[index].password = this.encryptPassword(Array(20)
             .fill("123456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz")
             .map(x => x[Math.floor(Math.random() * x.length)])
             .join(''));
@@ -89,7 +89,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     clipboard(index: number) {
-        this._clipboardService.copyFromContent(this.decryptPassword(this.entries[index].password));
+        this._clipboardService.copyFromContent(this.decryptPassword(this.getEntries()[index].password));
     }
 
     unlock(password: string) {
