@@ -1,7 +1,7 @@
 <h1>Files</h1>
 <span class="spinner spinner-inline" *ngIf="!files$">Loading...</span>
 <app-alert-error [error]="error"></app-alert-error>
-<ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)">
+<ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" dropZoneClassName="filedrop">
     <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
         <button type="button" (click)="openFileSelector()">Browse Files</button>
     </ng-template>

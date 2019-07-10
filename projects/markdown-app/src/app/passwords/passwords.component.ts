@@ -3,7 +3,8 @@ import { BackendService } from '../shared/backend.service';
 import { Page } from '../shared/page';
 import { AesService } from '../shared/aes.service';
 import { ClipboardService } from 'ngx-clipboard'
-import { timer } from 'rxjs';
+import { timer, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-passwords',
@@ -12,7 +13,8 @@ import { timer } from 'rxjs';
 })
 export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     
-    @ViewChildren('passw') passw;
+    @ViewChildren('unlockPasswordInput') unlockPasswordInput;
+    @ViewChildren('password') password;
     
     page: Page = null;
     error: any = null;
@@ -22,6 +24,9 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     askPassword = false;
     success = false;
     hash: string = "none";
+    q: string = "";
+    qChanged: Subject<string> = new Subject<string>();
+    private qChanged$ = new Subscription();
 
     constructor(private backendService: BackendService,
         private aesService: AesService,
@@ -40,11 +45,16 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             }
         );
+
+        this.qChanged$ = this.qChanged.pipe(
+            debounceTime(700),
+            distinctUntilChanged()
+        ).subscribe(q => this.q = q);
     }
 
     ngAfterViewInit() {
         setTimeout(() => {
-            this.passw.first.nativeElement.focus();
+            this.unlockPasswordInput.first.nativeElement.focus();
         }, 400);
     }
 
@@ -52,6 +62,11 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.entries = [];
         this.hash = "none";
         this.page = null;
+        this.qChanged$.unsubscribe();
+    }
+
+    getEntries() {
+        return this.q != null && this.q.length > 0 ? this.entries.filter(entry => entry.service.includes(this.q)) : this.entries;
     }
 
     add() {
@@ -108,6 +123,13 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         let decryptedPassword = this.decryptPassword(entry.password);
         entry.password = this.aesService.encrypt(decryptedPassword, newpassword);
         return entry;
+    }
+
+    showAskPassword() {
+        this.askPassword = true
+        setTimeout(() => {
+            this.password.first.nativeElement.focus();
+        }, 200);
     }
 
     save(password: string, password2: string) {
