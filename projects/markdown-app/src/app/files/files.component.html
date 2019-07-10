@@ -3,7 +3,7 @@
 <app-alert-error [error]="error"></app-alert-error>
 <ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" dropZoneClassName="filedrop">
     <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-        <button type="button" (click)="openFileSelector()">Browse Files</button>
+        <button class="btn" type="button" (click)="openFileSelector()">Browse Files</button>
     </ng-template>
 </ngx-file-drop>
 <div class="progress loop" *ngIf="uploading"><progress></progress></div>

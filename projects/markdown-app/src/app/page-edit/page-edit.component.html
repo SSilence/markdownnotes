@@ -1,10 +1,26 @@
 <span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
 <app-alert-error [error]="error"></app-alert-error>
-<div *ngIf="page">
+<div *ngIf="page" class="edit">
     <div>
-        <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><clr-icon [attr.shape]="page.icon" size="24"></clr-icon></button>
-        
-        <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page.title">
+        <div class="top">
+            <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><clr-icon [attr.shape]="page.icon" size="24"></clr-icon></button>
+            <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page.title">
+            <div class="btn-group btn-primary">
+                    <button class="btn btn-primary" (click)="save(true)">save</button> 
+                    <div class="btn-group-overflow" [ngClass]="{'open': showMenue}">
+                        <button class="btn dropdown-toggle btn-icon" (click)="showMenue=!showMenue">
+                            <clr-icon shape="ellipsis-horizontal"></clr-icon>
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="btn" (click)="save(false)" *ngIf="!success">save without show</button> 
+                            <div *ngIf="success" class="btn success">page successfully saved</div>
+                            <button class="btn btn-link" [routerLink]="['/page', page.id]" *ngIf="page.id">cancel</button>
+                            <button class="btn btn-link" [routerLink]="['/']" *ngIf="!page.id">cancel</button>
+                            <button class="btn" (click)="showDeleteConfirmation=true" style="float:right" *ngIf="page.id">delete</button>
+                        </div>
+                    </div>
+                </div>
+        </div>
 
         <lib-markdown-editor [(content)]="page.content"></lib-markdown-editor>
 
@@ -21,7 +37,6 @@
     <button class="btn" (click)="save(false)" [ngClass]="{'btn-success-outline': success, 'btn-outline': !success}">save without show</button> 
     <button class="btn btn-link" [routerLink]="['/page', page.id]" *ngIf="page.id">cancel</button>
     <button class="btn btn-link" [routerLink]="['/']" *ngIf="!page.id">cancel</button>
-
     <button class="btn btn-danger-outline" (click)="showDeleteConfirmation=true" style="float:right" *ngIf="page.id">delete</button>
 
     <div *ngIf="success" class="success">page successfully saved</div>

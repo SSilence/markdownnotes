@@ -19,6 +19,7 @@ export class PageEditComponent implements OnInit {
     showDeleteConfirmation = false;
     selectIconDialog = false;
     success = false;
+    showMenue = false;
 
     constructor(private route: ActivatedRoute,
         private router: Router,
