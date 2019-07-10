@@ -15,6 +15,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     
     @ViewChildren('unlockPasswordInput') unlockPasswordInput;
     @ViewChildren('password') password;
+    @ViewChildren('search') search;
     
     page: Page = null;
     error: any = null;
@@ -70,7 +71,9 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     add() {
-        this.entries.push(new PasswordEntry().withEditTrue());
+        const entry = new PasswordEntry();
+        entry.username = this.entries.map(e => e.username).reduce((a,b,i,arr) => (arr.filter(v=>v===a).length>=arr.filter(v=>v===b).length?a:b), null);
+        this.entries.push(entry.withEditTrue());
     }
 
     delete(index: number) {
@@ -106,6 +109,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         } catch(e) {
             this.error = "decrypt error";
         }
+        this.search.first.nativeElement.focus();
     }
 
     decryptPassword(password: string): string {
