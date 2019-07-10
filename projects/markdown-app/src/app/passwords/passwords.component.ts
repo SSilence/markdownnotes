@@ -106,10 +106,11 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             });
             this.hash = this.aesService.sha512(password);
+            this.search.first.nativeElement.focus();
         } catch(e) {
             this.error = "decrypt error";
+            this.unlockPasswordInput.first.nativeElement.focus();
         }
-        this.search.first.nativeElement.focus();
     }
 
     decryptPassword(password: string): string {
