@@ -30,7 +30,7 @@
               "node_modules/@clr/ui/clr-ui.min.css",
               "projects/markdown-app/src/styles.css",
               "node_modules/simplemde/dist/simplemde.min.css",
-              "node_modules/highlightjs/styles/atom-one-light.css",
+              "node_modules/highlight.js/styles/atom-one-light.css",
               "node_modules/font-awesome/css/font-awesome.min.css"
             ],
             "scripts": [

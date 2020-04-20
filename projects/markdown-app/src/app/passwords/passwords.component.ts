@@ -55,7 +55,9 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     ngAfterViewInit() {
         setTimeout(() => {
-            this.unlockPasswordInput.first.nativeElement.focus();
+            if (this.entries == null) {
+                this.unlockPasswordInput.first.nativeElement.focus();
+            }
         }, 400);
     }
 
@@ -67,10 +69,11 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     getEntries() {
-        return this.q != null && this.q.length > 0 ? this.entries.filter(entry => entry.service.includes(this.q)) : this.entries;
+        return this.q != null && this.q.length > 0 && this.entries ? this.entries.filter(entry => entry.service && entry.service.includes(this.q)) : this.entries;
     }
 
     add() {
+        this.q = "";
         const entry = new PasswordEntry();
         entry.username = this.entries.map(e => e.username).reduce((a,b,i,arr) => (arr.filter(v=>v===a).length>=arr.filter(v=>v===b).length?a:b), null);
         this.entries.push(entry.withEditTrue());
