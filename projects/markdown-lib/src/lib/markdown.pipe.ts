@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 import * as showdown from 'showdown/dist/showdown.min.js';
-import * as highlightjs from 'highlight.js/lib/highlight.js';
+import * as highlightjs from 'highlight.js/lib/index.js';
 
 @Pipe({
     name: 'markdown'
