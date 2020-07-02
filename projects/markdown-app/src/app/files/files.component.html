@@ -11,8 +11,9 @@
 <table class="table" *ngIf="files$">
   <thead>
       <tr>
-          <th>Filename</th>
-          <th>Size</th>
+          <th (click)="sort('name')">Filename <clr-icon shape="caret up" *ngIf="sortField=='name' && sortAsc"></clr-icon> <clr-icon shape="caret down" *ngIf="sortField=='name' && !sortAsc"></clr-icon></th>
+          <th (click)="sort('size')">Size <clr-icon shape="caret up" *ngIf="sortField=='size' && sortAsc"></clr-icon> <clr-icon shape="caret down" *ngIf="sortField=='size' && !sortAsc"></clr-icon></th>
+          <th (click)="sort('date')">Date <clr-icon shape="caret up" *ngIf="sortField=='date' && sortAsc"></clr-icon> <clr-icon shape="caret down" *ngIf="sortField=='date' && !sortAsc"></clr-icon></th>
           <th></th>
       </tr>
   </thead>
@@ -20,26 +21,15 @@
       <tr *ngFor="let file of files$ | async">
           <td class="left"><a href="data/files/{{file.name}}" target="_blank">{{file.name}}</a></td>
           <td>{{file.size | fileSize}}</td>
+          <td>{{file.date | date:'medium'}}</td>
           <td>
               <clr-icon shape="copy-to-clipboard" size="20" ngxClipboard [cbContent]="'[' + file.name + '](data/files/' + file.name + ')'"></clr-icon>
-              &nbsp;<clr-icon shape="trash" size="20" (click)="fileToDelete=file" *ngIf="!file.loading"></clr-icon>
-              &nbsp;<span class="spinner spinner-inline" *ngIf="file.loading"></span></td>
+              &nbsp;
+              <clr-icon shape="trash" size="20" (click)="file.delete = true" *ngIf="!file.loading && !file.delete"></clr-icon>
+              <button class="btn btn-danger btn-sm" type="button" (click)="delete(file)" *ngIf="!file.loading && file.delete">delete</button>
+              <button class="btn btn-outline btn-sm btn-link" type="button" (click)="file.delete = false" *ngIf="!file.loading && file.delete">cancel</button>
+              &nbsp;
+              <span class="spinner spinner-inline" *ngIf="file.loading"></span></td>
       </tr>
   </tbody>
 </table>
-
-<div class="modal" *ngIf="fileToDelete">
-    <div class="modal-dialog" role="dialog" aria-hidden="true">
-        <div class="modal-content">
-            <div class="modal-body">
-                <p>Really delete {{fileToDelete.name}}?</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" type="button" (click)="fileToDelete=null">Cancel</button>
-                <button class="btn btn-danger" type="button" (click)="delete()">Ok</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal-backdrop" aria-hidden="true" *ngIf="fileToDelete"></div>

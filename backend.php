@@ -212,7 +212,8 @@ router('GET', '/file$', function() {
         if (is_file(CONFIG_FILES_PATH . $file) && $file != '.' && $file != '..') {
             $files[] = array(
                 "name" => $file,
-                "size" => filesize(CONFIG_FILES_PATH . $file)
+                "size" => filesize(CONFIG_FILES_PATH . $file),
+                "date" => filemtime(CONFIG_FILES_PATH . $file) * 1000
             );
         }
     }

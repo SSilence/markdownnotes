@@ -3,7 +3,7 @@ import { BackendService } from '../shared/backend.service';
 import { FileDto } from '../shared/file-dto';
 import { Observable } from 'rxjs';
 import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-files',
@@ -15,12 +15,39 @@ export class FilesComponent implements OnInit {
     files$: Observable<FileDto[]> = null;
     error: any = null;
     uploading = false;
-    fileToDelete: FileDto = null;
+    sortField = "date";
+    sortAsc = false;
 
     constructor(private backendService: BackendService) { }
 
     ngOnInit() {
-        this.files$ = this.backendService.getAllFiles();
+        this.update();
+    }
+
+    public update() {
+        this.files$ = this.backendService.getAllFiles().pipe(
+            map(files => files.sort((a, b) => {
+                    const reverse = this.sortAsc ? 1 : -1;
+                    if (this.sortField == "date") {
+                        return reverse * (a.date - b.date);
+                    } else if (this.sortField == "size") {
+                        return reverse * (a.size - b.size);
+                    } else {
+                        return reverse * a.name.localeCompare(b.name);
+                    }
+                })
+            )
+        );
+    }
+
+    public sort(field: string) {
+        if (this.sortField == field) {
+            this.sortAsc = !this.sortAsc;
+        } else {
+            this.sortField = field;
+            this.sortAsc = true;
+        }
+        this.update();
     }
 
     public dropped(files: NgxFileDropEntry[]) {
@@ -33,7 +60,7 @@ export class FilesComponent implements OnInit {
             const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
             fileEntry.file((file: File) => {
                 this.backendService.saveFile(droppedFile.relativePath, file).pipe(
-                    tap(() => this.files$ = this.backendService.getAllFiles())
+                    tap(() => this.update())
                 ).subscribe(
                     () => { this.uploading = false; },
                     error => { this.error = error; this.uploading = false; }
@@ -42,13 +69,13 @@ export class FilesComponent implements OnInit {
         }
     }
 
-    public delete() {
-        (this.fileToDelete as any).loading = true;
-        this.backendService.deleteFile(this.fileToDelete.name).pipe(
-            tap(() => this.files$ = this.backendService.getAllFiles())
+    public delete(fileToDelete: FileDto) {
+        (fileToDelete as any).loading = true;
+        this.backendService.deleteFile(fileToDelete.name).pipe(
+            tap(() => this.update())
         ).subscribe(
-            () => { this.fileToDelete = null; },
-            error => { this.error = error; (this.fileToDelete as any).loading = false; }
+            () => { },
+            error => { this.error = error; (fileToDelete as any).loading = false; }
         );
     }
 }

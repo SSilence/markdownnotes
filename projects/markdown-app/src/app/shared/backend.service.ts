@@ -82,9 +82,7 @@ export class BackendService {
 
 
     getAllFiles(): Observable<FileDto[]> {
-        return this.http.get<FileDto[]>(BackendService.BASE_URL + 'file').pipe(
-            map(files => files.sort((a, b) => a.name.localeCompare(b.name)))
-        );
+        return this.http.get<FileDto[]>(BackendService.BASE_URL + 'file');
     }
 
     deleteFile(id: string): Observable<void> {

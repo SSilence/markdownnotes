@@ -15,15 +15,24 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     
     @ViewChildren('unlockPasswordInput') unlockPasswordInput;
     @ViewChildren('password') password;
+    @ViewChildren('exportPassword') exportPassword;
     @ViewChildren('search') search;
     
     page: Page = null;
+    
     error: any = null;
-    pwerror: any = null;
+    errorPassword: any = null;
+    errorExport: any = null;
+    
+    success = false;
+    successImport = false;
+    successExport = false;
+
+    export = false;
     entries: PasswordEntry[] = null;
     entryToDelete: number = null;
     askPassword = false;
-    success = false;
+    
     hash: string = "none";
     q: string = "";
     qChanged: Subject<string> = new Subject<string>();
@@ -72,6 +81,10 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         return this.q != null && this.q.length > 0 && this.entries ? this.entries.filter(entry => entry.service && entry.service.includes(this.q)) : this.entries;
     }
 
+    hasEntries() {
+        return this.entries != null && this.entries.length > 0;
+    }
+
     add() {
         this.q = "";
         const entry = new PasswordEntry();
@@ -109,7 +122,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
             });
             this.hash = this.aesService.sha512(password);
-            this.search.first.nativeElement.focus();
+            setTimeout(() => this.search.first.nativeElement.focus(), 0);
         } catch(e) {
             this.error = "decrypt error";
             this.unlockPasswordInput.first.nativeElement.focus();
@@ -141,18 +154,18 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     save(password: string, password2: string) {
-        this.pwerror = null;
+        this.errorPassword = null;
         if (!password) {
-            this.pwerror = "please enter a password";
+            this.errorPassword = "please enter a password";
             return;
         }
         if (password !== password2) {
-            this.pwerror = "passwords are not equals";
+            this.errorPassword = "passwords are not equals";
             return;
         }
         let hash = this.aesService.sha512(password);
         let toSave = this.entries
-            .map(e => new PasswordEntry().fromOther(e))
+            .map(e => PasswordEntry.fromOther(e))
             .map(e => this.reencryptPassword(e, hash));
         let json = JSON.stringify(toSave);
         let content = this.aesService.encrypt(json, password);
@@ -169,6 +182,66 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
             }
         );
     }
+
+    import(fileInput: any) {
+        this.error = null;
+        this.successImport = false;
+        if (fileInput.target.files.length === 0) {
+            return;
+        }
+        const file = fileInput.target.files[0];
+
+        const reader = new FileReader();
+        reader.readAsText(file, 'UTF-8');
+        reader.onload = (evt: any) => {
+            fileInput.target.value = '';
+            const parsed = JSON.parse(evt.target.result);
+            this.entries = parsed.map(e => PasswordEntry.fromData(e.service, e.username, this.encryptPassword(e.password)));
+            this.successImport = true;
+            timer(3000).subscribe(() => this.successImport = false);
+        }
+    }
+
+    showExport() {
+        this.export = true;
+        this.errorExport = null;
+        setTimeout(() => {
+            this.exportPassword.first.nativeElement.focus();
+        }, 200);
+    }
+
+    exportToClipboard(password: string) {
+        this.errorExport = null;
+        if (this.aesService.sha512(password) != this.hash) {
+            this.errorExport = 'invalid password';
+            return;
+        }
+        this.successExport = false;
+        const passwords = this.entries.map(e => ({service: e.service, username: e.username, password: this.decryptPassword(e.password)}));
+        const json = JSON.stringify(passwords, null, 4);
+        this._clipboardService.copyFromContent(json);
+        this.export = false;
+        this.successExport = true;
+        timer(3000).subscribe(() => this.successExport = false);
+    }
+
+    public static saveFile (name: string, type: string, data: any) {
+        const blob = new Blob([data], {type: type});
+
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blob, name);
+        } else {
+            const a = document.createElement('a');
+            a.setAttribute('style', 'display:none');
+            const url = window.URL.createObjectURL(blob);
+            a.setAttribute('href', url);
+            a.setAttribute('download', name);
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        }
+    }
 }
 
 class PasswordEntry {
@@ -180,11 +253,20 @@ class PasswordEntry {
     edit: boolean;
     prev: PasswordEntry;
 
-    fromOther(other: PasswordEntry): PasswordEntry {
-        this.service = other.service;
-        this.username = other.username;
-        this.password = other.password;
-        return this;
+    static fromOther(other: PasswordEntry): PasswordEntry {
+        const passwordEntry = new PasswordEntry();
+        passwordEntry.service = other.service;
+        passwordEntry.username = other.username;
+        passwordEntry.password = other.password;
+        return passwordEntry;
+    }
+
+    static fromData(service: string, username: string, password: string): PasswordEntry {
+        const passwordEntry = new PasswordEntry();
+        passwordEntry.service = service;
+        passwordEntry.username = username;
+        passwordEntry.password = password;
+        return passwordEntry;
     }
 
     withEditTrue(): PasswordEntry {
