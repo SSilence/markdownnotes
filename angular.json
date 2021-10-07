@@ -47,7 +47,11 @@
                   "with": "projects/markdown-app/src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": { 
+                "scripts": true, 
+                "fonts": { "inline": true }, 
+                "styles": { "minify": true, "inlineCritical": false } 
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
