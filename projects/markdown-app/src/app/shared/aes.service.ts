@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as aesjs from 'aes-js/index.js';
-import * as sha from 'jssha/src/sha.js';
+import jsSHA from 'jssha';
 import * as CryptoJS from 'crypto-js/crypto-js.js';
 
 @Injectable()
@@ -48,13 +48,13 @@ export class AesService {
     }
 
     key(password: string): Uint8Array {
-        let sha512 = new sha("SHA-512", "TEXT");
+        let sha512 = new jsSHA("SHA-512", "TEXT");
         sha512.update(password + AesService.SALT);
         return new Uint8Array(sha512.getHash("ARRAYBUFFER")).slice(0,32);
     }
 
     sha512(text: string): string {
-        let sha512 = new sha("SHA-512", "TEXT");
+        let sha512 = new jsSHA("SHA-512", "TEXT");
         sha512.update(text + AesService.SALT);
         return sha512.getHash("HEX");
     }

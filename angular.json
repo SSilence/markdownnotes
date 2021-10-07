@@ -62,8 +62,17 @@
                   "maximumError": "5mb"
                 }
               ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
-          }
+          },
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -73,8 +82,12 @@
           "configurations": {
             "production": {
               "browserTarget": "markdown-app:build:production"
+            },
+            "development": {
+              "browserTarget": "markdown-app:build:development"
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
@@ -124,7 +137,7 @@
           "options": {
             "tsConfig": "projects/markdown-lib/tsconfig.lib.json",
             "project": "projects/markdown-lib/ng-package.json"
-          }
+          },
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
