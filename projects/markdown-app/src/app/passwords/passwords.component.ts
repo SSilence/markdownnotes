@@ -17,6 +17,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChildren('password') password;
     @ViewChildren('exportPassword') exportPassword;
     @ViewChildren('search') search;
+    @ViewChildren('service') service;
     
     page: Page = null;
     
@@ -90,6 +91,9 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         const entry = new PasswordEntry();
         entry.username = this.entries.map(e => e.username).reduce((a,b,i,arr) => (arr.filter(v=>v===a).length>=arr.filter(v=>v===b).length?a:b), null);
         this.entries.push(entry.withEditTrue());
+        setTimeout(() => {
+            this.service.last.nativeElement.focus();
+        }, 400);
     }
 
     delete(index: number) {
