@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Page } from '../shared/page';
+import { Page } from '../shared/models/page';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BackendService } from '../shared/backend.service';
+import { BackendService } from '../shared/services/backend.service';
 import { switchMap, map, tap } from 'rxjs/operators';
 import { of, timer } from 'rxjs';
-import { IconService } from '../shared/icon.service';
+import { IconService } from '../shared/services/icon.service';
 
 @Component({
   selector: 'app-page-edit',

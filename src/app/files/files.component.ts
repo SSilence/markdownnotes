@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { BackendService } from '../shared/backend.service';
-import { FileDto } from '../shared/file-dto';
+import { BackendService } from '../shared/services/backend.service';
+import { FileDto } from '../shared/dtos/file-dto';
 import { Observable } from 'rxjs';
 import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { tap, map } from 'rxjs/operators';

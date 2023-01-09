@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, ViewChild } from '@angular/core';
-import { BackendService } from '../shared/backend.service';
-import { Page } from '../shared/page';
-import { AesService } from '../shared/aes.service';
+import { BackendService } from '../shared/services/backend.service';
+import { Page } from '../shared/models/page';
+import { AesService } from '../shared/services/aes.service';
 import { ClipboardService } from 'ngx-clipboard'
 import { timer, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -30,7 +30,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     successExport = false;
 
     export = false;
-    entries: PasswordEntry[] = [];
+    entries: PasswordEntry[] | null = null;
     entryToDelete: number | null = null;
     askPassword = false;
     
@@ -44,9 +44,9 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         private _clipboardService: ClipboardService) { }
 
     ngOnInit() {
-        this.backendService.getPasswordPage().subscribe(
-            page => this.page = page,
-            error => {
+        this.backendService.getPasswordPage().subscribe({
+            next: page => this.page = page,
+            error: error => {
                 console.info(error);
                 if (error && error.status === 404) {
                     this.page = new Page();
@@ -55,7 +55,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.error = error;
                 }
             }
-        );
+        });
 
         this.qChanged$ = this.qChanged.pipe(
             debounceTime(700),
@@ -89,27 +89,27 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     add() {
         this.q = "";
         const entry = new PasswordEntry();
-        entry.username = this.entries.map(e => e.username).reduce((a: any,b: any,i: any,arr: any) => (arr.filter((v: any)=>v===a).length>=arr.filter((v: any)=>v===b).length?a:b), null);
-        this.entries.push(entry.withEditTrue());
+        entry.username = this.entries!.map(e => e.username).reduce((a: any,b: any,i: any,arr: any) => (arr.filter((v: any)=>v===a).length>=arr.filter((v: any)=>v===b).length?a:b), null);
+        this.entries!.push(entry.withEditTrue());
         setTimeout(() => {
             this.service.last.nativeElement.focus();
         }, 400);
     }
 
     delete(index: number) {
-        this.entries.splice(index, 1);
+        this.entries!.splice(index, 1);
     }
 
     random(index: number) {
-        this.getEntries()[index].password = this.encryptPassword(Array(20)
+        this.getEntries()![index].password = this.encryptPassword(Array(20)
             .fill("123456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz")
             .map(x => x[Math.floor(Math.random() * x.length)])
             .join(''));
-            this.entries[index].passwordShow = true;
+            this.entries![index].passwordShow = true;
     }
 
     clipboard(index: number) {
-        this._clipboardService.copyFromContent(this.decryptPassword(this.getEntries()[index].password)!);
+        this._clipboardService.copyFromContent(this.decryptPassword(this.getEntries()![index].password)!);
     }
 
     unlock(password: string) {
@@ -174,7 +174,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
         }
         let hash = this.aesService.sha512(password);
-        let toSave = this.entries
+        let toSave = this.entries!
             .map(e => PasswordEntry.fromOther(e))
             .map(e => this.reencryptPassword(e, hash));
         let json = JSON.stringify(toSave);
@@ -227,7 +227,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
         }
         this.successExport = false;
-        const passwords = this.entries.map(e => ({service: e.service, username: e.username, password: this.decryptPassword(e.password)}));
+        const passwords = this.entries!.map(e => ({service: e.service, username: e.username, password: this.decryptPassword(e.password)}));
         const json = JSON.stringify(passwords, null, 4);
         this._clipboardService.copyFromContent(json);
         this.export = false;

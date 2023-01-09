@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Page } from './shared/page';
-import { BackendService } from './shared/backend.service';
+import { Page } from './shared/models/page';
+import { BackendService } from './shared/services/backend.service';
 import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
 

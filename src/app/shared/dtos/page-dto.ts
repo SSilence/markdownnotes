@@ -1,4 +1,4 @@
-import { Page } from "./page";
+import { Page } from "./../models/page";
 
 export class PageDto {
     id: string | null = null;

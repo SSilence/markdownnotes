@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Page } from '../shared/page';
+import { Page } from '../shared/models/page';
 import { ActivatedRoute } from '@angular/router';
-import { BackendService } from '../shared/backend.service';
+import { BackendService } from '../shared/services/backend.service';
 import { switchMap, map, tap, filter } from 'rxjs/operators';
 
 @Component({

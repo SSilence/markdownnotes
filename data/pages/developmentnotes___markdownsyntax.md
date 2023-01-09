@@ -1,5 +1,6 @@
 title: markdown syntax
 icon: info-standard
+expanded: 
 ------------------------------------
 ---
 __Advertisement :)__

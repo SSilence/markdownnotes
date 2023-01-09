@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { BackendService } from '../shared/backend.service';
-import { Page } from '../shared/page';
+import { BackendService } from '../shared/services/backend.service';
+import { Page } from '../shared/models/page';
 
 @Component({
   selector: 'app-page-tree',

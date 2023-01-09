@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { Page } from './page';
+import { Page } from './../models/page';
 import { tap, switchMap, map } from 'rxjs/operators';
-import { PageDto } from './page-dto';
-import { ToRenameDto } from './to-rename-dto';
-import { FileDto } from './file-dto';
+import { PageDto } from './../dtos/page-dto';
+import { ToRenameDto } from './../dtos/to-rename-dto';
+import { FileDto } from './../dtos/file-dto';
 
 @Injectable()
 export class BackendService {

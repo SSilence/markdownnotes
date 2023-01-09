@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, Output, EventEmitter, Input, ViewChildren } from '@angular/core';
 import * as EasyMDE from 'easymde/dist/easymde.min.js';
-import { MarkdownPipe } from '../shared/markdown.pipe';
+import { MarkdownPipe } from '../shared/pipes/markdown.pipe';
 
 @Component({
   selector: 'markdown-editor',
