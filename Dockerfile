@@ -1,4 +1,4 @@
-FROM php:7.4.5-apache
+FROM php:8.2.1-apache
 LABEL maintainer="Tobias Zeising <tobias.zeising@aditu.de>"
 RUN apt-get update
 RUN a2enmod rewrite
