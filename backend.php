@@ -58,7 +58,7 @@ function router($httpMethods, $route, $callback, $exit = true) {
 
 function parseString($data, $key) {
     if (isset($data) && isset($data[$key])) {
-        return trim(filter_var($data[$key], FILTER_SANITIZE_STRING));
+        return trim(htmlspecialchars($data[$key]));
     }  else {
         return '';
     }
@@ -106,6 +106,7 @@ function readPageByFilename($filename) {
         'id' => basename($filename, ".md"),
         'title' => $meta['title'],
         'icon' => $meta['icon'],
+        'expanded' => isset($meta['expanded']) ? $meta['expanded'] == 1 : false,
         'content' => trim($parts[1])
     );
 }
@@ -114,25 +115,25 @@ function readPageById($id) {
     return readPageByFilename(toFilename($id));
 }
 
-function writePage($id, $title, $icon, $content) {
-    file_put_contents(toFilename($id), "title: $title\nicon: $icon\n" . CONFIG_META_SEPARATOR . "\n$content");
+function writePage($id, $title, $icon, $expanded, $content) {
+    file_put_contents(toFilename($id), "title: $title\nicon: $icon\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
 }
 
 
 // add/edit page
 router('POST', '/page$', function() {
     $data = body();
-    
     $id = parseString($data, 'id');
     $title = parseString($data, 'title');
     $icon = parseString($data, 'icon');
-    $content = $data['content'];
+    $expanded = $data['expanded'] === true;
+    $content = isset($data['content']) ? $data['content'] : readPageById($id)["content"];
 
     if (strlen($id) == 0) {
         error(404, "invalid id");
     }
 
-    writePage($id, $title, $icon, $content);
+    writePage($id, $title, $icon, $expanded, $content);
 });
 
 // delete page

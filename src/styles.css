@@ -1,0 +1,134 @@
+button:focus {
+    outline:0;
+}
+
+.CodeMirror pre {
+    font-family: monospace,monospace !important;
+}
+
+.markdown-formatted pre {
+    background-color:#eee;
+    padding:10px;
+    overflow-x:auto;
+}
+
+.markdown-formatted th {
+    background:#002538;
+    color:#eeeeee;
+    padding:10px;
+}
+
+.markdown-formatted td {
+    padding:10px;
+}
+
+.markdown-formatted tr:nth-child(even) {
+    background:#eee;
+}
+
+.markdown-formatted tr:nth-child(odd) {
+    background:#f9f9f9;
+}
+
+.markdown-formatted h1 {
+    font-size: 1.85em;
+}
+
+.markdown-formatted h2 {
+    font-size: 1.6em;
+}
+
+.markdown-formatted h3 {
+    font-size: 1.4em;
+}
+
+.markdown-formatted h4 {
+    font-size: 1.3em;
+}
+
+.markdown-formatted h5 {
+    font-size: 1.2em;
+}
+
+.markdown-formatted h6 {
+    font-size: 1.1em;
+}
+
+.markdown-formatted blockquote {
+    border-left:2px solid #678da0;
+    padding-left:5px;
+}
+
+.markdown-formatted .toc {
+    box-shadow: 0 0.125rem 0 0 #d7d7d7;
+    border-radius: .125rem;
+    border: 1px solid #d7d7d7;
+    background-color: #fff;
+    padding:15px;
+    display:inline-block;
+}
+
+    .markdown-formatted .toc h1 {
+        margin-top:0;
+        font-size:1.3em;
+        line-height: 1.5em;
+        margin-bottom:0.5em;
+    }
+
+.markdown-formatted .bookmarks li {
+    list-style: none;
+}
+
+.markdown-formatted .bookmarks h1,
+.markdown-formatted .bookmarks h2,
+.markdown-formatted .bookmarks h3,
+.markdown-formatted .bookmarks h4,
+.markdown-formatted .bookmarks h5,
+.markdown-formatted .bookmarks h6 {
+    margin-top:10px;
+}
+
+.markdown-formatted .bookmarks img {
+    width:16px;
+    height:16px;
+}
+
+.markdown-formatted .error {
+    color:#ff0000;
+}
+
+.markdown-formatted ol, 
+.markdown-formatted ul {
+    list-style-position: outside;
+    margin-left: 1.2em;
+}
+
+.markdown-formatted ul {
+    margin-left: 1.5em;
+}
+
+.markdown-formatted hr {
+    margin:30px 0 30px 0;
+}
+
+.markdown-formatted li p {
+    line-height: 0;
+    margin-top:0;
+    display: inline;
+}
+
+.filedrop {
+    cursor: pointer;
+    margin: auto;
+    height: 100px;
+    border: 3px dashed #0782d0;
+    border-radius: 5px;
+}
+
+.editor-toolbar {
+    padding: 0px 9px 8px 9px !important;
+}
+
+.editor-toolbar button.table {
+    width:auto;
+}

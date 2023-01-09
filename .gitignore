@@ -37,3 +37,4 @@ markdownnotes*.zip
 # System Files
 .DS_Store
 Thumbs.db
+.angular

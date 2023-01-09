@@ -1,5 +1,6 @@
 title: quick notes
 icon: copy-to-clipboard
+expanded: 1
 ------------------------------------
 * buy milk
 * write a simple note tool
