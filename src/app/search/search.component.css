@@ -1,0 +1,21 @@
+.q span {
+    font-weight: bold;
+}
+
+.result {
+    margin-top:1.5em;
+}
+
+.result a {
+    font-size:1.4em;
+    text-decoration: none;
+}
+
+.result span {
+    padding-left:0.4em;
+}
+
+pre {
+    padding:1em;
+    background:#eeeeee;
+}

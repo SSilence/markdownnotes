@@ -46,4 +46,12 @@ export class AppComponent implements OnInit {
     add() {
         this.router.navigate(['/page', 'add']);
     }
+
+    search(event: any) {
+        if (event.value.length>=3) {
+            this.router.navigate(['/search'], {
+                queryParams: {q: event.value}
+            });
+        }
+    }
 }

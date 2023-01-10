@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { Page } from './../models/page';
 import { tap, switchMap, map } from 'rxjs/operators';
@@ -109,6 +109,16 @@ export class BackendService {
         page.id = BackendService.PASSWORD_PAGE_ID
         page.title = BackendService.PASSWORD_PAGE_ID;
         return this.http.post<void>(BackendService.BASE_URL + 'page', new PageDto(page));
+    }
+
+    search(q: string): Observable<Page[]> {
+        const params = new HttpParams()
+            .set('q', q ? q : '');
+        return this.http.get<PageDto[]>(BackendService.BASE_URL + 'search', { params: params })
+                        .pipe(
+                            map(pagedtos => pagedtos.filter(dto => dto.id !== BackendService.PASSWORD_PAGE_ID )),
+                            map(pagedtos => pagedtos.sort((p1, p2) => p1.id!.localeCompare(p2.id!)).map(pagedto => new Page(pagedto)))
+                        );
     }
 
     private findPage(pages: Page[], page: Page): Page | null {

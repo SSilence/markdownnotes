@@ -4,6 +4,7 @@ import { PageShowComponent } from './page-show/page-show.component';
 import { PageEditComponent } from './page-edit/page-edit.component';
 import { FilesComponent } from './files/files.component';
 import { PasswordsComponent } from './passwords/passwords.component';
+import { SearchComponent } from './search/search.component';
 
 export const routes: Routes = [
       {
@@ -29,5 +30,9 @@ export const routes: Routes = [
       {
         path: 'passwords',
         component: PasswordsComponent
+      },
+      {
+        path: 'search',
+        component: SearchComponent
       }
 ];

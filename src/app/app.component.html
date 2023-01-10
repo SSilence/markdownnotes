@@ -11,6 +11,11 @@
             <a class="nav-link nav-icon" [routerLink]="['/passwords']"><cds-icon shape="key"></cds-icon></a>
             <a class="nav-link nav-icon" [routerLink]="['/filelist']"><cds-icon shape="upload-cloud"></cds-icon></a>
         </div>
+        <div class="search">
+            <label for="search_input">
+                <input id="search_input" type="text" placeholder="search for keywords..." (change)="search($event.target)">
+            </label>
+        </div>
     </header>
     
     <div class="content-container">

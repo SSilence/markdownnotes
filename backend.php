@@ -221,5 +221,22 @@ router('GET', '/file$', function() {
     json($files);
 });
 
+// search
+router('GET', '/search$', function() {
+    $q = htmlspecialchars($_GET["q"]);
+    
+    $pages = array();
+    foreach (scandir(CONFIG_DATA_PATH) as $file) {
+        if (endsWith($file, ".md")) {
+            $page = readPageByFilename(CONFIG_DATA_PATH . $file);
+            if (stripos($page['content'], $q) !== false || stripos($page['title'], $q) !== false) {
+                $pages[] = $page;
+            }
+        }
+    }
+
+    json($pages);
+});
+
 header("HTTP/1.0 404 Not Found");
 echo '404 Not Found';
