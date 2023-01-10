@@ -4,7 +4,8 @@ import * as showdown from 'showdown/dist/showdown.min.js';
 import highlightjs from 'highlight.js';
 
 @Pipe({
-    name: 'markdown'
+    name: 'markdown',
+    standalone: true
 })
 export class MarkdownPipe implements PipeTransform {
 

@@ -1,7 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { CdsModule } from '@cds/angular';
 
 @Component({
   selector: 'app-alert-error',
+  standalone: true,
+  imports: [CommonModule, CdsModule],
   templateUrl: './alert-error.component.html',
   styleUrls: ['./alert-error.component.css']
 })

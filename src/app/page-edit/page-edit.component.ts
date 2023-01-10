@@ -1,13 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { Page } from '../shared/models/page';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { BackendService } from '../shared/services/backend.service';
 import { switchMap, map, tap } from 'rxjs/operators';
 import { of, timer } from 'rxjs';
 import { IconService } from '../shared/services/icon.service';
+import { AlertErrorComponent } from '../alert-error/alert-error.component';
+import { CommonModule } from '@angular/common';
+import { CdsModule } from '@cds/angular';
+import { MarkdownPipe } from '../shared/pipes/markdown.pipe';
+import { FormsModule } from '@angular/forms';
+import { MarkdownEditorComponent } from '../markdown-editor/markdown-editor.component';
 
 @Component({
   selector: 'app-page-edit',
+  standalone: true,
+  imports: [AlertErrorComponent, CommonModule, CdsModule, MarkdownPipe, RouterModule, FormsModule, MarkdownEditorComponent],
   templateUrl: './page-edit.component.html',
   styleUrls: ['./page-edit.component.css']
 })

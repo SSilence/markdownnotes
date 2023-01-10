@@ -7,7 +7,8 @@ import { map, switchMap, catchError } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Pipe({
-    name: 'bookmarks'
+    name: 'bookmarks',
+    standalone: true
 })
 export class BookmakrsPipe implements PipeTransform {
 

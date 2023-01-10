@@ -1,11 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Page } from './shared/models/page';
 import { BackendService } from './shared/services/backend.service';
-import { Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, ActivatedRoute, NavigationEnd, RouterModule } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
+import { ClarityModule } from '@clr/angular';
+import { CommonModule } from '@angular/common';
+import { PageTreeComponent } from './page-tree/page-tree.component';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [ClarityModule, RouterModule, CommonModule, PageTreeComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

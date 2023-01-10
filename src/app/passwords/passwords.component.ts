@@ -5,9 +5,16 @@ import { AesService } from '../shared/services/aes.service';
 import { ClipboardService } from 'ngx-clipboard'
 import { timer, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { AlertErrorComponent } from '../alert-error/alert-error.component';
+import { ClarityModule } from '@clr/angular';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-passwords',
+  standalone: true,
+  imports: [AlertErrorComponent, ClarityModule, CommonModule, RouterModule, FormsModule],
   templateUrl: './passwords.component.html',
   styleUrls: ['./passwords.component.css']
 })
