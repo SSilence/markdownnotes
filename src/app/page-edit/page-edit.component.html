@@ -3,13 +3,13 @@
 <div *ngIf="page" class="edit">
     <div>
         <div class="top">
-            <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><clr-icon [attr.shape]="page!.icon" size="24"></clr-icon></button>
+            <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><cds-icon [attr.shape]="page!.icon" size="24"></cds-icon></button>
             <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page!.title">
             <div class="btn-group btn-primary">
                     <button class="btn btn-primary" (click)="save(true)">save</button> 
                     <div class="btn-group-overflow" [ngClass]="{'open': showMenue}">
                         <button class="btn dropdown-toggle btn-icon" (click)="showMenue=!showMenue">
-                            <clr-icon shape="ellipsis-horizontal"></clr-icon>
+                            <cds-icon shape="ellipsis-horizontal"></cds-icon>
                         </button>
                         <div class="dropdown-menu">
                             <button class="btn" (click)="save(false)" *ngIf="!success">save without show</button> 
@@ -60,8 +60,9 @@
 <div class="modal selectIconDialog" *ngIf="selectIconDialog">
     <div class="modal-dialog" role="dialog" aria-hidden="true">
         <div class="modal-content">
+            
             <div class="modal-body">
-                <clr-icon class="selectIcon" [attr.shape]="icon" size="24" *ngFor="let icon of iconService.icons" (click)="page!.icon = icon; selectIconDialog=false"></clr-icon>
+                <cds-icon class="selectIcon" [attr.shape]="icon" size="24" *ngFor="let icon of iconService.icons" (click)="page!.icon = icon; selectIconDialog=false"></cds-icon>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" type="button" (click)="selectIconDialog=false">Close</button>

@@ -4,7 +4,7 @@
                 (clrExpandedChange)="toggle(page)"
                 [clrExpanded]="page.expanded">
         <button [routerLink]="['page', page.id]" class="clr-treenode-link" [class.active]="page.id==active">
-            <clr-icon [attr.shape]="page.icon"></clr-icon> {{page.title}}
+            <cds-icon [attr.shape]="page.icon"></cds-icon> {{page.title}}
         </button>
     </clr-tree-node>
 </clr-tree>
