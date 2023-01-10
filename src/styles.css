@@ -109,6 +109,7 @@ button:focus {
     margin-left: 1.2em;
 }
 
+.markdown-formatted ul:not([cds-list]),
 .markdown-formatted ul {
     margin-left: 1.5em;
 }
