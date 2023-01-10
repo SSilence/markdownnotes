@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './home/home.component';
-import { PageShowComponent } from './page-show/page-show.component';
-import { PageEditComponent } from './page-edit/page-edit.component';
-import { FilesComponent } from './files/files.component';
-import { PasswordsComponent } from './passwords/passwords.component';
-import { SearchComponent } from './search/search.component';
+import { FilesComponent } from './components/files/files.component';
+import { HomeComponent } from './components/home/home.component';
+import { PageEditComponent } from './components/page-edit/page-edit.component';
+import { PageShowComponent } from './components/page-show/page-show.component';
+import { PasswordsComponent } from './components/passwords/passwords.component';
+import { SearchComponent } from './components/search/search.component';
 
 export const routes: Routes = [
       {

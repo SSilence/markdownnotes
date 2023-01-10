@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { Page } from '../shared/models/page';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { BackendService } from '../shared/services/backend.service';
 import { switchMap, map, tap, filter } from 'rxjs/operators';
 import { AlertErrorComponent } from '../alert-error/alert-error.component';
 import { CommonModule } from '@angular/common';
-import { BookmakrsPipe } from '../shared/pipes/bookmarks.pipe';
-import { MarkdownPipe } from '../shared/pipes/markdown.pipe';
 import { CdsModule } from '@cds/angular';
+import { BookmakrsPipe } from 'src/app/pipes/bookmarks.pipe';
+import { MarkdownPipe } from 'src/app/pipes/markdown.pipe';
+import { Page } from 'src/app/models/page';
+import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
   selector: 'app-page-show',

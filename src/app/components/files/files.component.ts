@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { BackendService } from '../shared/services/backend.service';
-import { FileDto } from '../shared/dtos/file-dto';
 import { Observable } from 'rxjs';
 import { NgxFileDropEntry, FileSystemFileEntry, NgxFileDropModule } from 'ngx-file-drop';
 import { tap, map } from 'rxjs/operators';
 import { AlertErrorComponent } from '../alert-error/alert-error.component';
 import { CommonModule } from '@angular/common';
 import { CdsModule } from '@cds/angular';
-import { FileSizePipe } from '../shared/pipes/file-size.pipe';
 import { ClipboardModule } from 'ngx-clipboard';
+import { FileDto } from '../dtos/file-dto';
+import { BackendService } from 'src/app/services/backend.service';
+import { FileSizePipe } from 'src/app/pipes/file-size.pipe';
 
 @Component({
   selector: 'app-files',

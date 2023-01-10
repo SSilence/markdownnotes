@@ -3,11 +3,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CdsModule } from '@cds/angular';
 import { Subscription } from 'rxjs';
-import { Page } from '../shared/models/page';
-import { HighlightPipe } from '../shared/pipes/highlight.pipe';
-import { Nl2BrPipe } from '../shared/pipes/nl2br.pipe';
-import { SearchResultPipe } from '../shared/pipes/searchresult.pipe';
-import { BackendService } from '../shared/services/backend.service';
+import { Page } from 'src/app/models/page';
+import { HighlightPipe } from 'src/app/pipes/highlight.pipe';
+import { Nl2BrPipe } from 'src/app/pipes/nl2br.pipe';
+import { SearchResultPipe } from 'src/app/pipes/searchresult.pipe';
+import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
   selector: 'app-search',

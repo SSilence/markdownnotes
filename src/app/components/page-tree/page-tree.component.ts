@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { BackendService } from '../shared/services/backend.service';
-import { Page } from '../shared/models/page';
 import { ClarityModule } from '@clr/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CdsModule } from '@cds/angular';
+import { Page } from 'src/app/models/page';
+import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
   selector: 'app-page-tree',

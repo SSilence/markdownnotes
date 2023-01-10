@@ -1,7 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, ViewChild } from '@angular/core';
-import { BackendService } from '../shared/services/backend.service';
-import { Page } from '../shared/models/page';
-import { AesService } from '../shared/services/aes.service';
+import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit } from '@angular/core';
 import { ClipboardService } from 'ngx-clipboard'
 import { timer, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -10,6 +7,9 @@ import { ClarityModule } from '@clr/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Page } from 'src/app/models/page';
+import { BackendService } from 'src/app/services/backend.service';
+import { AesService } from 'src/app/services/aes.service';
 
 @Component({
   selector: 'app-passwords',
