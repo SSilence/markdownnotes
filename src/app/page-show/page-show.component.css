@@ -1,7 +1,7 @@
 h1 {
     margin-top:0;
-    margin-bottom:20px;
-    margin-left:35px;
+    margin-bottom:0.5em;
+    margin-left:1.2em;
 }
 
 button {
@@ -14,5 +14,5 @@ button {
 
 cds-icon {
     position: absolute;
-    top:9px;
+    top:0.6em;
 }

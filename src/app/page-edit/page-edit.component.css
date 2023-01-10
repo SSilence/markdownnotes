@@ -4,29 +4,29 @@
 
 .dropdown-menu {
     top:auto;
-    left:-133px;
+    left:-9.3em;
 }
 
 input {
-    margin-top:10px;
-    margin-bottom:20px;
-    margin-right:30px;
+    margin-top:0.5em;
+    margin-bottom:1em;
+    margin-right:1.4em;
     font-size:1.5em;
     flex-grow: 1;
 }
 
 .selectIcon  {
     cursor: pointer;
-    margin:2px;
+    margin:0.2em;
 }
 
 .parent {
-    margin-top:10px;
-    margin-bottom:10px;
+    margin-top:1em;
+    margin-bottom:1em;
     border-radius: .125rem;
     border: 1px solid #d7d7d7;
     background-color: #fff;
-    padding:15px;
+    padding:1em;
     display:inline-block;
 }
 

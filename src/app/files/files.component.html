@@ -11,9 +11,9 @@
 <table class="table" *ngIf="files$">
   <thead>
       <tr>
-          <th (click)="sort('name')">Filename <cds-icon shape="caret up" *ngIf="sortField=='name' && sortAsc"></cds-icon> <cds-icon shape="caret down" *ngIf="sortField=='name' && !sortAsc"></cds-icon></th>
-          <th (click)="sort('size')">Size <cds-icon shape="caret up" *ngIf="sortField=='size' && sortAsc"></cds-icon> <cds-icon shape="caret down" *ngIf="sortField=='size' && !sortAsc"></cds-icon></th>
-          <th (click)="sort('date')">Date <cds-icon shape="caret up" *ngIf="sortField=='date' && sortAsc"></cds-icon> <cds-icon shape="caret down" *ngIf="sortField=='date' && !sortAsc"></cds-icon></th>
+          <th (click)="sort('name')">Filename <cds-icon shape="angle" *ngIf="sortField=='name' && sortAsc"></cds-icon> <cds-icon shape="angle" flip="vertical" *ngIf="sortField=='name' && !sortAsc"></cds-icon></th>
+          <th (click)="sort('size')">Size <cds-icon shape="angle" *ngIf="sortField=='size' && sortAsc"></cds-icon> <cds-icon shape="angle" flip="vertical" *ngIf="sortField=='size' && !sortAsc"></cds-icon></th>
+          <th (click)="sort('date')">Date <cds-icon shape="angle" *ngIf="sortField=='date' && sortAsc"></cds-icon> <cds-icon shape="angle" flip="vertical" *ngIf="sortField=='date' && !sortAsc"></cds-icon></th>
           <th></th>
       </tr>
   </thead>
