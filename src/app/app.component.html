@@ -19,14 +19,14 @@
     </header>
     
     <div class="content-container">
-        <main class="content-area">
-            <router-outlet></router-outlet>
-        </main>
         <nav class="sidenav" [clr-nav-level]="1">
             <section class="sidenav-content">
                 <span class="spinner spinner-inline" *ngIf="loading">Loading Pages...</span>
                 <app-page-tree [pages]="pages" [active]="active" *ngIf="!loading"></app-page-tree>
             </section>
         </nav>
+        <main class="content-area">
+            <router-outlet></router-outlet>
+        </main>
     </div>
 </div>
