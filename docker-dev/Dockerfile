@@ -1,4 +1,4 @@
-FROM php:8.2.1-apache
+FROM php:8.2.9-apache
 COPY php.ini /usr/local/etc/php/
 RUN apt-get update 
 #RUN apt-get install -y libfreetype6-dev
