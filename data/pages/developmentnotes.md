@@ -1,4 +1,4 @@
 title: development notes
-icon: form
+icon: note
 expanded: 1
 ------------------------------------

@@ -1,5 +1,5 @@
 title: markdown syntax
-icon: highlighter
+icon: form
 expanded: 
 ------------------------------------
 ---
