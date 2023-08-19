@@ -58,11 +58,11 @@
 </div>
 
 <div class="modal selectIconDialog" *ngIf="selectIconDialog">
-    <div class="modal-dialog" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="dialog" aria-hidden="true">
         <div class="modal-content">
             
             <div class="modal-body">
-                <cds-icon class="selectIcon" [attr.shape]="icon" size="24" *ngFor="let icon of iconService.icons" (click)="page!.icon = icon; selectIconDialog=false"></cds-icon>
+                <cds-icon class="selectIcon" [attr.shape]="icon" size="24" *ngFor="let icon of iconService.icons" (click)="page!.icon = icon; selectIconDialog=false" [title]="icon"></cds-icon>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" type="button" (click)="selectIconDialog=false">Close</button>

@@ -1,5 +1,5 @@
 title: markdown syntax
-icon: info-standard
+icon: highlighter
 expanded: 
 ------------------------------------
 ---

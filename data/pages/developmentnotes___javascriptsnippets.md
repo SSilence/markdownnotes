@@ -1,5 +1,6 @@
 title: JavaScript Snippets
-icon: plugin
+icon: scroll
+expanded: 
 ------------------------------------
 [toc]
 
