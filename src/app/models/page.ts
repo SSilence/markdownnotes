@@ -6,6 +6,7 @@ export class Page {
     icon: string = "";
     content: string = "";
     expanded: boolean = false;
+    updated: Date | null = null;
 
     parent: Page | null = null;
     children: Page[] = [];
@@ -18,6 +19,7 @@ export class Page {
             this.content = pageDto.content;
             this.expanded = pageDto.expanded;
             this.parent = null;
+            this.updated = new Date((pageDto.updated ??= 0) * 1000);
             this.children = [];
         }
     }

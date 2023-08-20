@@ -38,8 +38,6 @@ export class SearchResultPipe implements PipeTransform {
         }
         extracts.push(current);
 
-        console.info(extracts);
-
         return (persist.length > 0 && persist[0] != 0 ? "...\n" : "") + extracts
                 .filter(c => c.length>0)
                 .map(c => c.map(i => lines[i]).join("\n"))

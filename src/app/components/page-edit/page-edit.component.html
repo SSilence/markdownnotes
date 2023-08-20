@@ -6,7 +6,7 @@
             <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><cds-icon [attr.shape]="page!.icon" size="24"></cds-icon></button>
             <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page!.title">
             <div class="btn-group btn-primary">
-                    <button class="btn btn-primary" (click)="save(true)">save</button> 
+                    <button class="btn btn-primary" (click)="save(true)">save</button>
                     <div class="btn-group-overflow" [ngClass]="{'open': showMenue}">
                         <button class="btn dropdown-toggle btn-icon" (click)="showMenue=!showMenue">
                             <cds-icon shape="ellipsis-horizontal"></cds-icon>

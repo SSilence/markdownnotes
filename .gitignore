@@ -38,3 +38,5 @@ markdownnotes*.zip
 .DS_Store
 Thumbs.db
 .angular
+backend_apikeys.php
+/data/audio

@@ -11,6 +11,7 @@ import { FileDto } from '../components/dtos/file-dto';
 export class BackendService {
 
     static readonly PASSWORD_PAGE_ID: string = 'password_page_storage';
+    static readonly VOCABULARY_PAGE_ID: string = 'vocabulary_page_storage';
 
     static readonly ID_SEPARATOR: string = '___';
     static readonly BASE_URL: string = 'api/';
@@ -25,7 +26,6 @@ export class BackendService {
     getAllPages(): Observable<Page[]> {
         return this.http.get<PageDto[]>(BackendService.BASE_URL + 'page')
                         .pipe(
-                            map(pagedtos => pagedtos.filter(dto => dto.id !== BackendService.PASSWORD_PAGE_ID )),
                             map(pagedtos => pagedtos.sort((p1, p2) => p1.id!.localeCompare(p2.id!)).map(pagedto => new Page(pagedto))),
                             map(pages => this.convertToNestedTree(pages)),
                             tap(pages => this.pages = pages),
@@ -34,7 +34,11 @@ export class BackendService {
     }
 
     getAllPagesFlatten(): Page[] {
-        return this.flattenPages(this.pages);
+        return this.flattenPages(this.filterSystemPages(this.pages));
+    }
+
+    filterSystemPages(pages: Page[]): Page[] {
+        return pages.filter(page => page.id !== BackendService.VOCABULARY_PAGE_ID && page.id !== BackendService.PASSWORD_PAGE_ID);
     }
 
     getPage(id: string): Observable<Page> {
@@ -80,6 +84,18 @@ export class BackendService {
         return this.http.post<void>(BackendService.BASE_URL + 'page/rename', toRenameDtos);
     }
 
+    search(q: string): Observable<Page[]> {
+        const params = new HttpParams()
+            .set('q', q ? q : '');
+        return this.http.get<PageDto[]>(BackendService.BASE_URL + 'search', { params: params })
+                        .pipe(
+                            map(pagedtos => pagedtos.filter(dto => dto.id !== BackendService.PASSWORD_PAGE_ID )),
+                            map(pagedtos => pagedtos.sort((p1, p2) => p1.id!.localeCompare(p2.id!)).map(pagedto => new Page(pagedto)))
+                        );
+    }
+
+
+
 
     getAllFiles(): Observable<FileDto[]> {
         return this.http.get<FileDto[]>(BackendService.BASE_URL + 'file');
@@ -99,6 +115,9 @@ export class BackendService {
         return this.http.get<string>(file, {responseType: 'text' as 'json'});
     }
 
+    
+
+    
     getPasswordPage(): Observable<Page> {
         return this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + BackendService.PASSWORD_PAGE_ID).pipe(
             map(pagedto => new Page(pagedto))
@@ -111,15 +130,33 @@ export class BackendService {
         return this.http.post<void>(BackendService.BASE_URL + 'page', new PageDto(page));
     }
 
-    search(q: string): Observable<Page[]> {
-        const params = new HttpParams()
-            .set('q', q ? q : '');
-        return this.http.get<PageDto[]>(BackendService.BASE_URL + 'search', { params: params })
-                        .pipe(
-                            map(pagedtos => pagedtos.filter(dto => dto.id !== BackendService.PASSWORD_PAGE_ID )),
-                            map(pagedtos => pagedtos.sort((p1, p2) => p1.id!.localeCompare(p2.id!)).map(pagedto => new Page(pagedto)))
-                        );
+    getVocabularyPage(): Observable<Page> {
+        return this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + BackendService.VOCABULARY_PAGE_ID).pipe(
+            map(pagedto => new Page(pagedto))
+        );
     }
+
+    getAllVocabularyPages(): Observable<Page[]> {
+        return this.http.get<PageDto[]>(BackendService.BASE_URL + 'page')
+            .pipe(
+                map(pagedtos => pagedtos.map(pagedto => new Page(pagedto))),
+                map(pages => this.convertToNestedTree(pages)),
+                map(pages => {
+                    const vocabularyPages = pages.filter(page => page.id === BackendService.VOCABULARY_PAGE_ID)
+                    return vocabularyPages.length > 0 ? vocabularyPages[0].children : [];
+                })
+            );
+    }
+    
+    createVocabularyParentPage(): Observable<void> {
+        const page = new Page();
+        page.id = BackendService.VOCABULARY_PAGE_ID;
+        page.title = BackendService.VOCABULARY_PAGE_ID;
+        return this.http.post<void>(BackendService.BASE_URL + 'page', new PageDto(page));
+    }
+
+
+
 
     private findPage(pages: Page[], page: Page): Page | null {
         if (!pages) {

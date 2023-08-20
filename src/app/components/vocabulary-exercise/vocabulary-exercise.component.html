@@ -1,0 +1,58 @@
+<div class="modal" *ngIf="current">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <clr-progress-bar [clrValue]="progressValue" clrLabeled [clrDisplayval]="progressLabel"></clr-progress-bar>
+                <button aria-label="Close" class="close" type="button" (click)="current=null">
+                    <cds-icon shape="close"></cds-icon>
+                </button>
+            </div>
+            <div class="modal-body">
+                
+                <app-alert-error [error]="error"></app-alert-error>
+
+                <div *ngIf="current && current.g2e">
+                    <div class="word">{{current.vocabulary.german}}</div>
+
+                    <hr />
+
+                    <div class="word" [style.visibility]="result || introduceMode ? 'visible' : 'hidden'">
+                        {{current.vocabulary.english}} <br />
+                        <button type="button" class="btn btn-icon btn-sm btn-link" (click)="play(current.vocabulary.english)">
+                            <cds-icon shape="play"></cds-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div *ngIf="current && !current.g2e">
+                    <div class="word">{{current.vocabulary.english}} <br />
+                        <button type="button" class="btn btn-icon btn-sm btn-link" (click)="play(current.vocabulary.english)">
+                            <cds-icon shape="play"></cds-icon>
+                        </button>
+                    </div>
+
+                    <hr />
+
+                    <div class="word" [style.visibility]="result || introduceMode ? 'visible' : 'hidden'">
+                        {{current.vocabulary.german}}
+                    </div>
+                </div>
+
+                <div class="action">
+                    <button type="button" class="btn btn-icon btn-sm btn-link" (click)="back()" *ngIf="hasBack()">
+                        <cds-icon shape="arrow" direction="left"></cds-icon>
+                    </button>
+                    <button class="btn btn-success" *ngIf="!result && !introduceMode" (click)="answer()">show answer</button>
+                    <button class="btn btn-warning" *ngIf="result && !introduceMode" (click)="wrong()">wrong</button> 
+                    <button class="btn btn-success" *ngIf="result && !introduceMode" (click)="correct()">correct</button>
+                    <button class="btn btn-primary" *ngIf="introduceMode" (click)="next()">next</button>
+                </div>
+
+                <audio #audio></audio>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" aria-hidden="true" *ngIf="current"></div>

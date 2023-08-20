@@ -1,0 +1,98 @@
+h1 {
+    margin-top:0;
+}
+
+h2 {
+    margin:0;
+    margin-bottom: 0.4rem;
+}
+
+.vocabularies {
+    display:flex;
+    flex-wrap: wrap;
+}
+
+.vocabulary {
+    border: 1px solid #cbcbcb;
+    background: #dddddd;
+    padding:1rem;
+    margin-right: 1rem;
+    margin-top: 1rem;
+}
+
+.vocabulary .content {
+    display: flex;
+}
+
+.vocabulary img {
+    height: 11rem;
+    margin-right: 1rem;
+}
+
+.vocabulary span {
+    margin-top: 0.5rem;
+    font-weight: bold;
+}
+
+.vocabulary ul,
+.vocabulary li {
+    list-style: none;
+}
+
+.vocabulary table {
+    margin-top: 0.2rem;
+    border-collapse: collapse;
+    border-style: hidden;
+}
+
+.vocabulary th,
+.vocabulary td {
+    width:1.8rem;
+    text-align: center;
+    border: 1px solid #d0d0d0;
+    font-size:0.6rem;
+}
+
+.vocabulary .action {
+    margin-top: 1rem;
+}
+
+.danger {
+    color:#ff0000;
+}
+
+.add {
+    clear:both;
+}
+
+.add button {
+    margin-top:1rem;
+}
+
+.stats-bg {
+    position: relative;
+    height:4rem;
+    vertical-align: bottom;
+}
+
+.stats-label {
+    z-index: 90;
+    position:absolute;
+    bottom:0;
+    width: 100%;
+    text-align: center;
+    color: #173700;
+}
+
+.stats-bar {
+    z-index: 80;
+    background-color: #3c8500;
+    position:absolute;
+    bottom:0;
+    width: 100%;
+}
+
+clr-range-container,
+clr-range-container input {
+    width: 25rem;
+}

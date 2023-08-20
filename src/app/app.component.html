@@ -10,6 +10,7 @@
             <a class="nav-link nav-icon" (click)="add()"><cds-icon shape="add-text"></cds-icon></a>
             <a class="nav-link nav-icon" [routerLink]="['/passwords']"><cds-icon shape="key"></cds-icon></a>
             <a class="nav-link nav-icon" [routerLink]="['/filelist']"><cds-icon shape="upload-cloud"></cds-icon></a>
+            <a class="nav-link nav-icon" [routerLink]="['/vocabulary']"><cds-icon shape="talk-bubbles"></cds-icon></a>
         </div>
         <div class="search">
             <label for="search_input">
@@ -19,7 +20,7 @@
     </header>
     
     <div class="content-container">
-        <nav class="sidenav" [clr-nav-level]="1">
+        <nav class="sidenav" *ngIf="showNavigation">
             <section class="sidenav-content">
                 <span class="spinner spinner-inline" *ngIf="loading">Loading Pages...</span>
                 <app-page-tree [pages]="pages" [active]="active" *ngIf="!loading"></app-page-tree>

@@ -19,6 +19,7 @@ export class AppComponent implements OnInit {
     active: string | null = null;
     loading = true;
     q = '';
+    showNavigation: boolean = true;
 
     constructor(private backendService: BackendService,
                 private route: ActivatedRoute,
@@ -38,8 +39,12 @@ export class AppComponent implements OnInit {
             ).subscribe(params => {
                 this.active = params['id'] ? params['id'] : null
             });
+
+            this.showNavigation = this.router.url == "/" || this.router.url.startsWith("/page") || this.router.url.startsWith("/search");
         });
-        this.backendService.pagesChanged.subscribe(pages => this.pages = pages.map(p => ({...p})))
+        this.backendService.pagesChanged.subscribe(pages => {
+            this.pages = this.backendService.filterSystemPages(pages).map(p => ({...p}));
+        });
         this.backendService.getAllPages().subscribe(() => this.loading = false);
     }
 

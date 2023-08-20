@@ -1,0 +1,96 @@
+<h1>Vocabulary</h1>
+<span class="spinner spinner-inline" *ngIf="!page && !error">Loading...</span>
+<app-alert-error [error]="error"></app-alert-error>
+
+<div class="vocabularies">
+    <div class="vocabulary" *ngFor="let page of pages">
+        <div class="content" *ngIf="!page.edit">
+            <img src="{{page.icon}}" *ngIf="page.icon" />
+            <div>
+                <h2>{{page.title}}</h2>
+                <ul>
+                    <li *ngIf="page.vocabularyCount"><span>{{page.vocabularyCount}}</span> vocabularies</li>
+                    <li *ngIf="page.updated"><span>{{page.updated | date:'mediumDate'}}</span> last updated</li>
+                    <li *ngIf="page.phases">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th *ngFor="let stats of page.phases" class="stats-bg">
+                                        <div [style.height]="stats.percent+'%'" class="stats-bar"></div>
+                                        <div class="stats-label">{{stats.count}}</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td *ngFor="let stats of page.phases">{{stats.phase}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="btn-group btn-primary action" *ngIf="!page.edit && !page.phases">
+            <button class="btn btn-primary-outline" (click)="loadFullPage(page)">load</button>
+        </div>
+
+        <div class="btn-group btn-primary action" *ngIf="!page.edit && page.phases">
+            <button class="btn btn-success" *ngIf="page.newVocabularyCount && page.newVocabularyCount > 0" (click)="showNewDialog(page)">{{page.newVocabularyCount}} new</button>
+            <button class="btn btn-primary" *ngIf="page.exerciseVocabularyCount && page.exerciseVocabularyCount > 0" (click)="startExercise(page)">{{page.exerciseVocabularyCount}} exercise</button>
+            <button class="btn btn-primary-outline" [routerLink]="['/vocabulary', 'vocabular', page.id]">list</button>
+            <button class="btn btn-icon btn-primary-outline" (click)="page.edit = true"><cds-icon shape="pencil"></cds-icon></button>
+            <button class="btn btn-icon btn-primary-outline" (click)="entryToDelete=page"><cds-icon shape="trash"></cds-icon></button>
+        </div>
+
+        <app-vocabulary-exercise [page]="page" [cards]="page.exerciseVocabulary" *ngIf="page.exercise" (finished)="loadFullPage(page)"></app-vocabulary-exercise>
+        <app-vocabulary-exercise [introduce]="true" [page]="page" [cards]="page.startVocabulary" *ngIf="page.start" (finished)="loadFullPage(page)"></app-vocabulary-exercise>
+
+        <div *ngIf="page.edit">
+            <app-vocabulary-edit [page]="page"></app-vocabulary-edit>
+            <button class="btn btn-primary" (click)="save(page)">save</button>
+            <button class="btn btn-link" (click)="page.edit = false">cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="add">
+    <button type="button" class="btn btn-icon btn-sm btn-link" (click)="add()">
+        <cds-icon shape="add-text"></cds-icon> add
+    </button>
+</div>
+
+<div class="modal" *ngIf="entryToDelete!==null">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Really delete {{entryToDelete.title}}?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" type="button" (click)="entryToDelete=null">cancel</button>
+                <button class="btn btn-danger" type="button" (click)="delete(entryToDelete); entryToDelete = null;">delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" *ngIf="start">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Select amount of words</h3>
+            </div>
+            <div class="modal-body">
+                <clr-range-container [clrRangeHasProgress]="true">
+                    <input type="range" clrRange [min]="1" [max]="start.newVocabularyCount" [(ngModel)]="startAmount" />
+                    <clr-control-helper>{{startAmount}}</clr-control-helper>
+                </clr-range-container>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" type="button" (click)="start = null">cancel</button>
+                <button class="btn btn-primary" type="button" (click)="startNew();">start</button>
+            </div>
+        </div>
+    </div>
+</div>

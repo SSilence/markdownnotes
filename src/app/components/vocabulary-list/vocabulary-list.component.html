@@ -1,0 +1,82 @@
+<span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
+<app-alert-error [error]="error"></app-alert-error>
+
+<div *ngIf="page" class="page">
+    <app-vocabulary-exercise [train]="true" [page]="page" [cards]="train" *ngIf="train.length > 0"></app-vocabulary-exercise>
+
+    <div class="top">
+        <h1>{{page.title}}</h1>
+        <div>
+            <span *ngIf="successSave" class="success">successfully saved</span>
+            <button class="btn btn-primary-outline" (click)="export()">export</button>
+            <input type="file" (change)="import($event)" [hidden]="true" #input>
+            <button class="btn btn-primary-outline" (click)="input.click()">import</button>
+            <button class="btn btn-warning-outline" (click)="resetChecked()">reset checked</button>
+            <button class="btn btn-success-outline" (click)="exercise()">exercise</button>
+            <button class="btn" (click)="save()" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}">save</button>
+        </div>
+    </div>
+    
+    <clr-datagrid class="datagrid-compact" [(clrDgSelected)]="selected" [clrDgPreserveSelection]="true">
+        <clr-dg-column [clrDgField]="'german'">German <clr-dg-string-filter [clrDgStringFilter]="germanFilter"></clr-dg-string-filter></clr-dg-column>
+        <clr-dg-column [clrDgField]="'english'">English <clr-dg-string-filter [clrDgStringFilter]="englishFilter"></clr-dg-string-filter></clr-dg-column>
+        <clr-dg-column [clrDgField]="'section'">Section 
+            <clr-dg-filter [clrDgFilter]="sectionFilter">
+                <section-filter [items]="sections" (filterValue)="sectionFilterValue=$event" #sectionFilter></section-filter>
+            </clr-dg-filter>
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'g2ePhase'">Phase de &rarr; en 
+            <clr-dg-filter [clrDgFilter]="g2ePhaseFilter">
+                <phase-filter [g2e]="true" (filterValue)="g2ePhaseFilterValue=$event" #g2ePhaseFilter></phase-filter>
+            </clr-dg-filter>
+        </clr-dg-column>
+        <clr-dg-column [clrDgField]="'e2gPhase'">Phase de &larr; en 
+            <clr-dg-filter [clrDgFilter]="e2gPhaseFilter">
+                <phase-filter [g2e]="false" (filterValue)="e2gPhaseFilterValue=$event" #e2gPhaseFilter></phase-filter>
+            </clr-dg-filter>
+        </clr-dg-column>
+        <clr-dg-column>
+            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="add()">
+                <cds-icon shape="add-text"></cds-icon> add
+            </button>
+        </clr-dg-column>
+
+        <clr-dg-row *clrDgItems="let entry of vocabulary; let i = index" [clrDgItem]="entry">
+            <clr-dg-cell><input type="text" [(ngModel)]="entry.german" #germanInput></clr-dg-cell>
+            <clr-dg-cell><input type="text" [(ngModel)]="entry.english"></clr-dg-cell>
+            <clr-dg-cell><input type="text" [(ngModel)]="entry.section"></clr-dg-cell>
+            <clr-dg-cell class="phase">{{entry.g2ePhase}} <span>{{entry.g2eNext | date:'mediumDate'}}</span></clr-dg-cell>
+            <clr-dg-cell class="phase">{{entry.e2gPhase}} <span>{{entry.e2gNext | date:'mediumDate'}}</span></clr-dg-cell>
+            <clr-dg-cell>
+                <audio #audio></audio>
+                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src='/api/text2speech?text='+entry.english;audio.play()">
+                    <cds-icon shape="play"></cds-icon>
+                </button>
+                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="reset(entry)">
+                    <cds-icon shape="refresh" direction="down"></cds-icon>
+                </button>
+                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="delete(entry)">
+                    <cds-icon shape="trash"></cds-icon>
+                </button>
+            </clr-dg-cell>
+        </clr-dg-row>
+    
+        <clr-dg-footer>
+            <clr-dg-footer>
+                <clr-dg-pagination #pagination [clrDgPageSize]="30">
+                    <clr-dg-page-size [clrPageSizeOptions]="[10,20,30,50,100,200,300,500,1000,2000]">items per page</clr-dg-page-size>
+                    {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}} of {{pagination.totalItems}} vocabularies
+                </clr-dg-pagination>
+            </clr-dg-footer>
+
+            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="add()">
+                <cds-icon shape="add-text"></cds-icon> add
+            </button>
+            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="save()">
+                <cds-icon shape="sync"></cds-icon> save
+                <span *ngIf="successSave" class="success">(successfully saved)</span>
+            </button>
+        </clr-dg-footer>
+
+    </clr-datagrid>
+</div>

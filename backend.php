@@ -1,7 +1,10 @@
 <?PHP
 
+include("backend_apikeys.php"); // define("CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY", "...");
+
 define("CONFIG_DATA_PATH", __DIR__ . "/data/pages/");
 define("CONFIG_FILES_PATH", __DIR__ . "/data/files/");
+define("CONFIG_AUDIO_PATH", __DIR__ . "/data/audio/");
 define("CONFIG_META_SEPARATOR", "------------------------------------");
 
 if (!file_exists(CONFIG_DATA_PATH)) {
@@ -10,6 +13,10 @@ if (!file_exists(CONFIG_DATA_PATH)) {
 
 if (!file_exists(CONFIG_FILES_PATH)) {
     mkdir(CONFIG_FILES_PATH, 0777);
+}
+
+if (!file_exists(CONFIG_AUDIO_PATH)) {
+    mkdir(CONFIG_AUDIO_PATH, 0777);
 }
 
 function endsWith($haystack, $needle) {
@@ -64,9 +71,20 @@ function parseString($data, $key) {
     }
 }
 
+function gzip($json) {
+    if(strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip')!==FALSE) {
+        header('Content-Type: application/json');
+        header('Content-Encoding: gzip');
+        die(gzencode($json));
+    } else {
+        header('Content-Type: application/json');
+        die($json);
+    }
+}
+
 function json($data) {
     header('Content-Type: application/json');
-    die(json_encode($data));
+    gzip(json_encode($data));
 }
 
 function success() {
@@ -107,7 +125,8 @@ function readPageByFilename($filename) {
         'title' => $meta['title'],
         'icon' => $meta['icon'],
         'expanded' => isset($meta['expanded']) ? $meta['expanded'] == 1 : false,
-        'content' => trim($parts[1])
+        'content' => trim($parts[1]),
+        'updated' => filemtime($filename)
     );
 }
 
@@ -119,6 +138,36 @@ function writePage($id, $title, $icon, $expanded, $content) {
     file_put_contents(toFilename($id), "title: $title\nicon: $icon\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
 }
 
+function text2SpeechAuth() {
+    global $azureTextToSpeechApiKey;
+    $context = stream_context_create([
+        'http' => [
+            'header' => "Ocp-Apim-Subscription-Key: " . CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY . "\r\nContent-Length: 0",
+            'method' => 'POST'
+        ],
+    ]);
+    $result = file_get_contents('https://eastus.api.cognitive.microsoft.com/sts/v1.0/issueToken', false, $context);
+    if ($result === false) {
+        error(500, "autherror");
+    }
+    return $result;
+}
+
+function text2Speech($text) {
+    $data = "<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='Male' name='en-US-ChristopherNeural'>$text</voice></speak>";
+    $context = stream_context_create([
+        'http' => [
+            'header' => "Content-type: application/ssml+xml\r\nUser-Agent: MarkdownNotes\r\nAuthorization: Bearer " . text2SpeechAuth() . "\r\nX-Microsoft-OutputFormat: audio-16khz-64kbitrate-mono-mp3\r\nContent-Length: " . strlen($data) . "\r\n",
+            'method' => 'POST',
+            'content' => $data,
+        ],
+    ]);
+    $result = file_get_contents('https://eastus.tts.speech.microsoft.com/cognitiveservices/v1', false, $context);
+    if ($result === false) {
+        error(500, "text2speech error");
+    }
+    return $result;
+}
 
 // add/edit page
 router('POST', '/page$', function() {
@@ -237,6 +286,21 @@ router('GET', '/search$', function() {
 
     json($pages);
 });
+
+// text2speech
+router('GET', '/text2speech$', function() {
+    $text = htmlspecialchars($_GET["text"]);
+    $filename = CONFIG_AUDIO_PATH . sanitizeFilename($text) . ".mp3";
+    if (file_exists($filename)) {
+        header('Content-Type: audio/mpeg');
+        die(file_get_contents($filename));
+    }
+    $mp3 = text2Speech($text);
+    file_put_contents($filename, $mp3);
+    header('Content-Type: audio/mpeg');
+    echo $mp3;
+});
+
 
 header("HTTP/1.0 404 Not Found");
 echo '404 Not Found';

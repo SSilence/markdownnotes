@@ -6,6 +6,7 @@ export class PageDto {
     icon: string = "";
     expanded: boolean = false;
     content: string = "";
+    updated: number | null = null;
 
     constructor(page: Page | null = null) {
         if (page != null) {

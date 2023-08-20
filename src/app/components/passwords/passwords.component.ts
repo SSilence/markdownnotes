@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
 import { AesService } from 'src/app/services/aes.service';
+import { PasswordEntry } from 'src/app/models/password-entry';
 
 @Component({
   selector: 'app-passwords',
@@ -54,7 +55,6 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.backendService.getPasswordPage().subscribe({
             next: page => this.page = page,
             error: error => {
-                console.info(error);
                 if (error && error.status === 404) {
                     this.page = new Page();
                     this.entries = [];
@@ -242,7 +242,7 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         timer(3000).subscribe(() => this.successExport = false);
     }
 
-    public static saveFile (name: string, type: string, data: any) {
+    public static saveFile(name: string, type: string, data: any) {
         const blob = new Blob([data], {type: type});
         const a = document.createElement('a');
         a.setAttribute('style', 'display:none');
@@ -253,36 +253,5 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
         a.click();
         window.URL.revokeObjectURL(url);
         a.remove();
-    }
-}
-
-class PasswordEntry {
-    service: string = "";
-    username: string = "";
-    password: string = "";
-
-    passwordShow: boolean = false;
-    edit: boolean = false;
-    prev: PasswordEntry | null = null;
-
-    static fromOther(other: PasswordEntry): PasswordEntry {
-        const passwordEntry = new PasswordEntry();
-        passwordEntry.service = other.service;
-        passwordEntry.username = other.username;
-        passwordEntry.password = other.password;
-        return passwordEntry;
-    }
-
-    static fromData(service: string, username: string, password: string): PasswordEntry {
-        const passwordEntry = new PasswordEntry();
-        passwordEntry.service = service;
-        passwordEntry.username = username;
-        passwordEntry.password = password;
-        return passwordEntry;
-    }
-
-    withEditTrue(): PasswordEntry {
-        this.edit = true;
-        return this;
     }
 }

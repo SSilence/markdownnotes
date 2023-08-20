@@ -6,7 +6,7 @@
 
 .sidenav {
     padding-top:1em;
-    overflow:scroll;
+    overflow:auto;
 }
 
 .nav-link {

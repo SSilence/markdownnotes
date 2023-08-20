@@ -5,6 +5,8 @@ import { PageEditComponent } from './components/page-edit/page-edit.component';
 import { PageShowComponent } from './components/page-show/page-show.component';
 import { PasswordsComponent } from './components/passwords/passwords.component';
 import { SearchComponent } from './components/search/search.component';
+import { VocabularyComponent } from './components/vocabulary/vocabulary.component';
+import { VocabularyListComponent } from './components/vocabulary-list/vocabulary-list.component';
 
 export const routes: Routes = [
       {
@@ -34,5 +36,13 @@ export const routes: Routes = [
       {
         path: 'search',
         component: SearchComponent
+      },
+      {
+        path: 'vocabulary',
+        component: VocabularyComponent
+      },
+      {
+        path: 'vocabulary/vocabular/:id',
+        component: VocabularyListComponent
       }
 ];

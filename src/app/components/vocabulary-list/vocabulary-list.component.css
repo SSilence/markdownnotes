@@ -1,0 +1,64 @@
+h1 {
+    margin-top:0;
+    margin-bottom:0.5em;
+    margin-left:0;
+}
+
+.top {
+    display:flex;
+}
+
+.top h1 {
+    flex: 1;
+}
+
+input {
+    font-size: 1.1em;
+    border-radius: 0.1em;
+    margin-right:0.3em;
+    padding: 0.3em;
+    vertical-align: middle;
+    border: 1px solid #ddd;
+    width: 100%;
+}
+
+.table th {
+    vertical-align: middle;
+} 
+
+.search {
+    font-weight: normal;
+}
+
+.add {
+    margin-top:0;
+    text-align: left;
+}
+
+.success {
+    color:green;
+    padding-right: 10px;
+}
+
+.btn-cell {
+    margin:0;
+}
+
+.phase {
+    padding-top:0.7rem;
+}
+
+.phase span {
+    font-size:0.5rem;
+    color: #999;
+}
+
+clr-dg-pagination {
+    font-size:0.7rem;
+    height:1.7rem;
+}
+
+:host ::ng-deep .datagrid-select {
+    display: block;
+    margin-top: 0.4rem;
+}
