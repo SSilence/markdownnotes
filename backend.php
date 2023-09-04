@@ -169,6 +169,12 @@ function text2Speech($text) {
     return $result;
 }
 
+
+// time
+router('GET', '/$', function() {
+    die("".time());
+});
+
 // add/edit page
 router('POST', '/page$', function() {
     $data = body();
