@@ -189,6 +189,7 @@ router('POST', '/page$', function() {
     }
 
     writePage($id, $title, $icon, $expanded, $content);
+    json(readPageById($id));
 });
 
 // delete page
