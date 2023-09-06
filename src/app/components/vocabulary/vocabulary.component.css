@@ -69,10 +69,19 @@ h2 {
     margin-top:1rem;
 }
 
+.stats-table th,
+.stats-table td {
+    border:0;
+    width:1.3rem;
+    margin-right:0.2rem;
+    display:inline-block;
+}
+
 .stats-bg {
     position: relative;
     height:4rem;
     vertical-align: bottom;
+    width:1rem;
 }
 
 .stats-label {
@@ -82,6 +91,7 @@ h2 {
     width: 100%;
     text-align: center;
     color: #173700;
+    font-size: 0.4rem;
 }
 
 .stats-bar {
@@ -90,6 +100,7 @@ h2 {
     position:absolute;
     bottom:0;
     width: 100%;
+    border-radius: 0.2rem;
 }
 
 clr-range-container,

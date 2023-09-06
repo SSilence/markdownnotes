@@ -12,7 +12,7 @@
                     <li *ngIf="page.vocabularyCount"><span>{{page.vocabularyCount}}</span> vocabularies</li>
                     <li *ngIf="page.updated"><span>{{page.updated | date:'mediumDate'}}</span> last updated</li>
                     <li *ngIf="page.phases">
-                        <table>
+                        <table class="stats-table">
                             <thead>
                                 <tr>
                                     <th *ngFor="let stats of page.phases" class="stats-bg">
