@@ -34,7 +34,7 @@ export class VocabularyExerciseComponent {
     private backup: VocabularyCard[] = [];
 
     progressAll: number = 0;
-    progressCorrect: number = 0;
+    progressFinished: number = 0;
     progressValue: number = 0;
     progressLabel: string = "";
 
@@ -78,7 +78,7 @@ export class VocabularyExerciseComponent {
     }
 
     correct() {
-        this.progressCorrect++;
+        this.progressFinished++;
         this.save(true);
     }
 
@@ -98,7 +98,7 @@ export class VocabularyExerciseComponent {
         const wasCorrectg2e = current!.g2e && current!.vocabulary.g2ePhase > backup!.vocabulary.g2ePhase;
         const wasCorrecte2g = current!.g2e == false && current!.vocabulary.e2gPhase > backup!.vocabulary.e2gPhase;
         if (wasCorrectg2e || wasCorrecte2g) {
-            this.progressCorrect--;
+            this.progressFinished--;
             this.progressUpdate();
         }
 
@@ -109,26 +109,25 @@ export class VocabularyExerciseComponent {
         this.current = current;
     }
 
-    private pushToHistory() {
-        const vocabulary = new VocabularyEntry(this.current!.vocabulary ? this.current!.vocabulary : null);
-        const copy = new VocabularyCard(vocabulary, this.current!.g2e);
-        this.backup.push(copy);
-        this.history.push(this.current!);
-    }
-
     private save(correct: boolean) {
-        this.pushToHistory();
-        if (!this.train) {
+        const isAlreadyInHistory = this.history.find(entry => entry.g2e == this.current!.g2e && VocabularyEntry.equals(entry.vocabulary, this.current!.vocabulary));
+        
+        const vocabularyCopy = new VocabularyEntry(this.current!.vocabulary ? this.current!.vocabulary : null);
+        this.backup.push(new VocabularyCard(vocabularyCopy, this.current!.g2e));
+
+        if (!this.train && !isAlreadyInHistory) {
             if (this.current!.g2e) {
-                const newPhase = this.current!.vocabulary.g2ePhase + (correct ? 1 : -1);
-                this.current!.vocabulary.g2ePhase = newPhase == 0 ? 1 : newPhase;
-                this.current!.vocabulary.g2eNext = this.phaseToNext(this.current!!.vocabulary.g2ePhase);
+                const newPhase = this.current!.vocabulary.g2ePhase + (correct ? 1 : -2);
+                this.current!.vocabulary.g2ePhase = newPhase <= 0 ? 1 : newPhase;
+                this.current!.vocabulary.g2eNext = correct ? this.phaseToNext(newPhase) : this.phaseToNext(2);
             } else {
-                const newPhase = this.current!.vocabulary.e2gPhase + (correct ? 1 : -1);
-                this.current!.vocabulary.e2gPhase = newPhase == 0 ? 1 : newPhase;
-                this.current!.vocabulary.e2gNext = correct ? this.phaseToNext(this.current!.vocabulary.e2gPhase) : this.phaseToNext(2);
+                const newPhase = this.current!.vocabulary.e2gPhase + (correct ? 1 : -2);
+                this.current!.vocabulary.e2gPhase = newPhase <= 0 ? 1 : newPhase;
+                this.current!.vocabulary.e2gNext = correct ? this.phaseToNext(newPhase) : this.phaseToNext(2);
             }
         }
+
+        this.history.push(this.current!);
 
         if (!correct) {
             this._cards.push(this.current!);
@@ -157,8 +156,8 @@ export class VocabularyExerciseComponent {
     }
 
     private progressUpdate() {
-        this.progressValue = Math.round((this.progressCorrect / (this.progressAll)) * 100);
-        this.progressLabel = `${this.progressCorrect}/${this.progressAll}`;
+        this.progressValue = Math.round((this.progressFinished / (this.progressAll)) * 100);
+        this.progressLabel = `${this.progressFinished}/${this.progressAll}`;
     }
     
     next() {
@@ -201,17 +200,15 @@ export class VocabularyExerciseComponent {
     }
 
     private phaseToNext(phase: number): Date {
-        if (phase == 1) {
-            return moment().startOf('day').toDate();
-        } else if(phase == 2) {
+        if(phase == 1) {
             return moment().add(1, 'days').startOf('day').toDate();
-        } else if(phase == 3) {
+        } else if(phase == 2) {
             return moment().add(3, 'days').startOf('day').toDate();
-        } else if(phase == 4) {
+        } else if(phase == 3) {
             return moment().add(9, 'days').startOf('day').toDate();
-        } else if(phase == 5) {
+        } else if(phase == 4) {
             return moment().add(29, 'days').startOf('day').toDate();
-        } else if(phase == 6) {
+        } else if(phase == 5) {
             return moment().add(90, 'days').startOf('day').toDate();
         } else {
             return moment().add(100, 'years').startOf('day').toDate();
