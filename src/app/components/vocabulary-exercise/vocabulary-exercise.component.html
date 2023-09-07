@@ -2,6 +2,7 @@
     <div class="modal-dialog" role="dialog" aria-hidden="true">
         <div class="modal-content">
             <div class="modal-header">
+                <span class="phase" *ngIf="!introduceMode">{{current.g2e ? current.vocabulary.g2ePhase : current.vocabulary.e2gPhase }}</span>
                 <clr-progress-bar [clrValue]="progressValue" clrLabeled [clrDisplayval]="progressLabel"></clr-progress-bar>
                 <button aria-label="Close" class="close" type="button" (click)="current=null">
                     <cds-icon shape="close"></cds-icon>

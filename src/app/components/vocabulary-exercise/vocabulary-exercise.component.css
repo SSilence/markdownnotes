@@ -25,3 +25,7 @@ audio {
 .modal-header button {
     margin-left:0.5rem;
 }
+
+.phase {
+    padding-right:1rem;
+}
