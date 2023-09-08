@@ -22,6 +22,7 @@
                 "src/favicon.ico",
                 "src/assets",
                 { "glob": "backend.php", "input": "./", "output": "./" },
+                { "glob": "backend_apikeys.php", "input": "./", "output": "./" },
                 { "glob": ".htaccess", "input": "./", "output": "./" },
                 { "glob": "**/*", "input": "./data", "output": "./data" }
               ],
