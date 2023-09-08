@@ -12,11 +12,22 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 import { VocabularyExerciseComponent } from "../vocabulary-exercise/vocabulary-exercise.component";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import * as moment from 'moment';
+import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
+import { VocabularyExerciseResultComponent } from "../vocabulary-exercise-result/vocabulary-exercise-result.component";
 
 @Component({
     selector: 'app-vocabulary',
     standalone: true,
-    imports: [AlertErrorComponent, ClarityModule, CommonModule, FormsModule, VocabularyEditComponent, RouterModule, VocabularyExerciseComponent],
+    imports: [
+        AlertErrorComponent, 
+        ClarityModule, 
+        CommonModule, 
+        FormsModule, 
+        VocabularyEditComponent, 
+        RouterModule, 
+        VocabularyExerciseComponent,
+        VocabularyExerciseResultComponent
+    ],
     templateUrl: './vocabulary.component.html',
     styleUrls: ['./vocabulary.component.css']
 })
@@ -28,6 +39,8 @@ export class VocabularyComponent implements OnInit {
     entryToDelete: Page | null = null;
     start: PageEditable | null = null;
     startAmount: number = 10;
+    
+    exerciseResult: VocabularyExerciseResult | null = null;
 
     constructor(private backendService: BackendService) {}
 

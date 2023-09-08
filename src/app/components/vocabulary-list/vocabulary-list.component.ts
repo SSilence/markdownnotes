@@ -13,11 +13,23 @@ import { SectionFilterComponent } from "./section-filter-component";
 import { PhaseFilterComponent } from "./phase-filter-component";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { VocabularyExerciseComponent } from "../vocabulary-exercise/vocabulary-exercise.component";
+import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
+import { VocabularyExerciseResultComponent } from "../vocabulary-exercise-result/vocabulary-exercise-result.component";
 
 @Component({
     selector: 'app-vocabulary-list',
     standalone: true,
-    imports: [AlertErrorComponent, ClarityModule, CommonModule, FormsModule, RouterModule, SectionFilterComponent, PhaseFilterComponent, VocabularyExerciseComponent],
+    imports: [
+        AlertErrorComponent, 
+        ClarityModule, 
+        CommonModule, 
+        FormsModule, 
+        RouterModule, 
+        SectionFilterComponent, 
+        PhaseFilterComponent, 
+        VocabularyExerciseComponent,
+        VocabularyExerciseResultComponent
+    ],
     templateUrl: './vocabulary-list.component.html',
     styleUrls: ['./vocabulary-list.component.css']
 })
@@ -38,6 +50,8 @@ export class VocabularyListComponent implements OnInit {
     e2gPhaseFilterValue: number[] = [];
 
     train: VocabularyCard[] = [];
+
+    exerciseResult: VocabularyExerciseResult | null = null;
 
     @ViewChildren('germanInput') germanInput: any;
     @ViewChild('pagination') pagination: any;

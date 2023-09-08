@@ -31,6 +31,7 @@
     "jquery": "^3.6.3",
     "jssha": "^3.3.0",
     "moment": "^2.29.4",
+    "ng-circle-progress": "^1.7.1",
     "ngx-clipboard": "^15.1.0",
     "ngx-file-drop": "^14.0.2",
     "rxjs": "~7.5.0",

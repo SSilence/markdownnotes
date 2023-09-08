@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import { BackendService } from "src/app/services/backend.service";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { AlertErrorComponent } from "../alert-error/alert-error.component";
+import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
 
 @Component({
     selector: 'app-vocabulary-exercise',
@@ -37,10 +38,14 @@ export class VocabularyExerciseComponent {
     progressFinished: number = 0;
     progressValue: number = 0;
     progressLabel: string = "";
+    progressCorrect: number = 0
+    progressWrong: number = 0
 
     @Input()
     train: boolean = false;
 
+    @Output() finished = new EventEmitter<VocabularyExerciseResult>();
+    
     error: any = null;
 
     private _audio: any | null = null;
@@ -56,10 +61,14 @@ export class VocabularyExerciseComponent {
 
     constructor(private backendService: BackendService) {}
 
-    @Output() finished = new EventEmitter();
-
     @Input()
     set cards(value: VocabularyCard[]) {
+        this.progressAll = 0
+        this.progressFinished = 0
+        this.progressCorrect = 0
+        this.progressWrong = 0
+        this.history = [];
+        this.backup = [];
         if (this.introduce) {
             this.introduceCards = value.filter(v => v.g2e);
         }
@@ -99,8 +108,11 @@ export class VocabularyExerciseComponent {
         const wasCorrecte2g = current!.g2e == false && current!.vocabulary.e2gPhase > backup!.vocabulary.e2gPhase;
         if (wasCorrectg2e || wasCorrecte2g) {
             this.progressFinished--;
-            this.progressUpdate();
+            this.progressCorrect--;
+        } else {
+            this.progressWrong--;
         }
+        this.progressUpdate();
 
         current!.vocabulary.e2gPhase = backup!.vocabulary.e2gPhase;
         current!.vocabulary.e2gNext = backup!.vocabulary.e2gNext;
@@ -111,7 +123,15 @@ export class VocabularyExerciseComponent {
 
     private save(correct: boolean) {
         const isAlreadyInHistory = this.history.find(entry => entry.g2e == this.current!.g2e && VocabularyEntry.equals(entry.vocabulary, this.current!.vocabulary));
-        
+        if (!isAlreadyInHistory && correct) {
+            console.info("correct")
+            this.progressCorrect++;
+        }
+        if (!isAlreadyInHistory && !correct) {
+            console.info("wrong")
+            this.progressWrong++
+        }
+
         const vocabularyCopy = new VocabularyEntry(this.current!.vocabulary ? this.current!.vocabulary : null);
         this.backup.push(new VocabularyCard(vocabularyCopy, this.current!.g2e));
 
@@ -170,7 +190,8 @@ export class VocabularyExerciseComponent {
             this.current = this._cards.shift();
             
             if (!this.current && this.history.length > 0) {
-                this.finished.emit(true);
+                const percent = Math.round((this.progressCorrect / (this.progressAll)) * 100);
+                this.finished.emit(new VocabularyExerciseResult(percent, this.progressCorrect, this.progressWrong));
                 return;
             }
 

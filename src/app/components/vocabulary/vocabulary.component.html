@@ -44,8 +44,8 @@
             <button class="btn btn-icon btn-primary-outline" (click)="entryToDelete=page"><cds-icon shape="trash"></cds-icon></button>
         </div>
 
-        <app-vocabulary-exercise [page]="page" [cards]="page.exerciseVocabulary" *ngIf="page.exercise" (finished)="loadFullPage(page)"></app-vocabulary-exercise>
-        <app-vocabulary-exercise [introduce]="true" [page]="page" [cards]="page.startVocabulary" *ngIf="page.start" (finished)="loadFullPage(page)"></app-vocabulary-exercise>
+        <app-vocabulary-exercise [page]="page" [cards]="page.exerciseVocabulary" *ngIf="page.exercise" (finished)="loadFullPage(page);exerciseResult=$event"></app-vocabulary-exercise>
+        <app-vocabulary-exercise [introduce]="true" [page]="page" [cards]="page.startVocabulary" *ngIf="page.start" (finished)="loadFullPage(page);exerciseResult=$event"></app-vocabulary-exercise>
 
         <div *ngIf="page.edit">
             <app-vocabulary-edit [page]="page"></app-vocabulary-edit>
@@ -94,3 +94,5 @@
         </div>
     </div>
 </div>
+
+<app-vocabulary-exercise-result [result]="exerciseResult" (finished)="exerciseResult = null"></app-vocabulary-exercise-result>

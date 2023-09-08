@@ -2,7 +2,7 @@
 <app-alert-error [error]="error"></app-alert-error>
 
 <div *ngIf="page" class="page">
-    <app-vocabulary-exercise [train]="true" [page]="page" [cards]="train" *ngIf="train.length > 0"></app-vocabulary-exercise>
+    <app-vocabulary-exercise [train]="true" [page]="page" [cards]="train" *ngIf="train.length > 0" (finished)="exerciseResult = $event"></app-vocabulary-exercise>
 
     <div class="top">
         <h1>{{page.title}}</h1>
@@ -80,3 +80,5 @@
 
     </clr-datagrid>
 </div>
+
+<app-vocabulary-exercise-result [result]="exerciseResult" (finished)="exerciseResult = null"></app-vocabulary-exercise-result>

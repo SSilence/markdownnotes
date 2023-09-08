@@ -1,0 +1,26 @@
+<div class="modal" *ngIf="result!==null">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-body">
+                <circle-progress
+                    [percent]="result.percent"
+                    [radius]="100"
+                    [outerStrokeWidth]="16"
+                    [innerStrokeWidth]="8"
+                    [outerStrokeColor]="'#78C000'"
+                    [innerStrokeColor]="'#C7E596'"
+                    [animation]="true"
+                    [animationDuration]="300"
+                ></circle-progress>
+
+                <p class="correct">{{result.correct}} correct words</p>
+
+                <p class="wrong">{{result.wrong}} wrong words</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" type="button" (click)="close()">close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" aria-hidden="true" *ngIf="result!==null"></div>

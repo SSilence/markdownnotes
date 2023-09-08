@@ -1,0 +1,15 @@
+.modal-body {
+    text-align: center;
+}
+
+.correct {
+    color:green;
+    font-size:1.3rem;
+    font-weight: bold;
+}
+
+.wrong {
+    color:red;
+    font-size:1.3rem;
+    font-weight: bold;
+}
