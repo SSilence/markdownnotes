@@ -7,6 +7,8 @@
 .sidenav {
     padding-top:1em;
     overflow:auto;
+    min-width: 12rem;
+    width: 18%;
 }
 
 .nav-link {
