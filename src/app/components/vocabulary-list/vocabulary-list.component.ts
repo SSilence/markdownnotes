@@ -172,6 +172,12 @@ export class VocabularyListComponent implements OnInit {
         };
         reader.readAsText(event.target.files[0]);
     };
+
+    onSectionKeypress(event: KeyboardEvent): void {
+        if (event.key === 'Tab') {
+            this.add();
+        }
+    }
 }
 
 class GermanFilter implements ClrDatagridStringFilterInterface<VocabularyEntry> {

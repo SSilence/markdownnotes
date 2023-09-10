@@ -44,7 +44,7 @@
         <clr-dg-row *clrDgItems="let entry of vocabulary; let i = index" [clrDgItem]="entry">
             <clr-dg-cell><input type="text" [(ngModel)]="entry.german" #germanInput></clr-dg-cell>
             <clr-dg-cell><input type="text" [(ngModel)]="entry.english"></clr-dg-cell>
-            <clr-dg-cell><input type="text" [(ngModel)]="entry.section"></clr-dg-cell>
+            <clr-dg-cell><input type="text" [(ngModel)]="entry.section" (keydown)="onSectionKeypress($event)"></clr-dg-cell>
             <clr-dg-cell class="phase">{{entry.g2ePhase}} <span>{{entry.g2eNext | date:'mediumDate'}}</span></clr-dg-cell>
             <clr-dg-cell class="phase">{{entry.e2gPhase}} <span>{{entry.e2gNext | date:'mediumDate'}}</span></clr-dg-cell>
             <clr-dg-cell>
