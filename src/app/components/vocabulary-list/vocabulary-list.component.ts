@@ -178,6 +178,11 @@ export class VocabularyListComponent implements OnInit {
             this.add();
         }
     }
+
+    playUrl(word: String): string {
+        const base = document.querySelector('base')!!.getAttribute('href');
+        return `${base}api/api/text2speech?text=${word}`;
+    }
 }
 
 class GermanFilter implements ClrDatagridStringFilterInterface<VocabularyEntry> {

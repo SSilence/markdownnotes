@@ -49,7 +49,7 @@
             <clr-dg-cell class="phase">{{entry.e2gPhase}} <span>{{entry.e2gNext | date:'mediumDate'}}</span></clr-dg-cell>
             <clr-dg-cell>
                 <audio #audio></audio>
-                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src='/api/text2speech?text='+entry.english;audio.play()">
+                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src=playUrl(entry.english);audio.play()">
                     <cds-icon shape="play"></cds-icon>
                 </button>
                 <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="reset(entry)">

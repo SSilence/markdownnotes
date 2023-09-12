@@ -195,12 +195,6 @@ export class VocabularyExerciseComponent {
                 return;
             }
 
-            if (this.current?.g2e && this.current.vocabulary.g2ePhase == 0) {
-                this.current.vocabulary.g2ePhase = 1;
-            } else if (this.current!.vocabulary.e2gPhase == 0) {
-                this.current!.vocabulary.e2gPhase = 1;
-            }
-
             if (this.current!.g2e === false) {
                 this.play(this.current!.vocabulary.english);
             }
@@ -213,7 +207,8 @@ export class VocabularyExerciseComponent {
 
     play(word: string) {
         try {
-            this._audio.src='/api/text2speech?text=' + word;
+            const base = document.querySelector('base')!!.getAttribute('href');
+            this._audio.src= `${base}api/api/text2speech?text=${word}`;
             this._audio.play();
         } catch(ex) {
             // ignore error on init
