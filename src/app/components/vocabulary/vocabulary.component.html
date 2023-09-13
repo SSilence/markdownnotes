@@ -39,7 +39,7 @@
         <div class="btn-group btn-primary action" *ngIf="!page.edit && page.phases">
             <button class="btn btn-success" *ngIf="page.newVocabularyCount && page.newVocabularyCount > 0" (click)="showNewDialog(page)">{{page.newVocabularyCount}} new</button>
             <button class="btn btn-primary" *ngIf="page.exerciseVocabularyCount && page.exerciseVocabularyCount > 0" (click)="startExercise(page)">{{page.exerciseVocabularyCount}} exercise</button>
-            <button class="btn btn-primary-outline" [routerLink]="['/vocabulary', 'vocabular', page.id]">list</button>
+            <button class="btn btn-icon btn-primary-outline" [routerLink]="['/vocabulary', 'vocabular', page.id]"><cds-icon shape="view-list"></cds-icon></button>
             <button class="btn btn-icon btn-primary-outline" (click)="page.edit = true"><cds-icon shape="pencil"></cds-icon></button>
             <button class="btn btn-icon btn-primary-outline" (click)="entryToDelete=page"><cds-icon shape="trash"></cds-icon></button>
         </div>
