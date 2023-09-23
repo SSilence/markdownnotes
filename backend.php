@@ -1,6 +1,10 @@
 <?PHP
 
-include("backend_apikeys.php"); // define("CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY", "...");
+include("backend_apikeys.php"); 
+// contains:
+// define("CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY", "secret");
+// define("CONFIG_CHATGPT_API_KEY", "secret");
+// define("CONFIG_CHATGPT_ORG_ID", "secret");
 
 define("CONFIG_DATA_PATH", __DIR__ . "/data/pages/");
 define("CONFIG_FILES_PATH", __DIR__ . "/data/files/");
@@ -139,7 +143,6 @@ function writePage($id, $title, $icon, $expanded, $content) {
 }
 
 function text2SpeechAuth() {
-    global $azureTextToSpeechApiKey;
     $context = stream_context_create([
         'http' => [
             'header' => "Ocp-Apim-Subscription-Key: " . CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY . "\r\nContent-Length: 0",
@@ -169,6 +172,36 @@ function text2Speech($text) {
     return $result;
 }
 
+function chatgptStory($words) {
+    $data = json_encode(array(
+        "model" => "gpt-3.5-turbo",
+        "messages" => array(
+            array(
+                "role" => "user",
+                "content" => "Please write an easy, short, and entertaining story with the following words: " . $words
+            )
+        )
+    ));
+
+    $context = stream_context_create([
+        'http' => [
+            'header' => "Authorization: Bearer " . CONFIG_CHATGPT_API_KEY . "\r\nContent-Type: application/json",
+            'method' => 'POST',
+            'content' => $data
+        ],
+    ]);
+    $result = file_get_contents('https://api.openai.com/v1/chat/completions', false, $context);
+    if ($result === false) {
+        error(500, "error");
+    }
+    $responseArray = json_decode($result, true);
+    if ($responseArray !== null && isset($responseArray['choices'][0]['message']['content'])) {
+        $content = $responseArray['choices'][0]['message']['content'];
+        return $content;
+    } else {
+        throw 'can not parse json response';
+    }
+}
 
 // time
 router('GET', '/$', function() {
@@ -308,6 +341,11 @@ router('GET', '/text2speech$', function() {
     echo $mp3;
 });
 
+// chatgptStory
+router('POST', '/story$', function() {
+    $words = file_get_contents('php://input');
+    die(chatgptStory($words));
+});
 
 header("HTTP/1.0 404 Not Found");
 echo '404 Not Found';
