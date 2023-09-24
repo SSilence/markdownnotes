@@ -62,3 +62,10 @@ clr-dg-pagination {
     display: block;
     margin-top: 0.4rem;
 }
+
+.sticky {
+    position:fixed;
+    right:0.5rem;
+    top:0.1rem;
+    width:15rem;
+}

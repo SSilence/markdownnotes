@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewChildren } from "@angular/core";
+import { Component, HostListener, OnInit, ViewChild, ViewChildren } from "@angular/core";
 import { Page } from "src/app/models/page";
 import { BackendService } from "src/app/services/backend.service";
 import { AlertErrorComponent } from "../alert-error/alert-error.component";
@@ -60,6 +60,12 @@ export class VocabularyListComponent implements OnInit {
 
     constructor(private backendService: BackendService,
                 private route: ActivatedRoute) {}
+
+    @HostListener('document:keydown.control.s', ['$event'])
+    onCtrlSKey(event: KeyboardEvent): void {
+        this.save();
+        event.preventDefault();
+    }
 
     get sections(): string[] {
         return this.vocabulary.map(v => v.section)
