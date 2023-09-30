@@ -124,18 +124,16 @@ export class VocabularyExerciseComponent {
     private save(correct: boolean) {
         const isAlreadyInHistory = this.history.find(entry => entry.g2e == this.current!.g2e && VocabularyEntry.equals(entry.vocabulary, this.current!.vocabulary));
         if (!isAlreadyInHistory && correct) {
-            console.info("correct")
             this.progressCorrect++;
         }
         if (!isAlreadyInHistory && !correct) {
-            console.info("wrong")
             this.progressWrong++
         }
 
         const vocabularyCopy = new VocabularyEntry(this.current!.vocabulary ? this.current!.vocabulary : null);
         this.backup.push(new VocabularyCard(vocabularyCopy, this.current!.g2e));
 
-        if (!this.train && !isAlreadyInHistory) {
+        if (!this.introduce && !this.train && !isAlreadyInHistory) {
             if (this.current!.g2e) {
                 const newPhase = this.current!.vocabulary.g2ePhase + (correct ? 1 : -2);
                 this.current!.vocabulary.g2ePhase = newPhase <= 0 ? 1 : newPhase;
@@ -153,15 +151,15 @@ export class VocabularyExerciseComponent {
             this._cards.push(this.current!);
         }
         
-        if (!this.train) {
-            this.write();
+        if (!this.introduce && !this.train) {
+            this.write(this.current!!);
         }
         
         this.next();
     }
 
-    private write() {
-        const vocabulary = this.current!!.vocabulary;
+    private write(vocabularyCard: VocabularyCard) {
+        const vocabulary = vocabularyCard.vocabulary;
         const all = VocabularyEntry.parseVocabulary(this.page!!.content);
         const existing = all.find(v => VocabularyEntry.equals(v, vocabulary));
         existing!.g2ePhase = vocabulary.g2ePhase;
@@ -185,6 +183,7 @@ export class VocabularyExerciseComponent {
             this.current = this.introduceCards.shift();
             this.introduceMode = true;
             this.play(this.current!.vocabulary.english);
+            this.introduced(this.current!);
         } else {
             this.introduceMode = false;
             this.current = this._cards.shift();
@@ -203,6 +202,18 @@ export class VocabularyExerciseComponent {
         }
         
         this.progressUpdate();
+    }
+
+    private introduced(current: VocabularyCard) {
+        const g2eCard = this._cards.find(c => c.g2e === true  && VocabularyEntry.equals(c.vocabulary, current.vocabulary));
+        g2eCard!.vocabulary.g2eNext = this.phaseToNext(1);
+        g2eCard!.vocabulary.g2ePhase = 1;
+        this.write(g2eCard!);
+
+        const e2gCard = this._cards.find(c => c.g2e === false  && VocabularyEntry.equals(c.vocabulary, current.vocabulary));
+        e2gCard!.vocabulary.e2gNext = this.phaseToNext(1);
+        e2gCard!.vocabulary.e2gPhase = 1;
+        this.write(e2gCard!);
     }
 
     play(word: string) {
