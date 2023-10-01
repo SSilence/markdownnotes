@@ -15,6 +15,7 @@ import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { VocabularyExerciseComponent } from "../vocabulary-exercise/vocabulary-exercise.component";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
 import { VocabularyExerciseResultComponent } from "../vocabulary-exercise-result/vocabulary-exercise-result.component";
+import { AlertStickyComponent } from "../alert-sticky/alert-sticky.component";
 
 @Component({
     selector: 'app-vocabulary-list',
@@ -28,7 +29,8 @@ import { VocabularyExerciseResultComponent } from "../vocabulary-exercise-result
         SectionFilterComponent, 
         PhaseFilterComponent, 
         VocabularyExerciseComponent,
-        VocabularyExerciseResultComponent
+        VocabularyExerciseResultComponent,
+        AlertStickyComponent
     ],
     templateUrl: './vocabulary-list.component.html',
     styleUrls: ['./vocabulary-list.component.css']

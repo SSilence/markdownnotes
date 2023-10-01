@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { switchMap, map, tap } from 'rxjs/operators';
 import { of, timer } from 'rxjs';
@@ -11,13 +11,23 @@ import { MarkdownPipe } from 'src/app/pipes/markdown.pipe';
 import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
 import { IconService } from 'src/app/services/icon.service';
+import { AlertStickyComponent } from '../alert-sticky/alert-sticky.component';
 
 @Component({
-  selector: 'app-page-edit',
-  standalone: true,
-  imports: [AlertErrorComponent, CommonModule, CdsModule, MarkdownPipe, RouterModule, FormsModule, MarkdownEditorComponent],
-  templateUrl: './page-edit.component.html',
-  styleUrls: ['./page-edit.component.css']
+    selector: 'app-page-edit',
+    standalone: true,
+    imports: [
+        AlertErrorComponent, 
+        CommonModule, 
+        CdsModule, 
+        MarkdownPipe, 
+        RouterModule, 
+        FormsModule, 
+        MarkdownEditorComponent, 
+        AlertStickyComponent
+    ],
+    templateUrl: './page-edit.component.html',
+    styleUrls: ['./page-edit.component.css']
 })
 export class PageEditComponent implements OnInit {
 
@@ -45,6 +55,13 @@ export class PageEditComponent implements OnInit {
             next: page => this.page = page,
             error: error => { this.error = error; this.loading = false; }
         });
+    }
+
+    
+    @HostListener('document:keydown.control.s', ['$event'])
+    onCtrlSKey(event: KeyboardEvent): void {
+        this.save();
+        event.preventDefault();
     }
 
     createNewPage() {

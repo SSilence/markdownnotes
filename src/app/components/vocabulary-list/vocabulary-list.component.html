@@ -4,17 +4,7 @@
 <div *ngIf="page" class="page">
     <app-vocabulary-exercise [train]="true" [page]="page" [cards]="train" *ngIf="train.length > 0" (finished)="exerciseResult = $event"></app-vocabulary-exercise>
 
-
-    <div class="alert alert-success sticky" role="alert" *ngIf="successSave">
-        <div class="alert-items">
-            <div class="alert-item static">
-                <div class="alert-icon-wrapper">
-                    <cds-icon class="alert-icon" shape="check-circle"></cds-icon>
-                </div>
-                <span class="alert-text">successfully saved</span>
-            </div>
-        </div>
-      </div>
+    <app-alert-sticky message="successfully saved" *ngIf="successSave"></app-alert-sticky>
 
     <div class="top">
         <h1>{{page.title}}</h1>

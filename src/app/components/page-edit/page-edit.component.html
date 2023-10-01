@@ -1,5 +1,6 @@
 <span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
 <app-alert-error [error]="error"></app-alert-error>
+<app-alert-sticky message="successfully saved" *ngIf="success"></app-alert-sticky>
 <div *ngIf="page" class="edit">
     <div>
         <div class="top">
