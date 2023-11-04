@@ -5,6 +5,7 @@ export class Page {
     title: string = "";
     icon: string = "";
     content: string = "";
+    language: string = "";
     expanded: boolean = false;
     updated: Date | null = null;
 
@@ -17,6 +18,7 @@ export class Page {
             this.title = pageDto.title;
             this.icon = pageDto.icon;
             this.content = pageDto.content;
+            this.language = pageDto.language;
             this.expanded = pageDto.expanded;
             this.parent = null;
             this.updated = new Date((pageDto.updated ??= 0) * 1000);

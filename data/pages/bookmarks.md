@@ -1,5 +1,6 @@
 title: bookmarks
-icon: link
+icon: world
+language: 
 expanded: 
 ------------------------------------
 [bookmarks=data/files/bookmarks.html]

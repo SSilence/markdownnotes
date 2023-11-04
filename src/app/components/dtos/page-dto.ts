@@ -4,6 +4,7 @@ export class PageDto {
     id: string | null = null;
     title: string = "";
     icon: string = "";
+    language: string = "";
     expanded: boolean = false;
     content: string = "";
     updated: number | null = null;
@@ -13,6 +14,7 @@ export class PageDto {
             this.id = page.id;
             this.title = page.title;
             this.icon = page.icon;
+            this.language = page.language;
             this.expanded = page.expanded;
             this.content = page.content;
         }

@@ -1,5 +1,6 @@
 title: quick notes
-icon: pencil
+icon: file
+language: 
 expanded: 1
 ------------------------------------
 * buy milk

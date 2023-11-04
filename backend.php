@@ -128,6 +128,7 @@ function readPageByFilename($filename) {
         'id' => basename($filename, ".md"),
         'title' => $meta['title'],
         'icon' => $meta['icon'],
+        'language' => isset($meta['language']) ? $meta['language'] : '',
         'expanded' => isset($meta['expanded']) ? $meta['expanded'] == 1 : false,
         'content' => trim($parts[1]),
         'updated' => filemtime($filename)
@@ -138,8 +139,8 @@ function readPageById($id) {
     return readPageByFilename(toFilename($id));
 }
 
-function writePage($id, $title, $icon, $expanded, $content) {
-    file_put_contents(toFilename($id), "title: $title\nicon: $icon\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
+function writePage($id, $title, $icon, $language, $expanded, $content) {
+    file_put_contents(toFilename($id), "title: $title\nicon: $icon\nlanguage: $language\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
 }
 
 function text2SpeechAuth() {
@@ -156,8 +157,15 @@ function text2SpeechAuth() {
     return $result;
 }
 
-function text2Speech($text) {
-    $data = "<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='Male' name='en-US-ChristopherNeural'>$text</voice></speak>";
+function text2Speech($text, $lang) {
+    $voice = "en-US-ChristopherNeural";
+    if ($lang == "fr-FR") {
+        $voice = "fr-FR-HenriNeural";
+    } else if ($lang == "de-DE") {
+        $voice = "de-DE-ChristophNeural";
+    } 
+
+    $data = "<speak version='1.0' xml:lang='$lang'><voice xml:lang='$lang' xml:gender='Male' name='$voice'>$text</voice></speak>";
     $context = stream_context_create([
         'http' => [
             'header' => "Content-type: application/ssml+xml\r\nUser-Agent: MarkdownNotes\r\nAuthorization: Bearer " . text2SpeechAuth() . "\r\nX-Microsoft-OutputFormat: audio-16khz-64kbitrate-mono-mp3\r\nContent-Length: " . strlen($data) . "\r\n",
@@ -214,6 +222,7 @@ router('POST', '/page$', function() {
     $id = parseString($data, 'id');
     $title = parseString($data, 'title');
     $icon = parseString($data, 'icon');
+    $language = parseString($data, 'language');
     $expanded = $data['expanded'] === true;
     $content = isset($data['content']) ? $data['content'] : readPageById($id)["content"];
 
@@ -221,7 +230,7 @@ router('POST', '/page$', function() {
         error(404, "invalid id");
     }
 
-    writePage($id, $title, $icon, $expanded, $content);
+    writePage($id, $title, $icon, $language, $expanded, $content);
     json(readPageById($id));
 });
 
@@ -330,12 +339,28 @@ router('GET', '/search$', function() {
 // text2speech
 router('GET', '/text2speech$', function() {
     $text = htmlspecialchars($_GET["text"]);
-    $filename = CONFIG_AUDIO_PATH . sanitizeFilename($text) . ".mp3";
+    $lang = strtolower(isset($_GET["language"]) ? htmlspecialchars($_GET["language"]) : "en");
+    if ($lang == "en") {
+        $lang = "en-US";
+    } else if ($lang == "de") {
+        $lang = "de-DE";
+    } else if ($lang == "fr") {
+        $lang = "fr-FR";
+    } else {
+        $lang = "en-US";
+    }
+
+    $path = CONFIG_AUDIO_PATH . $lang . "/";
+    if (!file_exists($path)) {
+        mkdir($path, 0777);
+    }
+
+    $filename = $path . sanitizeFilename($text) . ".mp3";
     if (file_exists($filename)) {
         header('Content-Type: audio/mpeg');
         die(file_get_contents($filename));
     }
-    $mp3 = text2Speech($text);
+    $mp3 = text2Speech($text, $lang);
     file_put_contents($filename, $mp3);
     header('Content-Type: audio/mpeg');
     echo $mp3;
