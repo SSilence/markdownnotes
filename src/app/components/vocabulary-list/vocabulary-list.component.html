@@ -29,7 +29,7 @@
                 <input clrCheckbox type="checkbox" (change)="filterPhase(i)" [checked]="phase.includes(i)" />
             </clr-checkbox-wrapper>
 
-            <h4>Phase</h4>
+            <h4>Section</h4>
             <clr-checkbox-wrapper *ngFor="let sec of sections">
                 <label>{{sec}}</label>
                 <input clrCheckbox type="checkbox" (change)="filterSection(sec)" [checked]="section.includes(sec)" />
