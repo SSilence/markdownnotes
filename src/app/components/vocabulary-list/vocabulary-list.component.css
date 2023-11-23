@@ -40,25 +40,27 @@ input {
     padding-right: 10px;
 }
 
-.btn-cell {
+input {
+    border:0;
     margin:0;
+    padding:0.7rem;
 }
 
-.phase {
-    padding-top:0.7rem;
+td {
+    vertical-align: middle;
+    padding:0;
 }
 
-.phase span {
-    font-size:0.5rem;
-    color: #999;
+th span {
+    padding-left:0.5rem;
 }
 
-clr-dg-pagination {
-    font-size:0.7rem;
-    height:1.7rem;
+h1 {
+    margin-bottom:0;
 }
 
-:host ::ng-deep .datagrid-select {
-    display: block;
-    margin-top: 0.4rem;
+.viewport {
+    height: 200px;
+    width: 200px;
+    border: 1px solid black;
 }
