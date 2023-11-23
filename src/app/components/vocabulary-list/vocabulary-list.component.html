@@ -10,6 +10,7 @@
         <h1>{{page.title}}</h1>
         <div>
             <span *ngIf="successSave" class="success">successfully saved</span>
+            <button class="btn btn-outline" (click)="add()">add</button>
             <button class="btn btn-success-outline" (click)="exercise()">exercise</button>
             <button class="btn" (click)="save()" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}">save</button>
         </div>
@@ -17,15 +18,23 @@
     
     <div class="clr-row">
         <div class="clr-col-2">
-            <p>example</p>
-            <p>example</p>
-            <p>example</p>
-            <p>example</p>
-            <p>example</p>
-            <p>example</p>
-            <p>example</p>
-            <p>example</p>
-            <p>example</p>
+            
+            <clr-input-container>
+                <input clrInput class="search" placeholder="search" [(ngModel)]="q" (ngModelChange)="filterSearch()" />
+            </clr-input-container>
+
+            <h4>Phase</h4>
+            <clr-checkbox-wrapper *ngFor="let i of [0,1,2,3,4,5,6]">
+                <label>{{i}}</label>
+                <input clrCheckbox type="checkbox" (change)="filterPhase(i)" [checked]="phase.includes(i)" />
+            </clr-checkbox-wrapper>
+
+            <h4>Phase</h4>
+            <clr-checkbox-wrapper *ngFor="let sec of sections">
+                <label>{{sec}}</label>
+                <input clrCheckbox type="checkbox" (change)="filterSection(sec)" [checked]="section.includes(sec)" />
+            </clr-checkbox-wrapper>
+
         </div>
         <div class="clr-col">
             <table class="table">
@@ -35,18 +44,24 @@
                         <th class="left">English</th>
                         <th class="left">Section</th>
                         <th class="left">Phase</th>
-                        <th class="left">
-                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="add()">
-                                <cds-icon shape="add-text"></cds-icon> add
-                            </button>
-                        </th>
+                        <th class="left"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let entry of vocabulary">
-                        <td><input type="text" [(ngModel)]="entry.german" #germanInput></td>
+                    <tr *ngIf="toAdd" class="add">
+                        <td><input type="text" [(ngModel)]="toAdd.german" (keydown)="onAddKeypress($event)" #addGermanInput></td>
+                        <td><input type="text" [(ngModel)]="toAdd.english" (keydown)="onAddKeypress($event)"></td>
+                        <td><input type="text" [(ngModel)]="toAdd.section" (keydown)="onAddKeypress($event)"></td>
+                        <td></td>
+                        <td class="left">
+                            <button class="btn" (click)="addSave()" class="btn btn-primary">add</button>
+                            <button class="btn" (click)="toAdd=null" class="btn btn-outline">cancel</button>
+                        </td>
+                    </tr>
+                    <tr *ngFor="let entry of selected">
+                        <td><input type="text" [(ngModel)]="entry.german"></td>
                         <td><input type="text" [(ngModel)]="entry.english"></td>
-                        <td><input type="text" [(ngModel)]="entry.section" (keydown)="onSectionKeypress($event)"></td>
+                        <td><input type="text" [(ngModel)]="entry.section"></td>
                         <td  class="left">
                             {{entry.g2ePhase}} &rarr;<br />
                             {{entry.e2gPhase}} &larr;
@@ -66,6 +81,14 @@
                     </tr>
                 </tbody>
             </table>
+
+            <div class="centered">
+                <table class="pagination">
+                    <tr>
+                        <td *ngFor="let page of pages" (click)="selectPage(page)" [ngClass]="{'selected': currentPage==page}">{{page}}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 

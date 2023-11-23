@@ -37,7 +37,16 @@ export class VocabularyListComponent implements OnInit {
     error: any = null;
     loading: boolean = false;
     vocabulary: VocabularyEntry[] = [];
+    selected: VocabularyEntry[] = [];
+    selectedCount = 0;
+    
     q: string = "";
+    phase: number[] = [];
+    section: string[] = [];
+    currentPage: number = 1;
+    itemsPerPage = 100;
+
+    toAdd: VocabularyEntry | null = null;
 
     successSave: boolean = false;
     
@@ -45,21 +54,22 @@ export class VocabularyListComponent implements OnInit {
 
     exerciseResult: VocabularyExerciseResult | null = null;
 
-    @ViewChildren('germanInput') germanInput: any;
+    get sections(): string[] {
+        return structuredClone(this.vocabulary)
+                                .map(v => v.section)
+                                .filter((value, index, array) => array.indexOf(value) === index)
+                                .reverse();
+    }
 
+    get pages(): number[] {
+        const length = this.selectedCount / this.itemsPerPage;
+        return Array.from({length: length}, (_, i) => i + 1);
+    }
+
+    @ViewChildren('addGermanInput') addGermanInput: any;
+    
     constructor(private backendService: BackendService,
                 private route: ActivatedRoute) {}
-
-    @HostListener('document:keydown.control.s', ['$event'])
-    onCtrlSKey(event: KeyboardEvent): void {
-        this.save();
-        event.preventDefault();
-    }
-
-    get sections(): string[] {
-        return this.vocabulary.map(v => v.section)
-                              .filter((value, index, array) => array.indexOf(value) === index);
-    }
 
     ngOnInit(): void {
         this.route.params.pipe(
@@ -70,15 +80,100 @@ export class VocabularyListComponent implements OnInit {
         ).subscribe({
             next: page => {
                 this.page = page;
-                this.vocabulary = VocabularyEntry.parseVocabulary(this.page!!.content);
+                this.vocabulary = VocabularyEntry.parseVocabulary(this.page!!.content).reverse();
+                this.refresh();
             },
             error: error => { this.error = error; this.loading = false; }
         });
     }
 
+    @HostListener('document:keydown.control.s', ['$event'])
+    onCtrlSKey(event: KeyboardEvent): void {
+        this.save();
+        event.preventDefault();
+    }
+
+    add() {
+        this.clearFilters();
+        this.toAdd = new VocabularyEntry();
+        if (this.vocabulary.length>0) {
+            this.toAdd.section = this.vocabulary[0].section;
+        }
+        setTimeout(() => this.addGermanInput.last.nativeElement.focus(), 400);
+    }
+
+    onAddKeypress(event: KeyboardEvent): void {
+        if (event.key === 'Enter') {
+            this.addSave();
+        }
+    }
+
+    addSave() {
+        this.vocabulary.unshift(this.toAdd!);
+        this.add();
+        this.refresh();
+    }
+
+
+    clearFilters() {
+        this.q = "";    
+        this.phase = [];
+        this.section = [];
+        this.currentPage = 1;
+        this.refresh();
+    }
+
+    filterSearch() {
+        this.toAdd = null;
+        this.currentPage = 1;
+        this.refresh();
+    }
+
+    filterPhase(phase: number) {
+        this.toAdd = null;
+        if(this.phase.includes(phase)) {
+            this.phase = this.phase.filter(item => item != phase);
+        } else {
+            this.phase.push(phase);
+        }
+        this.currentPage = 1;
+        this.refresh();
+    }
+
+    filterSection(section: string) {
+        this.toAdd = null;
+        if(this.section.includes(section)) {
+            this.section = this.section.filter(item => item != section);
+        } else {
+            this.section.push(section);
+        }
+        this.currentPage = 1;
+        this.refresh();
+    }
+
+    selectPage(page: number) {
+        this.toAdd = null;
+        this.currentPage = page;
+        this.refresh();
+    }
+
+    refresh() {
+        const startIndex = (this.currentPage-1)*this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        this.selected = this.vocabulary.filter(item => {
+            const qMatch = this.q.length > 3 ? item.german.toLowerCase().includes(this.q.toLowerCase()) || item.english.toLowerCase().includes(this.q.toLowerCase()) : true;
+            const phaseMatch = this.phase.length > 0 ? this.phase.includes(item.e2gPhase) || this.phase.includes(item.g2ePhase) : true;
+            const sectionMatch = this.section.length > 0 ? this.section.includes(item.section) : true;
+            return qMatch && phaseMatch && sectionMatch;  
+        })
+        this.selectedCount = this.selected.length;
+        this.selected = this.selected.slice(startIndex, endIndex);
+    }
+
+
     exercise() {
         const train: VocabularyCard[] = [];
-        this.vocabulary.forEach(vocabulary => {
+        this.selected.forEach(vocabulary => {
             train.push(new VocabularyCard(vocabulary, false));
             train.push(new VocabularyCard(vocabulary, true));
         });
@@ -88,19 +183,8 @@ export class VocabularyListComponent implements OnInit {
         this.train = train;
     }
 
-    add() {
-        const vocabulary = new VocabularyEntry();
-        if (this.vocabulary.length>0) {
-            vocabulary.section = this.vocabulary[this.vocabulary.length-1].section;
-        }
-        this.vocabulary.push(vocabulary);
-        setTimeout(() => {
-            this.germanInput.last.nativeElement.focus();
-        }, 400);
-    }
-
     save() {
-        this.page!!.content = JSON.stringify(this.vocabulary, null, 4);
+        this.page!!.content = JSON.stringify(structuredClone(this.vocabulary).reverse(), null, 4);
         this.backendService.savePage(this.page!!).subscribe({
             next: () => {
                 this.successSave = true;
@@ -120,12 +204,6 @@ export class VocabularyListComponent implements OnInit {
         entry.e2gPhase = 0;
         entry.g2eNext = null;
         entry.g2ePhase = 0;
-    }
-
-    onSectionKeypress(event: KeyboardEvent): void {
-        if (event.key === 'Tab') {
-            this.add();
-        }
     }
 
     playUrl(word: String): string {

@@ -40,6 +40,10 @@ input {
     padding-right: 10px;
 }
 
+.add td {
+    border-bottom:3px green solid !important;
+}
+
 input {
     border:0;
     margin:0;
@@ -59,8 +63,31 @@ h1 {
     margin-bottom:0;
 }
 
-.viewport {
-    height: 200px;
-    width: 200px;
-    border: 1px solid black;
+h4 {
+    margin-bottom: 0.5rem;
+}
+
+.search {
+    border-bottom:1px solid black;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination {
+    margin-top:0.8rem;
+}
+
+.pagination td {
+    background:white;
+    border:1px solid #eee;
+    padding:0.4rem 0.8rem 0.4rem 0.8rem;
+    cursor: pointer;
+}
+
+.pagination td.selected {
+    background:#eee;
 }
