@@ -112,6 +112,7 @@ export class VocabularyListComponent implements OnInit {
         this.vocabulary.unshift(this.toAdd!);
         this.add();
         this.refresh();
+        this.save();
     }
 
 
@@ -197,6 +198,7 @@ export class VocabularyListComponent implements OnInit {
     delete(entry: VocabularyEntry) {
         const index = this.vocabulary.indexOf(entry);
         this.vocabulary.splice(index, 1);
+        this.refresh();
     }
 
     reset(entry: VocabularyEntry) {
