@@ -1,10 +1,10 @@
 {
     "/api": {
-      "target": "http://localhost",
+      "target": "http://127.0.0.1:8888",
       "secure": false
     },
     "/files": {
-      "target": "http://localhost",
+      "target": "http://127.0.0.1:8888",
       "secure": false
     }
   }
