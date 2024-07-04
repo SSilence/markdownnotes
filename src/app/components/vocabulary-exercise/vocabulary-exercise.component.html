@@ -44,7 +44,7 @@
                         <cds-icon shape="arrow" direction="left"></cds-icon>
                     </button>
                     <button class="btn btn-success" *ngIf="!result && !introduceMode" (click)="answer()">show answer</button>
-                    <button class="btn btn-warning" *ngIf="result && !introduceMode" (click)="wrong()">wrong</button> 
+                    <button class="btn btn-danger" *ngIf="result && !introduceMode" (click)="wrong()">wrong</button> 
                     <button class="btn btn-success" *ngIf="result && !introduceMode" (click)="correct()">correct</button>
                     <button class="btn btn-primary" *ngIf="introduceMode" (click)="next()">next</button>
                 </div>
