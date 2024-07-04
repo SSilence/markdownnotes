@@ -5,6 +5,6 @@ services:
     container_name: php-markdown
     build: ./
     ports:
-        - 80:80
+        - 8888:80
     volumes:
         - ./../:/var/www/html
