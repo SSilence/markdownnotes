@@ -5,6 +5,7 @@ h1 {
 h2 {
     margin:0;
     margin-bottom: 0.4rem;
+    font-size:1.35rem;
 }
 
 .vocabularies {
@@ -18,7 +19,7 @@ h2 {
     padding:1rem;
     margin-right: 1rem;
     margin-top: 1rem;
-    width:25rem;
+    width:24rem;
 }
 
 .vocabulary .content {
@@ -26,8 +27,11 @@ h2 {
 }
 
 .vocabulary img {
-    height: 11rem;
+    max-height: 11rem;
     margin-right: 1rem;
+    max-width: 8rem;
+    object-fit: cover;
+
 }
 
 .vocabulary span {

@@ -60,7 +60,7 @@ export class VocabularyComponent implements OnInit {
             next: pages => {
                 this.pages = pages.map(page => this.toPageEditable(page, false))
                                   .sort((a,b) => ((b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0)));
-                this.pages.slice(0, 1).forEach(page => this.loadFullPage(page));
+                this.pages.forEach(page => this.loadFullPage(page));
             },
             error: error => this.error = error
         });

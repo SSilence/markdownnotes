@@ -163,7 +163,9 @@ function text2Speech($text, $lang) {
         $voice = "fr-FR-HenriNeural";
     } else if ($lang == "de-DE") {
         $voice = "de-DE-ChristophNeural";
-    } 
+    } else if ($lang == "hr-HR") {
+        $voice = "hr-HR-GabrijelaNeural";
+    }
 
     $data = "<speak version='1.0' xml:lang='$lang'><voice xml:lang='$lang' xml:gender='Male' name='$voice'>$text</voice></speak>";
     $context = stream_context_create([
@@ -346,6 +348,8 @@ router('GET', '/text2speech$', function() {
         $lang = "de-DE";
     } else if ($lang == "fr") {
         $lang = "fr-FR";
+    } else if ($lang == "hr") {
+        $lang = "hr-HR";
     } else {
         $lang = "en-US";
     }
