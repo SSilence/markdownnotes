@@ -1,10 +1,12 @@
-<div class="alert alert-danger" role="alert" *ngIf="error">
-  <div class="alert-items">
+@if (error) {
+  <div class="alert alert-danger" role="alert">
+    <div class="alert-items">
       <div class="alert-item static">
-          <div class="alert-icon-wrapper">
-              <cds-icon class="alert-icon" shape="check-circle"></cds-icon>
-          </div>
-          <span class="alert-text">{{getErrorMessage()}}</span>
+        <div class="alert-icon-wrapper">
+          <cds-icon class="alert-icon" shape="check-circle"></cds-icon>
+        </div>
+        <span class="alert-text">{{getErrorMessage()}}</span>
       </div>
+    </div>
   </div>
-</div>
+}

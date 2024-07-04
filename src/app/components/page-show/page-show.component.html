@@ -1,8 +1,14 @@
-<span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
+@if (loading) {
+  <span class="spinner spinner-inline">Loading...</span>
+}
 <app-alert-error [error]="error"></app-alert-error>
-<div *ngIf="page" class="page">
+@if (page) {
+  <div class="page">
     <button class="btn btn-outline" [routerLink]="['/page', 'edit', page.id]">edit</button>
     <cds-icon [attr.shape]="page.icon" size="28"> </cds-icon>
     <h1>{{page.title}}</h1>
-    <div class="markdown-formatted" [innerHtml]="page.content | markdown | bookmarks | async" *ngIf="page.content"></div>
-</div>
+    @if (page.content) {
+      <div class="markdown-formatted" [innerHtml]="page.content | markdown | bookmarks | async"></div>
+    }
+  </div>
+}

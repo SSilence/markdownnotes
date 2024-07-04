@@ -1,35 +1,72 @@
 <h1>Files</h1>
-<span class="spinner spinner-inline" *ngIf="!files$">Loading...</span>
+@if (!files$) {
+  <span class="spinner spinner-inline">Loading...</span>
+}
+
 <app-alert-error [error]="error"></app-alert-error>
 <ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" dropZoneClassName="filedrop">
-    <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-        <button class="btn" type="button" (click)="openFileSelector()">Browse Files</button>
-    </ng-template>
+  <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+    <button class="btn" type="button" (click)="openFileSelector()">Browse Files</button>
+  </ng-template>
 </ngx-file-drop>
-<div class="progress loop" *ngIf="uploading"><progress></progress></div>
 
-<table class="table" *ngIf="files$">
-  <thead>
+@if (uploading) {
+  <div class="progress loop"><progress></progress></div>
+}
+
+@if (files$) {
+  <table class="table">
+    <thead>
       <tr>
-          <th (click)="sort('name')">Filename <cds-icon shape="angle" *ngIf="sortField=='name' && sortAsc"></cds-icon> <cds-icon shape="angle" flip="vertical" *ngIf="sortField=='name' && !sortAsc"></cds-icon></th>
-          <th (click)="sort('size')">Size <cds-icon shape="angle" *ngIf="sortField=='size' && sortAsc"></cds-icon> <cds-icon shape="angle" flip="vertical" *ngIf="sortField=='size' && !sortAsc"></cds-icon></th>
-          <th (click)="sort('date')">Date <cds-icon shape="angle" *ngIf="sortField=='date' && sortAsc"></cds-icon> <cds-icon shape="angle" flip="vertical" *ngIf="sortField=='date' && !sortAsc"></cds-icon></th>
-          <th></th>
+        <th (click)="sort('name')">Filename 
+          @if (sortField=='name' && sortAsc) {
+            <cds-icon shape="angle"></cds-icon>
+          } @if (sortField=='name' && !sortAsc) {
+            <cds-icon shape="angle" flip="vertical"></cds-icon>
+          }
+        </th>
+        <th (click)="sort('size')">Size 
+          @if (sortField=='size' && sortAsc) {
+            <cds-icon shape="angle"></cds-icon>
+          } @if (sortField=='size' && !sortAsc) {
+            <cds-icon shape="angle" flip="vertical"></cds-icon>
+          }
+        </th>
+        <th (click)="sort('date')">Date 
+          @if (sortField=='date' && sortAsc) {
+            <cds-icon shape="angle"></cds-icon>
+          } 
+          @if (sortField=='date' && !sortAsc) {
+            <cds-icon shape="angle" flip="vertical"></cds-icon>
+          }
+        </th>
+        <th></th>
       </tr>
-  </thead>
-  <tbody>
-      <tr *ngFor="let file of files$ | async">
+    </thead>
+    <tbody>
+      @for (file of files$ | async; track file) {
+        <tr>
           <td class="left"><a href="data/files/{{file.name}}" target="_blank">{{file.name}}</a></td>
           <td>{{file.size | fileSize}}</td>
           <td>{{file.date | date:'medium'}}</td>
           <td>
-              <cds-icon shape="copy-to-clipboard" size="20" ngxClipboard [cbContent]="'[' + file.name + '](data/files/' + file.name + ')'"></cds-icon>
-              &nbsp;
-              <cds-icon shape="trash" size="20" (click)="file.delete = true" *ngIf="!file.loading && !file.delete"></cds-icon>
-              <button class="btn btn-danger btn-sm" type="button" (click)="delete(file)" *ngIf="!file.loading && file.delete">delete</button>
-              <button class="btn btn-outline btn-sm btn-link" type="button" (click)="file.delete = false" *ngIf="!file.loading && file.delete">cancel</button>
-              &nbsp;
-              <span class="spinner spinner-inline" *ngIf="file.loading"></span></td>
-      </tr>
-  </tbody>
-</table>
+            <cds-icon shape="copy-to-clipboard" size="20" ngxClipboard [cbContent]="'[' + file.name + '](data/files/' + file.name + ')'"></cds-icon>
+            &nbsp;
+            @if (!file.loading && !file.delete) {
+              <cds-icon shape="trash" size="20" (click)="file.delete = true"></cds-icon>
+            }
+            @if (!file.loading && file.delete) {
+              <button class="btn btn-danger btn-sm" type="button" (click)="delete(file)">delete</button>
+            }
+            @if (!file.loading && file.delete) {
+              <button class="btn btn-outline btn-sm btn-link" type="button" (click)="file.delete = false">cancel</button>
+            }
+            &nbsp;
+            @if (file.loading) {
+              <span class="spinner spinner-inline"></span>
+            }</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }

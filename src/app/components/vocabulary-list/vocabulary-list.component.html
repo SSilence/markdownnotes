@@ -1,98 +1,108 @@
-<span class="spinner spinner-inline" *ngIf="loading">Loading...</span>
+@if (loading) {
+  <span class="spinner spinner-inline">Loading...</span>
+}
 <app-alert-error [error]="error"></app-alert-error>
 
-<div *ngIf="page" class="page">
-    <app-vocabulary-exercise [train]="true" [page]="page" [cards]="train" *ngIf="train.length > 0" (finished)="exerciseResult = $event"></app-vocabulary-exercise>
-
-    <app-alert-sticky message="successfully saved" *ngIf="successSave"></app-alert-sticky>
-
+@if (page) {
+  <div class="page">
+    @if (train.length > 0) {
+      <app-vocabulary-exercise [train]="true" [page]="page" [cards]="train" (finished)="exerciseResult = $event"></app-vocabulary-exercise>
+    }
+    @if (successSave) {
+      <app-alert-sticky message="successfully saved"></app-alert-sticky>
+    }
     <div class="top">
-        <h1>{{page.title}}</h1>
-        <div>
-            <span *ngIf="successSave" class="success">successfully saved</span>
-            <button class="btn btn-outline" (click)="add()">add</button>
-            <button class="btn btn-success-outline" (click)="exercise()">exercise</button>
-            <button class="btn" (click)="save()" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}">save</button>
-        </div>
+      <h1>{{page.title}}</h1>
+      <div>
+        @if (successSave) {
+          <span class="success">successfully saved</span>
+        }
+        <button class="btn btn-outline" (click)="add()">add</button>
+        <button class="btn btn-success-outline" (click)="exercise()">exercise</button>
+        <button class="btn" (click)="save()" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}">save</button>
+      </div>
     </div>
-    
     <div class="clr-row">
-        <div class="clr-col-2">
-            
-            <clr-input-container>
-                <input clrInput class="search" placeholder="search" [(ngModel)]="q" (ngModelChange)="filterSearch()" />
-            </clr-input-container>
-
-            <h4>Phase</h4>
-            <clr-checkbox-wrapper *ngFor="let i of [0,1,2,3,4,5,6]">
-                <label>{{i}}</label>
-                <input clrCheckbox type="checkbox" (change)="filterPhase(i)" [checked]="phase.includes(i)" />
-            </clr-checkbox-wrapper>
-
-            <h4>Section</h4>
-            <clr-checkbox-wrapper *ngFor="let sec of sections">
-                <label>{{sec}}</label>
-                <input clrCheckbox type="checkbox" (change)="filterSection(sec)" [checked]="section.includes(sec)" />
-            </clr-checkbox-wrapper>
-
+      <div class="clr-col-2">
+        <clr-input-container>
+          <input clrInput class="search" placeholder="search" [(ngModel)]="q" (ngModelChange)="filterSearch()" />
+        </clr-input-container>
+        <h4>Phase</h4>
+        @for (i of [0,1,2,3,4,5,6]; track i) {
+          <clr-checkbox-wrapper>
+            <label>{{i}}</label>
+            <input clrCheckbox type="checkbox" (change)="filterPhase(i)" [checked]="phase.includes(i)" />
+          </clr-checkbox-wrapper>
+        }
+        <h4>Section</h4>
+        @for (sec of sections; track sec) {
+          <clr-checkbox-wrapper>
+            <label>{{sec}}</label>
+            <input clrCheckbox type="checkbox" (change)="filterSection(sec)" [checked]="section.includes(sec)" />
+          </clr-checkbox-wrapper>
+        }
+      </div>
+      <div class="clr-col">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="left"><span>German</span></th>
+              <th class="left">English</th>
+              <th class="left">Section</th>
+              <th class="left">Phase</th>
+              <th class="left"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (toAdd) {
+              <tr class="add">
+                <td><input type="text" [(ngModel)]="toAdd.german" (keydown)="onAddKeypress($event)" #addGermanInput></td>
+                <td><input type="text" [(ngModel)]="toAdd.english" (keydown)="onAddKeypress($event)"></td>
+                <td><input type="text" [(ngModel)]="toAdd.section" (keydown)="onAddKeypress($event)"></td>
+                <td></td>
+                <td class="left">
+                  <button class="btn" (click)="addSave()" class="btn btn-primary">add</button>
+                  <button class="btn" (click)="toAdd=null" class="btn btn-outline">cancel</button>
+                </td>
+              </tr>
+            }
+            @for (entry of selected; track entry) {
+              <tr>
+                <td><input type="text" [(ngModel)]="entry.german"></td>
+                <td><input type="text" [(ngModel)]="entry.english"></td>
+                <td><input type="text" [(ngModel)]="entry.section"></td>
+                <td  class="left">
+                  {{entry.g2ePhase}} &rarr;<br />
+                  {{entry.e2gPhase}} &larr;
+                </td>
+                <td  class="left">
+                  <audio #audio></audio>
+                  <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src=playUrl(entry.english);audio.play()">
+                    <cds-icon shape="play"></cds-icon>
+                  </button>
+                  <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="reset(entry)">
+                    <cds-icon shape="refresh" direction="down"></cds-icon>
+                  </button>
+                  <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="delete(entry)">
+                    <cds-icon shape="trash"></cds-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <div class="centered">
+          <table class="pagination">
+            <tr>
+              @for (page of pages; track page) {
+                <td (click)="selectPage(page)" [ngClass]="{'selected': currentPage==page}">{{page}}</td>
+              }
+            </tr>
+          </table>
         </div>
-        <div class="clr-col">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th class="left"><span>German</span></th>
-                        <th class="left">English</th>
-                        <th class="left">Section</th>
-                        <th class="left">Phase</th>
-                        <th class="left"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngIf="toAdd" class="add">
-                        <td><input type="text" [(ngModel)]="toAdd.german" (keydown)="onAddKeypress($event)" #addGermanInput></td>
-                        <td><input type="text" [(ngModel)]="toAdd.english" (keydown)="onAddKeypress($event)"></td>
-                        <td><input type="text" [(ngModel)]="toAdd.section" (keydown)="onAddKeypress($event)"></td>
-                        <td></td>
-                        <td class="left">
-                            <button class="btn" (click)="addSave()" class="btn btn-primary">add</button>
-                            <button class="btn" (click)="toAdd=null" class="btn btn-outline">cancel</button>
-                        </td>
-                    </tr>
-                    <tr *ngFor="let entry of selected">
-                        <td><input type="text" [(ngModel)]="entry.german"></td>
-                        <td><input type="text" [(ngModel)]="entry.english"></td>
-                        <td><input type="text" [(ngModel)]="entry.section"></td>
-                        <td  class="left">
-                            {{entry.g2ePhase}} &rarr;<br />
-                            {{entry.e2gPhase}} &larr;
-                        </td>
-                        <td  class="left">
-                            <audio #audio></audio>
-                            <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src=playUrl(entry.english);audio.play()">
-                                <cds-icon shape="play"></cds-icon>
-                            </button>
-                            <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="reset(entry)">
-                                <cds-icon shape="refresh" direction="down"></cds-icon>
-                            </button>
-                            <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="delete(entry)">
-                                <cds-icon shape="trash"></cds-icon>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="centered">
-                <table class="pagination">
-                    <tr>
-                        <td *ngFor="let page of pages" (click)="selectPage(page)" [ngClass]="{'selected': currentPage==page}">{{page}}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+      </div>
     </div>
-
-    
-</div>
+  </div>
+}
 
 <app-vocabulary-exercise-result [result]="exerciseResult" (finished)="exerciseResult = null"></app-vocabulary-exercise-result>

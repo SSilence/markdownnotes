@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CdsModule } from '@cds/angular';
@@ -12,7 +12,7 @@ import { BackendService } from 'src/app/services/backend.service';
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [CommonModule, CdsModule, RouterModule, Nl2BrPipe, HighlightPipe, SearchResultPipe],
+  imports: [CdsModule, RouterModule, Nl2BrPipe, HighlightPipe, SearchResultPipe],
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.css']
 })

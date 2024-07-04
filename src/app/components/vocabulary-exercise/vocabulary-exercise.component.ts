@@ -1,6 +1,6 @@
 import { Component, Input, ViewChildren, Output, EventEmitter, ViewChild } from "@angular/core";
 import { ClarityModule } from "@clr/angular";
-import { CommonModule } from "@angular/common";
+
 import { FormsModule } from "@angular/forms";
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 import { Page } from "src/app/models/page";
@@ -13,7 +13,7 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
 @Component({
     selector: 'app-vocabulary-exercise',
     standalone: true,
-    imports: [ClarityModule, CommonModule, FormsModule, AlertErrorComponent],
+    imports: [ClarityModule, FormsModule, AlertErrorComponent],
     templateUrl: './vocabulary-exercise.component.html',
     styleUrls: ['./vocabulary-exercise.component.css']
 })

@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, ModuleWithProviders } from "@angular/core";
 import { ClarityModule } from "@clr/angular";
-import { CommonModule } from "@angular/common";
+
 import { FormsModule } from "@angular/forms";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
 
@@ -9,7 +9,7 @@ import { NgCircleProgressModule } from "ng-circle-progress";
 @Component({
     selector: 'app-vocabulary-exercise-result',
     standalone: true,
-    imports: [ClarityModule, CommonModule, FormsModule, NgCircleProgressModule],
+    imports: [ClarityModule, FormsModule, NgCircleProgressModule],
     providers: [
         (NgCircleProgressModule.forRoot({
           radius: 100,

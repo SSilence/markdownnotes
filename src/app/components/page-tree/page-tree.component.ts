@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { ClarityModule } from '@clr/angular';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 import { CdsModule } from '@cds/angular';
 import { Page } from 'src/app/models/page';
@@ -9,7 +9,7 @@ import { BackendService } from 'src/app/services/backend.service';
 @Component({
   selector: 'app-page-tree',
   standalone: true,
-  imports: [ClarityModule, CommonModule, RouterModule, CdsModule],
+  imports: [ClarityModule, RouterModule, CdsModule],
   templateUrl: './page-tree.component.html',
   styleUrls: ['./page-tree.component.css']
 })

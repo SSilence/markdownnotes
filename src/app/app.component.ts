@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd, RouterModule } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
 import { ClarityModule } from '@clr/angular';
-import { CommonModule } from '@angular/common';
+
 import { PageTreeComponent } from './components/page-tree/page-tree.component';
 import { Page } from './models/page';
 import { BackendService } from './services/backend.service';
@@ -10,7 +10,7 @@ import { BackendService } from './services/backend.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ClarityModule, RouterModule, CommonModule, PageTreeComponent],
+  imports: [ClarityModule, RouterModule, PageTreeComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
