@@ -125,7 +125,7 @@ button:focus {
 }
 
 .markdown-formatted li {
-    margin-bottom:0.2rem;
+    margin-bottom:0.1rem;
 }
 
 .markdown-formatted li p:not([cds-text]) {
