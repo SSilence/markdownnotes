@@ -30,28 +30,34 @@ button:focus {
     background:#f9f9f9;
 }
 
-.markdown-formatted h1 {
+.markdown-formatted h1:not([cds-text]) {
     font-size: 1.85em;
+    margin-bottom:0.6rem;
 }
 
-.markdown-formatted h2 {
+.markdown-formatted h2:not([cds-text]) {
     font-size: 1.6em;
+    margin-bottom:0.6rem;
 }
 
-.markdown-formatted h3 {
+.markdown-formatted h3:not([cds-text]) {
     font-size: 1.4em;
+    margin-bottom:0.6rem;
 }
 
-.markdown-formatted h4 {
+.markdown-formatted h4:not([cds-text]) {
     font-size: 1.3em;
+    margin-bottom:0.6rem;
 }
 
-.markdown-formatted h5 {
+.markdown-formatted h5:not([cds-text]) {
     font-size: 1.2em;
+    margin-bottom:0.6rem;
 }
 
-.markdown-formatted h6 {
+.markdown-formatted h6:not([cds-text]) {
     font-size: 1.1em;
+    margin-bottom:0.6rem;
 }
 
 .markdown-formatted blockquote {
@@ -77,7 +83,7 @@ button:focus {
 
 .markdown-formatted .bookmarks li {
     list-style: none;
-    margin-bottom:3px;
+    margin-bottom:5px;
 }
 
 .markdown-formatted .bookmarks h1,
@@ -118,7 +124,11 @@ button:focus {
     margin:30px 0 30px 0;
 }
 
-.markdown-formatted li p {
+.markdown-formatted li {
+    margin-bottom:0.2rem;
+}
+
+.markdown-formatted li p:not([cds-text]) {
     line-height: 0;
     margin-top:0;
     display: inline;
