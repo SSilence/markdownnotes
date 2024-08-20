@@ -6,7 +6,7 @@
 
 <div class="vocabularies">
   @for (page of pages; track page) {
-    <div class="vocabulary">
+    <div class="vocabulary" [ngClass]="{'disabled': page.disabled}">
       @if (!page.edit) {
         <div class="content">
           @if (page.icon) {
@@ -22,6 +22,8 @@
                 <li><span>{{page.updated | date:'mediumDate'}}</span> last updated</li>
               }
               @if (page.phases) {
+                <li><span>{{finished(page)}}</span>% finished</li>
+
                 <li>
                   <table class="stats-table">
                     <thead>
@@ -55,10 +57,10 @@
       }
       @if (!page.edit && page.phases) {
         <div class="btn-group btn-primary action">
-          @if (page.newVocabularyCount && page.newVocabularyCount > 0) {
+          @if (page.newVocabularyCount && page.newVocabularyCount > 0 && !page.disabled) {
             <button class="btn btn-success" (click)="showNewDialog(page)">{{page.newVocabularyCount}} new</button>
           }
-          @if (page.exerciseVocabularyCount && page.exerciseVocabularyCount > 0) {
+          @if (page.exerciseVocabularyCount && page.exerciseVocabularyCount > 0 && !page.disabled) {
             <button class="btn btn-primary" (click)="startExercise(page)">{{page.exerciseVocabularyCount}} exercise</button>
           }
           <button class="btn btn-icon btn-primary-outline" [routerLink]="['/vocabulary', 'vocabular', page.id]"><cds-icon shape="view-list"></cds-icon></button>

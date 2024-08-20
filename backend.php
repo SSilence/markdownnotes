@@ -129,6 +129,7 @@ function readPageByFilename($filename) {
         'title' => $meta['title'],
         'icon' => $meta['icon'],
         'language' => isset($meta['language']) ? $meta['language'] : '',
+        'disabled' => isset($meta['disabled']) ? $meta['disabled'] == 1 : false,
         'expanded' => isset($meta['expanded']) ? $meta['expanded'] == 1 : false,
         'content' => trim($parts[1]),
         'updated' => filemtime($filename)
@@ -139,8 +140,8 @@ function readPageById($id) {
     return readPageByFilename(toFilename($id));
 }
 
-function writePage($id, $title, $icon, $language, $expanded, $content) {
-    file_put_contents(toFilename($id), "title: $title\nicon: $icon\nlanguage: $language\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
+function writePage($id, $title, $icon, $language, $disabled, $expanded, $content) {
+    file_put_contents(toFilename($id), "title: $title\nicon: $icon\nlanguage: $language\ndisabled: $disabled\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
 }
 
 function text2SpeechAuth() {
@@ -225,6 +226,7 @@ router('POST', '/page$', function() {
     $title = parseString($data, 'title');
     $icon = parseString($data, 'icon');
     $language = parseString($data, 'language');
+    $disabled = $data['disabled'] === true;
     $expanded = $data['expanded'] === true;
     $content = isset($data['content']) ? $data['content'] : readPageById($id)["content"];
 
@@ -232,7 +234,7 @@ router('POST', '/page$', function() {
         error(404, "invalid id");
     }
 
-    writePage($id, $title, $icon, $language, $expanded, $content);
+    writePage($id, $title, $icon, $language, $disabled, $expanded, $content);
     json(readPageById($id));
 });
 

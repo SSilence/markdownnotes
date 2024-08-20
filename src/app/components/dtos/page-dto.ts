@@ -5,6 +5,7 @@ export class PageDto {
     title: string = "";
     icon: string = "";
     language: string = "";
+    disabled: boolean = false;
     expanded: boolean = false;
     content: string = "";
     updated: number | null = null;
@@ -15,6 +16,7 @@ export class PageDto {
             this.title = page.title;
             this.icon = page.icon;
             this.language = page.language;
+            this.disabled = page.disabled;
             this.expanded = page.expanded;
             this.content = page.content;
         }

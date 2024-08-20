@@ -6,6 +6,7 @@ export class Page {
     icon: string = "";
     content: string = "";
     language: string = "";
+    disabled: boolean = false;
     expanded: boolean = false;
     updated: Date | null = null;
 
@@ -19,6 +20,7 @@ export class Page {
             this.icon = pageDto.icon;
             this.content = pageDto.content;
             this.language = pageDto.language;
+            this.disabled = pageDto.disabled;
             this.expanded = pageDto.expanded;
             this.parent = null;
             this.updated = new Date((pageDto.updated ??= 0) * 1000);

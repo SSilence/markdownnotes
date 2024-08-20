@@ -112,3 +112,18 @@ clr-range-container,
 clr-range-container input {
     width: 25rem;
 }
+
+.vocabulary.disabled h2,
+.vocabulary.disabled li,
+.vocabulary.disabled .stats-label{
+    color: #bbbbbb;
+}
+
+.vocabulary.disabled .stats-bar {
+    background-color: #cacaca;
+}
+
+.vocabulary.disabled img,
+.vocabulary.disabled button {
+    opacity: 0.5;
+}

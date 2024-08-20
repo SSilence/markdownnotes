@@ -59,7 +59,15 @@ export class VocabularyComponent implements OnInit {
         this.backendService.getAllVocabularyPages().subscribe({
             next: pages => {
                 this.pages = pages.map(page => this.toPageEditable(page, false))
-                                  .sort((a,b) => ((b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0)));
+                                  .sort((a,b) => {
+                                        if (a.disabled) {
+                                            return 1;
+                                        } else if (b.disabled) {
+                                            return -1;
+                                        } else {
+                                            return (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0);
+                                        }
+                                    });
                 this.pages.forEach(page => this.loadFullPage(page));
             },
             error: error => this.error = error
@@ -117,7 +125,7 @@ export class VocabularyComponent implements OnInit {
                 const vocabulary = VocabularyEntry.parseVocabulary(loadedPage.content);
                 page.vocabularyCount = vocabulary.length;
                 page.phases = [];
-                for(let i=0; i <= 7; i++) {
+                for(let i=0; i <= 6; i++) {
                     const count = this.countPhases(vocabulary, i);
                     page.phases.push({
                         phase: i,
@@ -130,6 +138,10 @@ export class VocabularyComponent implements OnInit {
             },
             error: error => this.error = error
         })
+    }
+
+    finished(page: PageEditable): number {
+        return page.phases && page.phases[6] && !isNaN(page.phases[6].percent) ? page.phases[6].percent : 0;
     }
 
     private countPhases(vocabulary: VocabularyEntry[], phase: number): number {
