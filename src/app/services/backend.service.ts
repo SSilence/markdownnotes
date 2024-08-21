@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
 import { Page } from './../models/page';
 import { tap, switchMap, map } from 'rxjs/operators';
 import { PageDto } from '../components/dtos/page-dto';
@@ -42,14 +42,16 @@ export class BackendService {
     }
 
     getPage(id: string): Observable<Page> {
-        return this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + id).pipe(
-                        map(pagedto => new Page(pagedto)),
-                        map(page => {
-                            const p = this.findPage(this.pages, page);
-                            p!.content = page.content;
-                            return p!;
-                        })
-                    );
+        const observable = this.pages.length == 0 ? this.getAllPages() : of([]);
+        return observable.pipe(
+            switchMap(() => this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + id)),
+            map(pagedto => new Page(pagedto)),
+            map(page => {
+                const p = this.findPage(this.pages, page);
+                p!.content = page.content;
+                return p!;
+            })
+        );
     }
 
     savePage(page: Page): Observable<Page> {
