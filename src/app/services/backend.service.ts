@@ -42,8 +42,7 @@ export class BackendService {
     }
 
     getPage(id: string): Observable<Page> {
-        return this.getAllPages().pipe(
-                        switchMap(() => this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + id)),
+        return this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + id).pipe(
                         map(pagedto => new Page(pagedto)),
                         map(page => {
                             const p = this.findPage(this.pages, page);

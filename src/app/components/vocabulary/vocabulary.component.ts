@@ -58,16 +58,10 @@ export class VocabularyComponent implements OnInit {
         
         this.backendService.getAllVocabularyPages().subscribe({
             next: pages => {
-                this.pages = pages.map(page => this.toPageEditable(page, false))
-                                  .sort((a,b) => {
-                                        if (a.disabled) {
-                                            return 1;
-                                        } else if (b.disabled) {
-                                            return -1;
-                                        } else {
-                                            return (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0);
-                                        }
-                                    });
+                const sortedPages = pages.map(page => this.toPageEditable(page, false))
+                                         .sort((a,b) => (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0));
+
+                this.pages = sortedPages.filter(p => !p.disabled).concat(sortedPages.filter(p => p.disabled))
                 this.pages.forEach(page => this.loadFullPage(page));
             },
             error: error => this.error = error
