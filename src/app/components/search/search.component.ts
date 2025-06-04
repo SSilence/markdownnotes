@@ -10,11 +10,10 @@ import { SearchResultPipe } from 'src/app/pipes/searchresult.pipe';
 import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
-  selector: 'app-search',
-  standalone: true,
-  imports: [CdsModule, RouterModule, Nl2BrPipe, HighlightPipe, SearchResultPipe],
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.css']
+    selector: 'app-search',
+    imports: [CdsModule, RouterModule, Nl2BrPipe, HighlightPipe, SearchResultPipe],
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.css']
 })
 export class SearchComponent implements OnInit, OnDestroy {
 

@@ -49,7 +49,7 @@
     @if (page.id) {
       <button class="btn btn-link" [routerLink]="['/page', page!.id]">cancel</button>
     }
-    @if (!page?.id) {
+    @if (!page.id) {
       <button class="btn btn-link" [routerLink]="['/']">cancel</button>
     }
     @if (page.id) {

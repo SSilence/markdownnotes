@@ -4,7 +4,7 @@ import { ClarityModule } from "@clr/angular";
 import { FormsModule } from "@angular/forms";
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 import { Page } from "src/app/models/page";
-import * as moment from 'moment';
+import { DateTime } from "luxon";
 import { BackendService } from "src/app/services/backend.service";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { AlertErrorComponent } from "../alert-error/alert-error.component";
@@ -12,7 +12,6 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
 
 @Component({
     selector: 'app-vocabulary-exercise',
-    standalone: true,
     imports: [ClarityModule, FormsModule, AlertErrorComponent],
     templateUrl: './vocabulary-exercise.component.html',
     styleUrls: ['./vocabulary-exercise.component.css']
@@ -228,17 +227,17 @@ export class VocabularyExerciseComponent {
 
     private phaseToNext(phase: number): Date {
         if(phase == 1) {
-            return moment().add(1, 'days').startOf('day').toDate();
+            return DateTime.now().plus({days: 1}).startOf('day').toJSDate();
         } else if(phase == 2) {
-            return moment().add(3, 'days').startOf('day').toDate();
+            return DateTime.now().plus({days: 3}).startOf('day').toJSDate();
         } else if(phase == 3) {
-            return moment().add(9, 'days').startOf('day').toDate();
+            return DateTime.now().plus({days: 9}).startOf('day').toJSDate();
         } else if(phase == 4) {
-            return moment().add(29, 'days').startOf('day').toDate();
+            return DateTime.now().plus({days: 29}).startOf('day').toJSDate();
         } else if(phase == 5) {
-            return moment().add(90, 'days').startOf('day').toDate();
+            return DateTime.now().plus({days: 90}).startOf('day').toJSDate();
         } else {
-            return moment().add(100, 'years').startOf('day').toDate();
+            return DateTime().plus({years: 100}).startOf('day').toJSDate();
         }
     }
 

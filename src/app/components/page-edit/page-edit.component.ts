@@ -15,15 +15,13 @@ import { AlertStickyComponent } from '../alert-sticky/alert-sticky.component';
 
 @Component({
     selector: 'app-page-edit',
-    standalone: true,
     imports: [
-        AlertErrorComponent, 
-        CommonModule, 
-        CdsModule, 
-        MarkdownPipe, 
-        RouterModule, 
-        FormsModule, 
-        MarkdownEditorComponent, 
+        AlertErrorComponent,
+        CommonModule,
+        CdsModule,
+        RouterModule,
+        FormsModule,
+        MarkdownEditorComponent,
         AlertStickyComponent
     ],
     templateUrl: './page-edit.component.html',

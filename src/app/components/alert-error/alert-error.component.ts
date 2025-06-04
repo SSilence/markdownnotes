@@ -3,11 +3,10 @@ import { Component, Input } from '@angular/core';
 import { CdsModule } from '@cds/angular';
 
 @Component({
-  selector: 'app-alert-error',
-  standalone: true,
-  imports: [CdsModule],
-  templateUrl: './alert-error.component.html',
-  styleUrls: ['./alert-error.component.css']
+    selector: 'app-alert-error',
+    imports: [CdsModule],
+    templateUrl: './alert-error.component.html',
+    styleUrls: ['./alert-error.component.css']
 })
 export class AlertErrorComponent {
 

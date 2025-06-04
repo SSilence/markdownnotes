@@ -13,11 +13,10 @@ import { AesService } from 'src/app/services/aes.service';
 import { PasswordEntry } from 'src/app/models/password-entry';
 
 @Component({
-  selector: 'app-passwords',
-  standalone: true,
-  imports: [AlertErrorComponent, ClarityModule, CommonModule, RouterModule, FormsModule],
-  templateUrl: './passwords.component.html',
-  styleUrls: ['./passwords.component.css']
+    selector: 'app-passwords',
+    imports: [AlertErrorComponent, ClarityModule, CommonModule, RouterModule, FormsModule],
+    templateUrl: './passwords.component.html',
+    styleUrls: ['./passwords.component.css']
 })
 export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     

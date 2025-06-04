@@ -10,11 +10,10 @@ import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
-  selector: 'app-page-show',
-  standalone: true,
-  imports: [AlertErrorComponent, CommonModule, RouterModule, BookmakrsPipe, MarkdownPipe, CdsModule],
-  templateUrl: './page-show.component.html',
-  styleUrls: ['./page-show.component.css']
+    selector: 'app-page-show',
+    imports: [AlertErrorComponent, CommonModule, RouterModule, BookmakrsPipe, MarkdownPipe, CdsModule],
+    templateUrl: './page-show.component.html',
+    styleUrls: ['./page-show.component.css']
 })
 export class PageShowComponent implements OnInit {
     page: Page | null = null;

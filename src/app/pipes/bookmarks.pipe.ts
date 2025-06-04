@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import * as jquery from 'jquery';
+import jquery from 'jquery';
 import { Observable, of } from 'rxjs';
 import { BackendService } from './../services/backend.service';
 import { map, switchMap, catchError } from 'rxjs/operators';

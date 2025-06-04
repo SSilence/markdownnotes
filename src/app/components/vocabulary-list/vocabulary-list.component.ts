@@ -17,13 +17,12 @@ import { AlertStickyComponent } from "../alert-sticky/alert-sticky.component";
 
 @Component({
     selector: 'app-vocabulary-list',
-    standalone: true,
     imports: [
-        AlertErrorComponent, 
-        ClarityModule, 
-        CommonModule, 
-        FormsModule, 
-        RouterModule, 
+        AlertErrorComponent,
+        ClarityModule,
+        CommonModule,
+        FormsModule,
+        RouterModule,
         VocabularyExerciseComponent,
         VocabularyExerciseResultComponent,
         AlertStickyComponent

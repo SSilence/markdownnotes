@@ -11,11 +11,10 @@ import { BackendService } from 'src/app/services/backend.service';
 import { FileSizePipe } from 'src/app/pipes/file-size.pipe';
 
 @Component({
-  selector: 'app-files',
-  standalone: true,
-  imports: [CdsModule, NgxFileDropModule, AlertErrorComponent, CommonModule, FileSizePipe, ClipboardModule],
-  templateUrl: './files.component.html',
-  styleUrls: ['./files.component.css']
+    selector: 'app-files',
+    imports: [CdsModule, NgxFileDropModule, AlertErrorComponent, CommonModule, FileSizePipe, ClipboardModule],
+    templateUrl: './files.component.html',
+    styleUrls: ['./files.component.css']
 })
 export class FilesComponent implements OnInit {
 

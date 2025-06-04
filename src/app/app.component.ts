@@ -8,11 +8,10 @@ import { Page } from './models/page';
 import { BackendService } from './services/backend.service';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [ClarityModule, RouterModule, PageTreeComponent],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    imports: [ClarityModule, RouterModule, PageTreeComponent],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
     pages: Page[] = [];

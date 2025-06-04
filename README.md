@@ -34,7 +34,7 @@ MarkdownNotes notes and files will be saved in your given path. Just replace ``/
 
 ## credits
 
-Copyright (c) 2021 Tobias Zeising, tobias.zeising@aditu.de  
+Copyright (c) 2025 Tobias Zeising, tobias.zeising@aditu.de  
 https://www.aditu.de  
 Licensed under the GPLv3 license
 

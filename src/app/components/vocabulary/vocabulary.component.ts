@@ -11,20 +11,19 @@ import { RouterModule } from "@angular/router";
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 import { VocabularyExerciseComponent } from "../vocabulary-exercise/vocabulary-exercise.component";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
-import * as moment from 'moment';
+import { DateTime } from "luxon";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
 import { VocabularyExerciseResultComponent } from "../vocabulary-exercise-result/vocabulary-exercise-result.component";
 
 @Component({
     selector: 'app-vocabulary',
-    standalone: true,
     imports: [
-        AlertErrorComponent, 
-        ClarityModule, 
-        CommonModule, 
-        FormsModule, 
-        VocabularyEditComponent, 
-        RouterModule, 
+        AlertErrorComponent,
+        ClarityModule,
+        CommonModule,
+        FormsModule,
+        VocabularyEditComponent,
+        RouterModule,
         VocabularyExerciseComponent,
         VocabularyExerciseResultComponent
     ],
@@ -163,10 +162,10 @@ export class VocabularyComponent implements OnInit {
 
     private getExerciseVocabularyCards(vocabulary: VocabularyEntry[]): VocabularyCard[] {
         const e2g = vocabulary
-                  .filter(v => v.e2gPhase > 0 && v.e2gNext && moment().isAfter(v.e2gNext))
+                  .filter(v => v.e2gPhase > 0 && v.e2gNext && DateTime.now() > DateTime.fromISO(v.e2gNext))
                   .map(v => new VocabularyCard(v, false));
         const g2e = vocabulary
-                  .filter(v => v.g2ePhase > 0 && v.g2eNext && moment().isAfter(v.g2eNext))
+                  .filter(v => v.g2ePhase > 0 && v.g2eNext && DateTime.now() > DateTime.fromISO(v.g2eNext))
                   .map(v => new VocabularyCard(v, true));
         return e2g.concat(g2e);
     }

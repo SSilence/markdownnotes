@@ -8,18 +8,17 @@ import { NgCircleProgressModule } from "ng-circle-progress";
 
 @Component({
     selector: 'app-vocabulary-exercise-result',
-    standalone: true,
     imports: [ClarityModule, FormsModule, NgCircleProgressModule],
     providers: [
         (NgCircleProgressModule.forRoot({
-          radius: 100,
-          outerStrokeWidth: 16,
-          innerStrokeWidth: 8,
-          outerStrokeColor: '#78C000',
-          innerStrokeColor: '#C7E596',
-          animationDuration: 300,
+            radius: 100,
+            outerStrokeWidth: 16,
+            innerStrokeWidth: 8,
+            outerStrokeColor: '#78C000',
+            innerStrokeColor: '#C7E596',
+            animationDuration: 300,
         }) as ModuleWithProviders<NgCircleProgressModule>).providers!,
-      ],
+    ],
     templateUrl: './vocabulary-exercise-result.component.html',
     styleUrls: ['./vocabulary-exercise-result.component.css']
 })

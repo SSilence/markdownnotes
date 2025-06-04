@@ -6,7 +6,6 @@ import { FormsModule } from "@angular/forms";
 
 @Component({
     selector: 'app-vocabulary-edit',
-    standalone: true,
     imports: [ClarityModule, FormsModule],
     templateUrl: './vocabulary-edit.component.html',
     styleUrls: ['./vocabulary-edit.component.css']

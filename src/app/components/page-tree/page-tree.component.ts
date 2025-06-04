@@ -7,11 +7,10 @@ import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
-  selector: 'app-page-tree',
-  standalone: true,
-  imports: [ClarityModule, RouterModule, CdsModule],
-  templateUrl: './page-tree.component.html',
-  styleUrls: ['./page-tree.component.css']
+    selector: 'app-page-tree',
+    imports: [ClarityModule, RouterModule, CdsModule],
+    templateUrl: './page-tree.component.html',
+    styleUrls: ['./page-tree.component.css']
 })
 export class PageTreeComponent {
 
