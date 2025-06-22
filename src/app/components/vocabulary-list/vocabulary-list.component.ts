@@ -115,7 +115,7 @@ export class VocabularyListComponent implements OnInit {
     }
 
     private enrich() {
-        const itemsToUpdate = this.vocabulary.filter(item => item.score < 0 || item.score > 10 || !item.score || !item.example);
+        const itemsToUpdate = this.vocabulary.filter(item => item.score < 0 || item.score > 10);
         from(itemsToUpdate).pipe(
             concatMap(item =>
                 this.backendService.getVocabularyEnrich(item.german, item.english).pipe(

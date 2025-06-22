@@ -213,21 +213,35 @@ function chatgpt($prompt) {
     if ($responseArray !== null && isset($responseArray['choices'][0]['message']['content'])) {
         $content = $responseArray['choices'][0]['message']['content'];
         return $content;
+    } else if ($responseArray !== null && isset($responseArray['choices'][0]['content_filter_results'])) {
+        return false;
     } else {
         error(500, "invalid response from chatgpt" . json_encode($responseArray));
     }
 }
 
 function chatgptStory($words) {
-    return chatgpt("Please write an easy, short, and entertaining story with the following words: " . $words);
+    $response = chatgpt("Please write an easy, short, and entertaining story with the following words: " . $words);
+    if ($response === false) {
+        error(500, "chatgpt story generation failed");
+    }
+    return $response;
 }
 
 function chatgptVocabularyScore($english, $german) {
-    return chatgpt("You are an expert for the English language. Rate the word $english (in German $german) between 1 and 10. 10 means it is a very useful and often used. 1 means it is very rarely used and not useful. Please only return the number, nothing else.");
+    $response = chatgpt("You are an expert for the English language. Rate the word $english (in German $german) between 1 and 10. 10 means it is a very useful and often used. 1 means it is very rarely used and not useful. Please only return the number, nothing else.");
+    if ($response === false) {
+        return 5;
+    }
+    return $response;
 }
 
 function chatgptVocabularyExample($english, $german) {
-    return chatgpt("You are an expert for the English language. You are a English teacher. Create a short and simple sentence with the word $english (in German $german) to show how it is used in a sentence. Mark the used word as bold. Please only return the sentence, nothing else.");
+    $response = chatgpt("You are an expert for the English language. You are a English teacher. Create a short and simple sentence with the word $english (in German $german) to show how it is used in a sentence. Mark the used word as bold. Please only return the sentence, nothing else.");
+    if ($response === false) {
+        return "";
+    }
+    return $response;
 }
 
 // time
