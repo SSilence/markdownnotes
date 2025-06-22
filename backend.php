@@ -214,7 +214,7 @@ function chatgpt($prompt) {
         $content = $responseArray['choices'][0]['message']['content'];
         return $content;
     } else {
-        throw 'can not parse json response';
+        error(500, "invalid response from chatgpt" . json_encode($responseArray));
     }
 }
 

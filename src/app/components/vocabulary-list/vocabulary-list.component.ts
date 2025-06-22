@@ -6,9 +6,9 @@ import { ClarityModule } from "@clr/angular";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, RouterModule } from "@angular/router";
-import { switchMap, map, tap, concatMap } from 'rxjs/operators';
+import { switchMap, map, tap, concatMap, catchError } from 'rxjs/operators';
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
-import { from, Observable, of, timer } from "rxjs";
+import { from, of, timer } from "rxjs";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { VocabularyExerciseComponent } from "../vocabulary-exercise/vocabulary-exercise.component";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
@@ -61,7 +61,7 @@ export class VocabularyListComponent implements OnInit {
     }
 
     get pages(): number[] {
-        const length = this.selectedCount / this.itemsPerPage;
+        const length = Math.ceil(this.selectedCount / this.itemsPerPage);
         return Array.from({length: length}, (_, i) => i + 1);
     }
 
@@ -122,7 +122,8 @@ export class VocabularyListComponent implements OnInit {
                     map(response => {
                         item.score = response.score;
                         item.example = response.example;
-                    })
+                    }),
+                    catchError(() => of(null))
                 )
             )
         ).subscribe({
@@ -177,16 +178,15 @@ export class VocabularyListComponent implements OnInit {
     refresh() {
         const startIndex = (this.currentPage-1)*this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
-        this.selected = this.vocabulary.filter(item => {
+        const filtered = this.vocabulary.filter(item => {
             const qMatch = this.q.length > 3 ? item.german.toLowerCase().includes(this.q.toLowerCase()) || item.english.toLowerCase().includes(this.q.toLowerCase()) : true;
             const phaseMatch = this.phase.length > 0 ? this.phase.includes(item.e2gPhase) || this.phase.includes(item.g2ePhase) : true;
             const sectionMatch = this.section.length > 0 ? this.section.includes(item.section) : true;
             return qMatch && phaseMatch && sectionMatch;  
-        })
-        this.selectedCount = this.selected.length;
-        this.selected = this.selected.slice(startIndex, endIndex);
+        });
+        this.selectedCount = filtered.length;
+        this.selected = filtered.slice(startIndex, endIndex);
     }
-
 
     exercise() {
         const train: VocabularyCard[] = [];
