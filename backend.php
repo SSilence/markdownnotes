@@ -3,8 +3,8 @@
 include("backend_apikeys.php"); 
 // contains:
 // define("CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY", "secret");
+// define("CONFIG_CHATGPT_URL", "secret");
 // define("CONFIG_CHATGPT_API_KEY", "secret");
-// define("CONFIG_CHATGPT_ORG_ID", "secret");
 
 define("CONFIG_DATA_PATH", __DIR__ . "/data/pages/");
 define("CONFIG_FILES_PATH", __DIR__ . "/data/files/");
@@ -183,28 +183,32 @@ function text2Speech($text, $lang) {
     return $result;
 }
 
-function chatgptStory($words) {
-    $data = json_encode(array(
-        "model" => "gpt-3.5-turbo",
-        "messages" => array(
-            array(
-                "role" => "user",
-                "content" => "Please write an easy, short, and entertaining story with the following words: " . $words
-            )
-        )
-    ));
-
+function chatgpt($prompt) {
     $context = stream_context_create([
         'http' => [
             'header' => "Authorization: Bearer " . CONFIG_CHATGPT_API_KEY . "\r\nContent-Type: application/json",
             'method' => 'POST',
-            'content' => $data
+            'content' => json_encode(array(
+                "model" => "gpt-35-turbo",
+                "max_tokens" => 4096,
+                "temperature" => 0,
+                "top_p" => 0.1,
+                "messages" => array(
+                    array(
+                        "role" => "user",
+                        "content" => $prompt
+                    )
+                )
+            ))
         ],
     ]);
-    $result = file_get_contents('https://api.openai.com/v1/chat/completions', false, $context);
+    
+    $result = file_get_contents(CONFIG_CHATGPT_URL, false, $context);
+    
     if ($result === false) {
         error(500, "error");
     }
+    
     $responseArray = json_decode($result, true);
     if ($responseArray !== null && isset($responseArray['choices'][0]['message']['content'])) {
         $content = $responseArray['choices'][0]['message']['content'];
@@ -212,6 +216,18 @@ function chatgptStory($words) {
     } else {
         throw 'can not parse json response';
     }
+}
+
+function chatgptStory($words) {
+    return chatgpt("Please write an easy, short, and entertaining story with the following words: " . $words);
+}
+
+function chatgptVocabularyScore($english, $german) {
+    return chatgpt("You are an expert for the English language. Rate the word $english (in German $german) between 1 and 10. 10 means it is a very useful and often used. 1 means it is very rarely used and not useful. Please only return the number, nothing else.");
+}
+
+function chatgptVocabularyExample($english, $german) {
+    return chatgpt("You are an expert for the English language. You are a English teacher. Create a short and simple sentence with the word $english (in German $german) to show how it is used in a sentence. Mark the used word as bold. Please only return the sentence, nothing else.");
 }
 
 // time
@@ -376,6 +392,15 @@ router('GET', '/text2speech$', function() {
 router('POST', '/story$', function() {
     $words = file_get_contents('php://input');
     die(chatgptStory($words));
+});
+
+router('GET', '/vocabulary/enrich$', function() {
+    $english = htmlspecialchars($_GET["english"]);
+    $german = htmlspecialchars($_GET["german"]);
+    json(array(
+        "score" => (int)chatgptVocabularyScore($english, $german),
+        "example" => chatgptVocabularyExample($english, $german)
+    ));
 });
 
 header("HTTP/1.0 404 Not Found");

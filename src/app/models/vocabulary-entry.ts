@@ -2,6 +2,8 @@ export class VocabularyEntry {
     german: string = "";
     english: string = "";
     section: string = "";
+    score: number = -1;
+    example: string = "";
     e2gPhase: number = 0;
     e2gNext: Date | null = null;
     g2ePhase: number = 0;
@@ -12,6 +14,8 @@ export class VocabularyEntry {
             this.german = other.german;
             this.english = other.english;
             this.section = other.section;
+            this.score = other.score;
+            this.example = other.example;
             this.e2gPhase = other.e2gPhase;
             this.e2gNext = other.e2gNext;
             this.g2ePhase = other.g2ePhase;

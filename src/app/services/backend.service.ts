@@ -6,6 +6,7 @@ import { tap, switchMap, map } from 'rxjs/operators';
 import { PageDto } from '../components/dtos/page-dto';
 import { ToRenameDto } from '../components/dtos/to-rename-dto';
 import { FileDto } from '../components/dtos/file-dto';
+import { EnrichResponse } from '../components/dtos/enrich-response';
 
 @Injectable()
 export class BackendService {
@@ -156,8 +157,12 @@ export class BackendService {
         return this.http.post<void>(BackendService.BASE_URL + 'page', new PageDto(page));
     }
 
-
-
+    getVocabularyEnrich(german: string, english: string): Observable<EnrichResponse> {
+        const params = new HttpParams()
+            .set('german', german ? german : '')
+            .set('english', english ? english : '');
+        return this.http.get<EnrichResponse>(BackendService.BASE_URL + 'vocabulary/enrich', { params: params });
+    }
 
     private findPage(pages: Page[], page: Page): Page | null {
         if (!pages) {

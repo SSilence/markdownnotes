@@ -6,9 +6,9 @@ import { ClarityModule } from "@clr/angular";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, RouterModule } from "@angular/router";
-import { switchMap, map, tap } from 'rxjs/operators';
+import { switchMap, map, tap, concatMap } from 'rxjs/operators';
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
-import { timer } from "rxjs";
+import { from, Observable, of, timer } from "rxjs";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { VocabularyExerciseComponent } from "../vocabulary-exercise/vocabulary-exercise.component";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
@@ -88,7 +88,7 @@ export class VocabularyListComponent implements OnInit {
 
     @HostListener('document:keydown.control.s', ['$event'])
     onCtrlSKey(event: KeyboardEvent): void {
-        this.save();
+        this.save(() => this.enrich());
         event.preventDefault();
     }
 
@@ -111,9 +111,26 @@ export class VocabularyListComponent implements OnInit {
         this.vocabulary.unshift(this.toAdd!);
         this.add();
         this.refresh();
-        this.save();
+        this.save(() => this.enrich());
     }
 
+    private enrich() {
+        const itemsToUpdate = this.vocabulary.filter(item => item.score < 0 || item.score > 10 || !item.score || !item.example);
+        from(itemsToUpdate).pipe(
+            concatMap(item =>
+                this.backendService.getVocabularyEnrich(item.german, item.english).pipe(
+                    map(response => {
+                        item.score = response.score;
+                        item.example = response.example;
+                    })
+                )
+            )
+        ).subscribe({
+            next: () => {
+                this.save();
+            }
+        });
+    }
 
     clearFilters() {
         this.q = "";    
@@ -183,12 +200,17 @@ export class VocabularyListComponent implements OnInit {
         this.train = train;
     }
 
-    save() {
+    saveClick() {
+        this.save(() => this.enrich());
+    }
+    
+    save(finished?: () => any) {
         this.page!!.content = JSON.stringify(structuredClone(this.vocabulary).reverse(), null, 4);
         this.backendService.savePage(this.page!!).subscribe({
             next: () => {
                 this.successSave = true;
                 timer(3000).subscribe(() => this.successSave = false);
+                finished?.();
             },
             error: error => { this.error = error; }
         });

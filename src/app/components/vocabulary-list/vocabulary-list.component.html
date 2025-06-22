@@ -19,7 +19,7 @@
         }
         <button class="btn btn-outline" (click)="add()">add</button>
         <button class="btn btn-success-outline" (click)="exercise()">exercise</button>
-        <button class="btn" (click)="save()" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}">save</button>
+        <button class="btn" (click)="saveClick()" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}">save</button>
       </div>
     </div>
     <div class="clr-row">
@@ -50,6 +50,7 @@
               <th class="left">English</th>
               <th class="left">Section</th>
               <th class="left">Phase</th>
+              <th class="centered">Score</th>
               <th class="left"></th>
             </tr>
           </thead>
@@ -59,6 +60,7 @@
                 <td><input type="text" [(ngModel)]="toAdd.german" (keydown)="onAddKeypress($event)" #addGermanInput></td>
                 <td><input type="text" [(ngModel)]="toAdd.english" (keydown)="onAddKeypress($event)"></td>
                 <td><input type="text" [(ngModel)]="toAdd.section" (keydown)="onAddKeypress($event)"></td>
+                <td></td>
                 <td></td>
                 <td class="left">
                   <button class="btn" (click)="addSave()" class="btn btn-primary">add</button>
@@ -71,11 +73,16 @@
                 <td><input type="text" [(ngModel)]="entry.german"></td>
                 <td><input type="text" [(ngModel)]="entry.english"></td>
                 <td><input type="text" [(ngModel)]="entry.section"></td>
-                <td  class="left">
+                <td class="left phase">
                   {{entry.g2ePhase}} &rarr;<br />
                   {{entry.e2gPhase}} &larr;
                 </td>
-                <td  class="left">
+                <td title="{{entry.example}}"
+                [ngStyle]="{
+                  'color': 'rgb(' + (230 - 10 * (entry.score||0)) + ',0,' + (230 - 10 * (entry.score||0)) + ')',
+                  'font-weight': 300 + 40 * (entry.score||0)
+                }">{{entry.score}}</td>
+                <td class="left">
                   <audio #audio></audio>
                   <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src=playUrl(entry.english);audio.play()">
                     <cds-icon shape="play"></cds-icon>
