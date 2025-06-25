@@ -5,6 +5,7 @@ include("backend_apikeys.php");
 // define("CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY", "secret");
 // define("CONFIG_CHATGPT_URL", "secret");
 // define("CONFIG_CHATGPT_API_KEY", "secret");
+// define("CONFIG_PONS_API_KEY", "secret");
 
 define("CONFIG_DATA_PATH", __DIR__ . "/data/pages/");
 define("CONFIG_FILES_PATH", __DIR__ . "/data/files/");
@@ -244,6 +245,51 @@ function chatgptVocabularyExample($english, $german) {
     return $response;
 }
 
+function dictionary($q) {
+    $context = stream_context_create([
+        'http' => [
+            'header' => "X-Secret: " . CONFIG_PONS_API_KEY . "\r\nContent-Type: application/json",
+            'method' => 'GET'
+        ],
+    ]);
+    
+    $result = file_get_contents("https://api.pons.com/v1/dictionary?l=deen&q=" . urlencode($q) . "&language=en", false, $context);
+    
+    if ($result === false) {
+        error(500, "error");
+    }
+    
+    $responseArray = json_decode($result, true);
+    if ($responseArray !== null && isset($responseArray)) {
+        $result = [];
+        foreach ($responseArray as $lang) {
+            $sourceLang = $lang['lang'];
+            foreach ((isset($lang['hits']) ? $lang['hits'] : []) as $entry) {
+                foreach ((isset($entry['roms']) ? $entry['roms'] : []) as $rom) {
+                    $headword = $rom['headword_full'];
+                    $wordclass = isset($rom['wordclass']) ? $rom['wordclass'] : "";
+                    foreach ((isset($rom['arabs']) ? $rom['arabs'] : []) as $arab) {
+                        $header = $arab['header'];
+                        foreach ((isset($arab['translations']) ? $arab['translations'] : []) as $translation) {
+                            $result[] = array(
+                                "lang" => $sourceLang,
+                                "headword" => trim(strip_tags($headword)),
+                                "wordclass" => trim(strip_tags($wordclass)),
+                                "header" => trim(strip_tags($header)),
+                                "source" => trim(strip_tags($translation["source"])),
+                                "target" => trim(strip_tags($translation["target"]))
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        return $result;
+    } else {
+        return [];
+    }
+}
+
 // time
 router('GET', '/$', function() {
     die("".time());
@@ -408,6 +454,7 @@ router('POST', '/story$', function() {
     die(chatgptStory($words));
 });
 
+// enrich vocabulary
 router('GET', '/vocabulary/enrich$', function() {
     $english = htmlspecialchars($_GET["english"]);
     $german = htmlspecialchars($_GET["german"]);
@@ -416,6 +463,13 @@ router('GET', '/vocabulary/enrich$', function() {
         "example" => chatgptVocabularyExample($english, $german)
     ));
 });
+
+// dictionary
+router('GET', '/vocabulary/dictionary$', function() {
+    $q = htmlspecialchars($_GET["q"]);
+    json(dictionary($q));
+});
+
 
 header("HTTP/1.0 404 Not Found");
 echo '404 Not Found';
