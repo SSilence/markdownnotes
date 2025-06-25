@@ -253,8 +253,12 @@ function dictionary($q) {
         ],
     ]);
     
-    $result = file_get_contents("https://api.pons.com/v1/dictionary?l=deen&q=" . urlencode($q) . "&language=en", false, $context);
-    
+    try {
+        $result = file_get_contents("https://api.pons.com/v1/dictionary?l=deen&q=" . urlencode($q) . "&language=en", false, $context);
+    } catch (Exception $e) {
+        error(500, "dictionary error: " . $e->getMessage());
+    }
+
     if ($result === false) {
         error(500, "error");
     }
@@ -266,18 +270,18 @@ function dictionary($q) {
             $sourceLang = $lang['lang'];
             foreach ((isset($lang['hits']) ? $lang['hits'] : []) as $entry) {
                 foreach ((isset($entry['roms']) ? $entry['roms'] : []) as $rom) {
-                    $headword = $rom['headword_full'];
+                    $headword = $rom['headword'];
                     $wordclass = isset($rom['wordclass']) ? $rom['wordclass'] : "";
                     foreach ((isset($rom['arabs']) ? $rom['arabs'] : []) as $arab) {
                         $header = $arab['header'];
                         foreach ((isset($arab['translations']) ? $arab['translations'] : []) as $translation) {
                             $result[] = array(
                                 "lang" => $sourceLang,
-                                "headword" => trim(strip_tags($headword)),
-                                "wordclass" => trim(strip_tags($wordclass)),
-                                "header" => trim(strip_tags($header)),
-                                "source" => trim(strip_tags($translation["source"])),
-                                "target" => trim(strip_tags($translation["target"]))
+                                "headword" => trim(strip_tags(html_entity_decode($headword))),
+                                "wordclass" => trim(strip_tags(html_entity_decode($wordclass))),
+                                "header" => trim(strip_tags(html_entity_decode($header))),
+                                "source" => trim(strip_tags(html_entity_decode(($translation["source"])))),
+                                "target" => trim(strip_tags(html_entity_decode($translation["target"])))
                             );
                         }
                     }
