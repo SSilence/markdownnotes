@@ -238,7 +238,7 @@ function chatgptVocabularyScore($english, $german) {
 }
 
 function chatgptVocabularyExample($english, $german) {
-    $response = chatgpt("You are an expert for the English language. You are a English teacher. Create a short and simple sentence with the word $english (in German $german) to show how it is used in a sentence. Mark the used word as bold. Please only return the sentence, nothing else.");
+    $response = chatgpt("You are an expert for the English language. You are a English teacher. Create a short and simple sentence with the word $english (the German meaning $german) to show how it is used in a sentence. The example sentence should use the word in the meaning it has in German. Mark the used word as bold. Please only return the sentence, nothing else.");
     if ($response === false) {
         return "";
     }
