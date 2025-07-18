@@ -6,6 +6,7 @@ export class PasswordEntry {
     passwordShow: boolean = false;
     edit: boolean = false;
     prev: PasswordEntry | null = null;
+    decryptedPassword: string = "";
 
     static fromOther(other: PasswordEntry): PasswordEntry {
         const passwordEntry = new PasswordEntry();
