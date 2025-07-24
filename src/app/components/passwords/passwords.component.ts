@@ -177,13 +177,12 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
                             } else {
                                 return p1.service.localeCompare(p2.service);
                             }
-                        })
-                        .map((e: PasswordEntry) => { e.decryptedPassword = ''; return e; });
+                        });
                     
                     this.aesService.sha512(password).subscribe({
                         next: hash => {
                             this.hash = hash;
-                            setTimeout(() => this.search.first.nativeElement.focus(), 0);
+                            setTimeout(() => this.search.first.nativeElement.focus(), 100);
                         },
                         error: () => {
                             this.error = "hash generation error";
