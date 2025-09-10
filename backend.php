@@ -436,6 +436,14 @@ router('GET', '/text2speech$', function() {
         $lang = "en-US";
     }
 
+    if ($lang == "de-DE") {
+        $text = preg_replace('/\betw\b/u', 'etwas', $text);
+        $text = preg_replace('/\bjdn\b/u', 'jemanden', $text);
+    } else if ($lang == "en-US") {
+        $text = preg_replace('/\bsth\b/u', 'something', $text);
+        $text = preg_replace('/\bsb\b/u', 'somebody', $text);
+    }
+
     $path = CONFIG_AUDIO_PATH . $lang . "/";
     if (!file_exists($path)) {
         mkdir($path, 0777);
