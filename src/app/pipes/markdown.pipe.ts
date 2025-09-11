@@ -98,8 +98,6 @@ export class MarkdownPipe implements PipeTransform {
                     };
                 }
 
-                
-
                 function sortHeader(tocEntries: any, level: any) {
                     level = level || 1;
                     var tagName = "H" + level,

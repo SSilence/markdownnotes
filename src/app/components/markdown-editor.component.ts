@@ -1,13 +1,20 @@
-
-import { Component, AfterViewInit, Output, EventEmitter, Input, ViewChildren } from '@angular/core';
+import { Component, AfterViewInit, Output, EventEmitter, Input, ViewChildren, inject } from '@angular/core';
 import EasyMDE from 'easymde/dist/easymde.min.js';
 import { MarkdownPipe } from 'src/app/pipes/markdown.pipe';
 
 @Component({
     selector: 'markdown-editor',
     imports: [],
-    templateUrl: './markdown-editor.component.html',
-    styleUrls: ['./markdown-editor.component.css']
+    template: `
+        <div>
+            <textarea #markdown></textarea>
+        </div>
+    `,
+    styles: [`
+        ::ng-deep h1 {
+            font-size: 0.7em;
+        }
+    `]
 })
 export class MarkdownEditorComponent implements AfterViewInit {
 
@@ -18,7 +25,7 @@ export class MarkdownEditorComponent implements AfterViewInit {
 
     @Output() contentChange = new EventEmitter();
 
-    constructor(private markdownPipe: MarkdownPipe) { }
+    private markdownPipe = inject(MarkdownPipe);
 
     @Input()
     get content() {

@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { FilesComponent } from './components/files/files.component';
-import { HomeComponent } from './components/home/home.component';
-import { PageEditComponent } from './components/page-edit/page-edit.component';
-import { PageShowComponent } from './components/page-show/page-show.component';
-import { PasswordsComponent } from './components/passwords/passwords.component';
-import { SearchComponent } from './components/search/search.component';
-import { VocabularyComponent } from './components/vocabulary/vocabulary.component';
-import { VocabularyListComponent } from './components/vocabulary-list/vocabulary-list.component';
+import { FilesComponent } from './components/files.component';
+import { HomeComponent } from './components/home.component';
+import { PageEditComponent } from './components/page-edit.component';
+import { PageShowComponent } from './components/page-show.component';
+import { PasswordsComponent } from './components/passwords.component';
+import { SearchComponent } from './components/search.component';
+import { VocabularyComponent } from './components/vocabulary.component';
+import { VocabularyListComponent } from './components/vocabulary-list.component';
 
 export const routes: Routes = [
       {

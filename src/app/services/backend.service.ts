@@ -3,10 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
 import { Page } from './../models/page';
 import { tap, switchMap, map } from 'rxjs/operators';
-import { PageDto } from '../components/dtos/page-dto';
-import { ToRenameDto } from '../components/dtos/to-rename-dto';
-import { FileDto } from '../components/dtos/file-dto';
-import { EnrichResponse } from '../components/dtos/enrich-response';
+import { PageDto } from '../dtos/page-dto';
+import { ToRenameDto } from '../dtos/to-rename-dto';
+import { FileDto } from '../dtos/file-dto';
+import { EnrichResponse } from '../dtos/enrich-response';
 
 @Injectable()
 export class BackendService {

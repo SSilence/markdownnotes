@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, NavigationEnd, RouterModule } from '@angular/ro
 import { filter, first } from 'rxjs/operators';
 import { ClarityModule } from '@clr/angular';
 
-import { PageTreeComponent } from './components/page-tree/page-tree.component';
+import { PageTreeComponent } from './components/page-tree.component';
 import { Page } from './models/page';
 import { BackendService } from './services/backend.service';
 

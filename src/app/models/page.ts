@@ -1,4 +1,4 @@
-import { PageDto } from "../components/dtos/page-dto";
+import { PageDto } from "../dtos/page-dto";
 
 export class Page {
     id: string | null = null;

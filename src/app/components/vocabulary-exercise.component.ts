@@ -1,4 +1,4 @@
-import { Component, Input, ViewChildren, Output, EventEmitter, ViewChild } from "@angular/core";
+import { Component, Input, ViewChildren, Output, EventEmitter, ViewChild, inject } from "@angular/core";
 import { ClarityModule } from "@clr/angular";
 
 import { FormsModule } from "@angular/forms";
@@ -7,14 +7,117 @@ import { Page } from "src/app/models/page";
 import { DateTime } from "luxon";
 import { BackendService } from "src/app/services/backend.service";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
-import { AlertErrorComponent } from "../alert-error/alert-error.component";
+import { AlertErrorComponent } from "./alert-error.component";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
 
 @Component({
     selector: 'app-vocabulary-exercise',
     imports: [ClarityModule, FormsModule, AlertErrorComponent],
-    templateUrl: './vocabulary-exercise.component.html',
-    styleUrls: ['./vocabulary-exercise.component.css']
+    template: `
+        @if (current) {
+            <div class="modal">
+                <div class="modal-dialog" role="dialog" aria-hidden="true">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    @if (!introduceMode) {
+                        <span class="phase">{{current.g2e ? current.vocabulary.g2ePhase : current.vocabulary.e2gPhase }}</span>
+                    }
+                    <clr-progress-bar [clrValue]="progressValue" clrLabeled [clrDisplayval]="progressLabel"></clr-progress-bar>
+                    <button aria-label="Close" class="close" type="button" (click)="current=null">
+                        <cds-icon shape="close"></cds-icon>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                    <app-alert-error [error]="error"></app-alert-error>
+                    @if (current && current.g2e) {
+                        <div>
+                        <div class="word">{{current.vocabulary.german}}</div>
+                        <hr />
+                        <div class="word" [style.visibility]="result || introduceMode ? 'visible' : 'hidden'">
+                            {{current.vocabulary.english}} <br />
+                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="play(current.vocabulary.english)">
+                            <cds-icon shape="play"></cds-icon>
+                            </button>
+                        </div>
+                        </div>
+                    }
+                    @if (current && !current.g2e) {
+                        <div>
+                        <div class="word">{{current.vocabulary.english}} <br />
+                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="play(current.vocabulary.english)">
+                            <cds-icon shape="play"></cds-icon>
+                            </button>
+                        </div>
+                        <hr />
+                        <div class="word" [style.visibility]="result || introduceMode ? 'visible' : 'hidden'">
+                            {{current.vocabulary.german}}
+                        </div>
+                        </div>
+                    }
+                    <div class="action">
+                        @if (hasBack()) {
+                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="back()">
+                                <cds-icon shape="arrow" direction="left"></cds-icon>
+                            </button>
+                        }
+                        @if (!result && !introduceMode) {
+                            <button class="btn btn-success" (click)="answer()">show answer</button>
+                        }
+                        @if (result && !introduceMode) {
+                            <button class="btn btn-danger" (click)="wrong()">wrong</button>
+                        }
+                        @if (result && !introduceMode) {
+                            <button class="btn btn-success" (click)="correct()">correct</button>
+                        }
+                        @if (introduceMode) {
+                            <button class="btn btn-primary" (click)="next()">next</button>
+                        }
+                    </div>
+                    <audio #audio></audio>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+                </div>
+            </div>
+        }
+        @if (current) {
+            <div class="modal-backdrop" aria-hidden="true"></div>
+        }
+    `,
+    styles: [`
+        .action {
+            width:100%;
+            float: left;
+            text-align: center;
+        }
+
+        .word {
+            width:100%;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding:5rem;
+        }
+
+        audio {
+            display: none;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-header button {
+            margin-left:0.5rem;
+        }
+
+        .phase {
+            padding-right:1rem;
+        }
+    `]
 })
 export class VocabularyExerciseComponent {
 
@@ -58,7 +161,7 @@ export class VocabularyExerciseComponent {
         }
       }
 
-    constructor(private backendService: BackendService) {}
+    private backendService = inject(BackendService);
 
     @Input()
     set cards(value: VocabularyCard[]) {
