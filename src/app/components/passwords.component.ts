@@ -159,13 +159,16 @@ import { PasswordEntry } from 'src/app/models/password-entry';
                             <h3 class="modal-title">Please enter your master password</h3>
                         </div>
                         <div class="modal-body savepassword">
+                            @if(saving) {
+                                <span class="spinner spinner-inline"></span>
+                            }
                             <app-alert-error [error]="errorPassword"></app-alert-error>
-                            <input type="password" class="password" placeholder="master password" #password>
-                            <input type="password" class="password" placeholder="master password again" #password2 (keyup.enter)="save(password.value, password2.value);password.value='';password2.value=''">
+                            <input type="password" class="password" placeholder="master password" #password [hidden]="saving">
+                            <input type="password" class="password" placeholder="master password again" #password2 (keyup.enter)="save(password.value, password2.value);password.value='';password2.value=''" [hidden]="saving">
                         </div>
                         <div class="modal-footer">
-                            <button class="btn btn-outline" type="button" (click)="askPassword=false;password.value='';password2.value=''">cancel</button>
-                            <button class="btn btn-danger" type="button" (click)="save(password.value, password2.value);password.value='';password2.value=''">save</button>
+                            <button class="btn btn-outline" type="button" (click)="askPassword=false;password.value='';password2.value=''" [disabled]="saving">cancel</button>
+                            <button class="btn btn-danger" type="button" (click)="save(password.value, password2.value);password.value='';password2.value=''" [disabled]="saving">save</button>
                         </div>
                     </div>
                 </div>
@@ -306,6 +309,8 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     errorPassword: any = null;
     errorExport: any = null;
     
+    saving = false;
+
     success = false;
     successImport = false;
     successExport = false;
@@ -555,6 +560,8 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
             return;
         }
         
+        this.saving = true;
+
         this.aesService.sha512(password).subscribe({
             next: hash => {
                 const toSave = this.entries!.map(e => PasswordEntry.fromOther(e));
@@ -572,29 +579,34 @@ export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
                                     next: () => {
                                         this.success = true;
                                         this.askPassword = false;
+                                        this.saving = false;
                                         timer(3000).subscribe(() => this.success = false);
                                     },
                                     error: error => {
                                         this.askPassword = false;
                                         this.error = error;
+                                        this.saving = false;
                                     }
                                 });
                             },
                             error: () => {
                                 this.askPassword = false;
                                 this.error = "encryption error";
+                                this.saving = false;
                             }
                         });
                     },
                     error: () => {
                         this.askPassword = false;
                         this.error = "reencryption error";
+                        this.saving = false;
                     }
                 });
             },
             error: () => {
                 this.askPassword = false;
                 this.error = "hash generation error";
+                this.saving = false;
             }
         });
     }
