@@ -11,6 +11,7 @@ import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
 import { IconService } from 'src/app/services/icon.service';
 import { AlertStickyComponent } from './alert-sticky.component';
+import { IconDialogComponent } from './icon-dialog.component';
 
 @Component({
     selector: 'app-page-edit',
@@ -21,7 +22,8 @@ import { AlertStickyComponent } from './alert-sticky.component';
         RouterModule,
         FormsModule,
         MarkdownEditorComponent,
-        AlertStickyComponent
+        AlertStickyComponent,
+        IconDialogComponent
     ],
     template: `
         @if (loading) {
@@ -35,7 +37,7 @@ import { AlertStickyComponent } from './alert-sticky.component';
             <div class="edit">
                 <div>
                 <div class="top">
-                    <button type="button" class="selectedIcon btn btn-icon" (click)="selectIconDialog=true"><cds-icon [attr.shape]="page!.icon" size="24"></cds-icon></button>
+                    <button type="button" class="selectedIcon btn btn-icon" (click)="openIconDialog()"><cds-icon [attr.shape]="page!.icon" size="24"></cds-icon></button>
                     <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page!.title">
                     <div class="btn-group btn-primary">
                     <button class="btn btn-primary" (click)="save(true)">save</button>
@@ -103,24 +105,14 @@ import { AlertStickyComponent } from './alert-sticky.component';
             </div>
         }
 
-        @if (selectIconDialog) {
-            <div class="modal selectIconDialog">
-                <div class="modal-dialog modal-xl" role="dialog" aria-hidden="true">
-                <div class="modal-content">
-                    <div class="modal-body">
-                    @for (icon of iconService.icons; track icon) {
-                        <cds-icon class="selectIcon" [attr.shape]="icon" size="24" (click)="page!.icon = icon; selectIconDialog=false" [title]="icon"></cds-icon>
-                    }
-                    </div>
-                    <div class="modal-footer">
-                    <button class="btn btn-outline" type="button" (click)="selectIconDialog=false">Close</button>
-                    </div>
-                </div>
-                </div>
-            </div>
-        }
+        <app-icon-dialog 
+            [isOpen]="selectIconDialog" 
+            [currentIcon]="page!.icon" 
+            (iconSelected)="onIconSelected($event)" 
+            (dialogClosed)="selectIconDialog=false">
+        </app-icon-dialog>
 
-        @if (showDeleteConfirmation || selectIconDialog) {
+        @if (showDeleteConfirmation) {
             <div class="modal-backdrop" aria-hidden="true"></div>
         }    
     `,
@@ -140,11 +132,6 @@ import { AlertStickyComponent } from './alert-sticky.component';
             margin-right:1.4em;
             font-size:1.5em;
             flex-grow: 1;
-        }
-
-        .selectIcon  {
-            cursor: pointer;
-            margin:0.2em;
         }
 
         .parent {
@@ -254,6 +241,14 @@ export class PageEditComponent implements OnInit {
             return "&nbsp;".repeat(spaces) + "&rarr; " + page.title;
         }
         return page.title!;
+    }
+
+    openIconDialog() {
+        this.selectIconDialog = true;
+    }
+
+    onIconSelected(icon: string) {
+        this.page!.icon = icon;
     }
 
 }
