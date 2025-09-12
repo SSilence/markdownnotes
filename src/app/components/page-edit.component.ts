@@ -40,25 +40,8 @@ import { IconDialogComponent } from './icon-dialog.component';
                     <button type="button" class="selectedIcon btn btn-icon" (click)="openIconDialog()"><cds-icon [attr.shape]="page!.icon" size="24"></cds-icon></button>
                     <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page!.title">
                     <div class="btn-group btn-primary">
-                    <button class="btn btn-primary" (click)="save(true)">save</button>
-                    <div class="btn-group-overflow" [ngClass]="{'open': showMenue}">
-                        <button class="btn dropdown-toggle btn-icon" (click)="showMenue=!showMenue">
-                        <cds-icon shape="ellipsis-horizontal"></cds-icon>
-                        </button>
-                        <div class="dropdown-menu">
-                        @if (!success) {
-                            <button class="btn" (click)="save(false)">save without show</button>
-                        } @else {
-                            <div class="btn success">page successfully saved</div>
-                        }
-                        @if (page.id) {
-                            <button class="btn btn-link" [routerLink]="['/page', page.id]">cancel</button>
-                            <button class="btn" (click)="showDeleteConfirmation=true" style="float:right">delete</button>
-                        } @else {
-                            <button class="btn btn-link" [routerLink]="['/']">cancel</button>
-                        }
-                        </div>
-                    </div>
+                        <button class="btn btn-success" (click)="save(false)">save</button>
+                        <button class="btn btn-primary" (click)="save(true)">save & show</button>
                     </div>
                 </div>
                 <markdown-editor [(content)]="page.content"></markdown-editor>
@@ -123,7 +106,7 @@ import { IconDialogComponent } from './icon-dialog.component';
 
         .dropdown-menu {
             top:auto;
-            left:-9.3em;
+            left:-5.6em;
         }
 
         input {
