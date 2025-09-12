@@ -146,23 +146,23 @@ button:focus {
 }
 
 div .cm-s-easymde .cm-header-1 {
-    font-size: 2em;
-}
-
-div .cm-s-easymde .cm-header-2 {
     font-size: 1.8em;
 }
 
-div .cm-s-easymde .cm-header-3 {
+div .cm-s-easymde .cm-header-2 {
     font-size: 1.6em;
 }
 
-div .cm-s-easymde .cm-header-4 {
+div .cm-s-easymde .cm-header-3 {
     font-size: 1.4em;
 }
 
-div .cm-s-easymde .cm-header-5 {
+div .cm-s-easymde .cm-header-4 {
     font-size: 1.2em;
+}
+
+div .cm-s-easymde .cm-header-5 {
+    font-size: 1em;
 }
 
 div .cm-s-easymde .cm-header-6 {
