@@ -15,6 +15,7 @@ import { FileSizePipe } from 'src/app/pipes/file-size.pipe';
     imports: [CdsModule, NgxFileDropModule, AlertErrorComponent, CommonModule, FileSizePipe, ClipboardModule],
     template: `
         <h1>Files</h1>
+
         @if (!files$) {
             <span class="spinner spinner-inline">Loading...</span>
         }
@@ -98,6 +99,7 @@ import { FileSizePipe } from 'src/app/pipes/file-size.pipe';
 
         h1 {
             margin-top:0;
+            margin-bottom:0.5em;
         }
 
         th {

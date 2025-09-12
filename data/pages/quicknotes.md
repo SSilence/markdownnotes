@@ -9,7 +9,8 @@ expanded: 1
 * update wordpress
 * make a nice example screenshot for markdownnotes
 
-Install MarkdownNotes
+# Install MarkdownNotes
+
 1. Download latest stable release ZIP file from https://github.com/SSilence/markdownnotes/releases and unzip
 2. Upload all files of this folder (IMPORTANT: also upload the invisible .htaccess files)
 3. Make the directories data/files and data/pages writeable

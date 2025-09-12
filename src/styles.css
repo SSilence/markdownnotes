@@ -8,7 +8,7 @@ button:focus {
 
 .markdown-formatted pre {
     background-color:#f9f9f9;
-    padding:10px;
+    padding:15px;
     overflow-x:auto;
 }
 
@@ -74,35 +74,34 @@ button:focus {
     display:inline-block;
 }
 
-    .markdown-formatted .toc h1 {
+    .markdown-formatted .toc h3 {
         margin-top:0;
         font-size:1.3em;
         line-height: 1.5em;
         margin-bottom:0.5em;
     }
 
+    .markdown-formatted ul {
+        margin:0 !important;
+        padding:0 !important;
+    }
+
+    .markdown-formatted .toc .toc-level-2 {
+        margin-left:1.0em;
+    }
+
+    .markdown-formatted .toc .toc-level-3 {
+        margin-left:1.8em;
+    }
+
+    .markdown-formatted .toc .toc-level-4 {
+        margin-left:2.8em;
+    }
+        
+
 .markdown-formatted .bookmarks li {
     list-style: none;
     margin-bottom:5px;
-}
-
-.markdown-formatted .bookmarks h1,
-.markdown-formatted .bookmarks h2,
-.markdown-formatted .bookmarks h3,
-.markdown-formatted .bookmarks h4,
-.markdown-formatted .bookmarks h5,
-.markdown-formatted .bookmarks h6 {
-    margin-top:10px;
-    margin-bottom:5px;
-}
-
-.markdown-formatted .bookmarks img {
-    width:16px;
-    height:16px;
-}
-
-.markdown-formatted .bookmarks a {
-    text-decoration: none;
 }
 
 .markdown-formatted .error {

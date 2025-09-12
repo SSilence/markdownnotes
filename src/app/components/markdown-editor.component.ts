@@ -246,12 +246,12 @@ export class MarkdownEditorComponent implements AfterViewInit {
                     const headingLevel = faClass.split('-')[2];
                     const headingElement = document.createElement('span');
                     headingElement.textContent = `H${headingLevel}`;
-                    headingElement.style.cssText = 'font-size: 12px; font-weight: bold; color: inherit;';
+                    headingElement.style.cssText = 'font-size: 15px; font-weight: bold; color: #6c757d;';
                     button.parentNode?.replaceChild(headingElement, button);
                 } else {
                     const clarityIconElement = document.createElement('cds-icon');
                     clarityIconElement.setAttribute('shape', clarityIcon);
-                    clarityIconElement.setAttribute('size', '16');
+                    clarityIconElement.setAttribute('size', '22');
                     button.parentNode?.replaceChild(clarityIconElement, button);
                 }
             });

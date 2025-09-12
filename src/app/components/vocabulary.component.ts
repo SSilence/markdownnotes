@@ -179,7 +179,7 @@ import { VocabularyExerciseResultComponent } from "./vocabulary-exercise-result.
 
         .vocabulary {
             border: 1px solid #cbcbcb;
-            background: #dddddd;
+            background: #ecececff;
             padding:1rem;
             margin-right: 1rem;
             margin-top: 1rem;

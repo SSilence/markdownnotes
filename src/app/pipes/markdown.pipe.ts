@@ -32,7 +32,7 @@ export class MarkdownPipe implements PipeTransform {
         
         renderer.heading = function({ tokens, depth }: any) {
             const text = this.parser.parseInline(tokens);
-            const escapedText = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+            const escapedText = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
             return `<h${depth} id="${escapedText}">${text}</h${depth}>`;
         };
 

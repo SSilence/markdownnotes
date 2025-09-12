@@ -165,7 +165,7 @@ import { AlertStickyComponent } from "./alert-sticky.component";
             margin-right:0.3em;
             padding: 0.3em;
             vertical-align: middle;
-            border: 1px solid #ddd;
+            border: 1px solid #ebebebff;
             width: 100%;
         }
 

@@ -4,14 +4,14 @@ import { switchMap, map, tap, filter } from 'rxjs/operators';
 import { AlertErrorComponent } from './alert-error.component';
 import { CommonModule } from '@angular/common';
 import { CdsModule } from '@cds/angular';
-import { BookmakrsPipe } from 'src/app/pipes/bookmarks.pipe';
 import { MarkdownPipe } from 'src/app/pipes/markdown.pipe';
+import { TocPipe } from 'src/app/pipes/toc.pipe';
 import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
     selector: 'app-page-show',
-    imports: [AlertErrorComponent, CommonModule, RouterModule, MarkdownPipe, CdsModule],
+    imports: [AlertErrorComponent, CommonModule, RouterModule, MarkdownPipe, CdsModule, TocPipe],
     template: `
         @if (loading) {
             <span class="spinner spinner-inline">Loading...</span>
@@ -21,18 +21,18 @@ import { BackendService } from 'src/app/services/backend.service';
             <div class="page">
                 <button class="btn btn-outline" [routerLink]="['/page', 'edit', page.id]">edit</button>
                 <cds-icon [attr.shape]="page.icon" size="28"> </cds-icon>
-                <h1>{{page.title}}</h1>
+                <h1 class="title">{{page.title}}</h1>
                 @if (page.content) {
-                    <div class="markdown-formatted" [innerHtml]="page.content | markdown"></div>
+                    <div class="markdown-formatted" [innerHtml]="page.content | markdown | toc"></div>
                 }
             </div>
         }    
     `,
     styles: [`
-        h1 {
+        .title {
+            margin-left:1.2em;
             margin-top:0;
             margin-bottom:0.5em;
-            margin-left:1.2em;
         }
 
         button {
