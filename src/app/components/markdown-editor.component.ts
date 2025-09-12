@@ -2,6 +2,7 @@ import { Component, AfterViewInit, Output, EventEmitter, Input, ViewChildren, in
 import EasyMDE from 'easymde/dist/easymde.min.js';
 import { MarkdownPipe } from 'src/app/pipes/markdown.pipe';
 import { CdsModule } from '@cds/angular';
+import { highlightAll } from '@speed-highlight/core';
 
 @Component({
     selector: 'markdown-editor',
@@ -205,10 +206,9 @@ export class MarkdownEditorComponent implements AfterViewInit {
             autoDownloadFontAwesome: false,
             spellChecker: false,
             status: false,
-            previewRender: (plainText: any) => this.markdownPipe.transform(plainText)
+            previewRender: (plainText: any) =>  this.markdownPipe.transform(plainText)
         });
         
-        // Replace FontAwesome icons with Clarity icons after editor initialization
         setTimeout(() => this.replaceFontAwesomeWithClarityIcons(), 0);
         
         this.editor.value(this._content);
@@ -219,7 +219,6 @@ export class MarkdownEditorComponent implements AfterViewInit {
         const toolbar = document.querySelector('.editor-toolbar');
         if (!toolbar) return;
 
-        // Icon mapping from FontAwesome classes to Clarity icon names
         const iconMapping = {
             'fa-undo': 'undo',
             'fa-redo': 'redo',
@@ -240,13 +239,10 @@ export class MarkdownEditorComponent implements AfterViewInit {
             'fa-question-circle': 'help'
         };
 
-        // Replace each FontAwesome icon with Clarity icon
         Object.entries(iconMapping).forEach(([faClass, clarityIcon]) => {
             const buttons = toolbar.querySelectorAll(`i.fa.${faClass}`);
             buttons.forEach(button => {
-                // Create Clarity icon element or custom element for headings
                 if (faClass.includes('fa-header-')) {
-                    // Create custom heading indicators
                     const headingLevel = faClass.split('-')[2];
                     const headingElement = document.createElement('span');
                     headingElement.textContent = `H${headingLevel}`;
@@ -256,8 +252,6 @@ export class MarkdownEditorComponent implements AfterViewInit {
                     const clarityIconElement = document.createElement('cds-icon');
                     clarityIconElement.setAttribute('shape', clarityIcon);
                     clarityIconElement.setAttribute('size', '16');
-                    
-                    // Replace the FontAwesome icon
                     button.parentNode?.replaceChild(clarityIconElement, button);
                 }
             });

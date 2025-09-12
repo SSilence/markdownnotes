@@ -11,7 +11,7 @@ import { BackendService } from 'src/app/services/backend.service';
 
 @Component({
     selector: 'app-page-show',
-    imports: [AlertErrorComponent, CommonModule, RouterModule, BookmakrsPipe, MarkdownPipe, CdsModule],
+    imports: [AlertErrorComponent, CommonModule, RouterModule, MarkdownPipe, CdsModule],
     template: `
         @if (loading) {
             <span class="spinner spinner-inline">Loading...</span>
@@ -23,7 +23,7 @@ import { BackendService } from 'src/app/services/backend.service';
                 <cds-icon [attr.shape]="page.icon" size="28"> </cds-icon>
                 <h1>{{page.title}}</h1>
                 @if (page.content) {
-                    <div class="markdown-formatted" [innerHtml]="page.content | markdown | bookmarks | async"></div>
+                    <div class="markdown-formatted" [innerHtml]="page.content | markdown"></div>
                 }
             </div>
         }    

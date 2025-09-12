@@ -8,7 +8,7 @@ import { AppComponent } from './app/app.component';
 
 import { routes } from './app/app.router';
 import { provideRouter } from '@angular/router';
-import {withInterceptorsFromDi, provideHttpClient, HTTP_INTERCEPTORS} from '@angular/common/http';
+import { withInterceptorsFromDi, provideHttpClient } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BackendService } from './app/services/backend.service';
 import { AesService } from './app/services/aes.service';
@@ -30,7 +30,6 @@ bootstrapApplication(AppComponent, {
     {provide: IconService, useClass: IconService},
     {provide: MarkdownPipe, useClass: MarkdownPipe},
     {provide: FileSizePipe, useClass: FileSizePipe},
-    {provide: BookmakrsPipe, useClass: BookmakrsPipe},
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(BrowserAnimationsModule)
