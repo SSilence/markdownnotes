@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { marked } from 'marked';
+import highlightjs from 'highlight.js';
 
 @Pipe({
     name: 'markdown',
@@ -36,7 +37,13 @@ export class MarkdownPipe implements PipeTransform {
         };
 
         renderer.code = ({ text, lang }: any) => {
-            return text;
+            let highlighted;
+            if (lang && highlightjs.getLanguage(lang)) {
+                highlighted = highlightjs.highlight(text, { language: lang, ignoreIllegals: true }).value;
+            } else {
+                highlighted = highlightjs.highlightAuto(text).value;
+            }
+            return `<pre class="hljs">${highlighted}</pre>`;
         };
 
         marked.setOptions({ renderer });
