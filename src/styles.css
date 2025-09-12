@@ -142,10 +142,6 @@ button:focus {
     border-radius: 5px;
 }
 
-.editor-toolbar {
-    padding: 0px 9px 8px 9px !important;
-}
-
 .editor-toolbar button.table {
     width:auto;
 }

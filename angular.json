@@ -35,11 +35,9 @@
                 "node_modules/@cds/core/styles/theme.dark.min.css",
                 "node_modules/@clr/ui/clr-ui.min.css",
                 "node_modules/easymde/dist/easymde.min.css",
-                "node_modules/highlight.js/styles/atom-one-light.css",
-                "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
+                "node_modules/highlight.js/styles/atom-one-light.css"
               ],
               "scripts": [
-                "node_modules/jquery/dist/jquery.min.js",
                 "node_modules/@webcomponents/custom-elements/custom-elements.min.js"
               ],
               "browser": "src/main.ts"
