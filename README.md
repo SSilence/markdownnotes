@@ -14,7 +14,7 @@ MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by
 
 ## requirements
 
-* webserver with php support (just 4 a small backend script, runs everywhere with PHP5+) or Docker
+* webserver with php support (just 4 a small backend script, runs everywhere with PHP5+)
 * modern browser
 
 ## installation
@@ -24,14 +24,6 @@ MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by
 3. Make the directories data and all of its subdirectories writeable
 4. If you are using MarkdownNotes on a subpath (e.g. http://example.com/markdownnotes) then add in .htaccess the line ``RewriteBase /markdownnotes/`` and add in index.html ``<base href="/markdownnotes/">``
 5. MarkdownNotes saves all data in files in the data dir. No database is necessary.
-
-## installation using docker
-
-Start the [MarkdownNotes docker image](https://hub.docker.com/r/ssilence/markdownnotes) with:
-```
-docker run -v /yourpath:/var/www/html/data -p 80:80 ssilence/markdownnotes:latest
-```
-MarkdownNotes notes and files will be saved in your given path. Just replace ``/yourpath`` with target data dir on your system.
 
 ## screenshots
 
