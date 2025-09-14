@@ -10,8 +10,68 @@ import { BackendService } from './services/backend.service';
 @Component({
     selector: 'app-root',
     imports: [ClarityModule, RouterModule, PageTreeComponent],
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css']
+    template: `
+        <div class="main-container">
+            <header class="header header-6">
+                <div class="branding">
+                <a class="nav-link" [routerLink]="['/']">
+                    <img class="logo" src="assets/logo.png">
+                    <span class="title">MarkdownNotes</span>
+                </a>
+                </div>
+                <div class="header-nav">
+                <a class="nav-link nav-icon" (click)="add()"><cds-icon shape="add-text"></cds-icon></a>
+                <a class="nav-link nav-icon" [routerLink]="['/passwords']"><cds-icon shape="key"></cds-icon></a>
+                <a class="nav-link nav-icon" [routerLink]="['/filelist']"><cds-icon shape="upload-cloud"></cds-icon></a>
+                <a class="nav-link nav-icon" [routerLink]="['/vocabulary']"><cds-icon shape="talk-bubbles"></cds-icon></a>
+                </div>
+                <div class="search">
+                <label for="search-input-sidenav-ng">
+                    <input id="search-input-sidenav-ng" type="text" placeholder="Search for keywords..." (change)="search($event.target)" />
+                </label>
+                </div>
+            </header>
+
+            <div class="content-container">
+                @if (showNavigation) {
+                <nav class="sidenav">
+                    <section class="sidenav-content">
+                    @if (loading) {
+                        <span class="spinner spinner-inline">Loading Pages...</span>
+                    } @else {
+                        <app-page-tree [pages]="pages" [active]="active"></app-page-tree>
+                    }
+                    </section>
+                </nav>
+                }
+                <main class="content-area">
+                <router-outlet></router-outlet>
+                </main>
+            </div>
+        </div>
+    `,
+    styles: [`
+        .logo {
+            width:2em;
+            height:2em;
+            margin-right:1em;
+        }
+
+        .sidenav {
+            padding-top:1em;
+            overflow:auto;
+            min-width: 12rem;
+            width: 18%;
+        }
+
+        .nav-link {
+            cursor: pointer;
+        }
+
+        #search_input {
+            padding-left:0.5em;
+        }        
+    `]
 })
 export class AppComponent implements OnInit {
     pages: Page[] = [];
