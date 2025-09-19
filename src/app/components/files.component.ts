@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NgxFileDropEntry, FileSystemFileEntry, NgxFileDropModule } from 'ngx-file-drop';
 import { tap, map } from 'rxjs/operators';
-import { AlertErrorComponent } from './alert-error.component';
+import { AlertComponent } from './alert.component';
 import { CommonModule } from '@angular/common';
 import { CdsModule } from '@cds/angular';
 import { ClipboardModule } from 'ngx-clipboard';
@@ -12,7 +12,7 @@ import { FileSizePipe } from 'src/app/pipes/file-size.pipe';
 
 @Component({
     selector: 'app-files',
-    imports: [CdsModule, NgxFileDropModule, AlertErrorComponent, CommonModule, FileSizePipe, ClipboardModule],
+    imports: [CdsModule, NgxFileDropModule, AlertComponent, CommonModule, FileSizePipe, ClipboardModule],
     template: `
         <h1>Files</h1>
 
@@ -20,7 +20,7 @@ import { FileSizePipe } from 'src/app/pipes/file-size.pipe';
             <span class="spinner spinner-inline">Loading...</span>
         }
 
-        <app-alert-error [error]="error"></app-alert-error>
+        <app-alert [error]="error"></app-alert>
         <ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" dropZoneClassName="filedrop">
         <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
             <button class="btn" type="button" (click)="openFileSelector()">Browse Files</button>

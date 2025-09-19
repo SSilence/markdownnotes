@@ -1,0 +1,6 @@
+{
+    "require": {
+        "ssilence/php-imap-client": "dev-master",
+        "phpmailer/phpmailer": "^6.10"
+    }
+}

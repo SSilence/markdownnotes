@@ -39,4 +39,5 @@ markdownnotes*.zip
 Thumbs.db
 .angular
 backend_apikeys.php
+config.php
 /data/audio

@@ -7,6 +7,8 @@ import { PageDto } from '../dtos/page-dto';
 import { ToRenameDto } from '../dtos/to-rename-dto';
 import { FileDto } from '../dtos/file-dto';
 import { EnrichResponse } from '../dtos/enrich-response';
+import { FolderDto } from '../dtos/folder-dto';
+import { MessageDto, SendEmailDto } from '../dtos/message-dto';
 
 @Injectable()
 export class BackendService {
@@ -132,6 +134,9 @@ export class BackendService {
         return this.http.post<void>(BackendService.BASE_URL + 'page', new PageDto(page));
     }
 
+
+
+
     getVocabularyPage(): Observable<Page> {
         return this.http.get<PageDto>(BackendService.BASE_URL + 'page/' + BackendService.VOCABULARY_PAGE_ID).pipe(
             map(pagedto => new Page(pagedto))
@@ -162,6 +167,140 @@ export class BackendService {
             .set('german', german ? german : '')
             .set('english', english ? english : '');
         return this.http.get<EnrichResponse>(BackendService.BASE_URL + 'vocabulary/enrich', { params: params });
+    }
+
+    
+    isImapEnabled(): Observable<boolean> {
+        return this.http.get<{enabled: boolean}>(BackendService.BASE_URL + 'imap/enabled').pipe(
+            map(response => response.enabled)
+        );
+    }
+
+    getImapFolders(): Observable<FolderDto[]> {
+        return this.http.get<FolderDto[]>(BackendService.BASE_URL + 'imap/folders')
+            .pipe(
+                map(folders => folders.map(folder => new FolderDto(folder)))
+            );
+    }
+
+    getImapMessages(folder: string, limit?: number, start?: number, order?: string): Observable<MessageDto[]> {
+        let params = new HttpParams();
+        if (limit !== undefined) {
+            params = params.set('limit', limit.toString());
+        }
+        if (start !== undefined) {
+            params = params.set('start', start.toString());
+        }
+        if (order) {
+            params = params.set('order', order);
+        }
+
+        return this.http.get<MessageDto[]>(BackendService.BASE_URL + 'imap/folder/' + encodeURIComponent(folder), { params: params })
+            .pipe(
+                map(messages => messages.map(message => new MessageDto(message)))
+            );
+    }
+
+    getImapMessage(folder: string, messageId: number): Observable<MessageDto> {
+        return this.http.get<MessageDto>(BackendService.BASE_URL + 'imap/message/' + encodeURIComponent(folder) + '/' + messageId)
+            .pipe(
+                map(message => new MessageDto(message))
+            );
+    }
+
+    sendEmail(emailData: SendEmailDto): Observable<{success: boolean}> {
+        // Check if there are attachments
+        if (emailData.attachments && emailData.attachments.length > 0) {
+            // Create FormData for file upload
+            const formData = new FormData();
+            
+            // Add text fields
+            formData.append('to', emailData.to);
+            formData.append('subject', emailData.subject);
+            formData.append('message', emailData.message);
+            if (emailData.cc) formData.append('cc', emailData.cc);
+            if (emailData.bcc) formData.append('bcc', emailData.bcc);
+            if (emailData.replyTo) formData.append('replyTo', emailData.replyTo);
+            
+            // Add all attachments as regular attachments
+            // Draft attachments are already loaded as File objects in the frontend
+            emailData.attachments.forEach((file, index) => {
+                formData.append(`attachment_${index}`, file, file.name);
+                console.log('Attachment added:', file.name, 'size:', file.size);
+            });
+            
+            // Debug: Show FormData contents (keys method might not be available in all browsers)
+            const formDataKeys: string[] = [];
+            formData.forEach((value, key) => formDataKeys.push(key));
+            console.log('Sending FormData with keys:', formDataKeys);
+            
+            return this.http.post<{success: boolean}>(BackendService.BASE_URL + 'imap/send', formData);
+        } else {
+            // No attachments, send as JSON
+            return this.http.post<{success: boolean}>(BackendService.BASE_URL + 'imap/send', emailData);
+        }
+    }
+
+    saveDraft(emailData: SendEmailDto, draftId?: string): Observable<{success: boolean, draftId: string, message: string}> {
+        // Always send drafts as JSON - attachments are not saved in drafts
+        const draftData = { 
+            to: emailData.to,
+            subject: emailData.subject,
+            message: emailData.message,
+            cc: emailData.cc,
+            bcc: emailData.bcc,
+            replyTo: emailData.replyTo,
+            draftId: draftId
+            // Note: attachments are intentionally excluded from drafts
+        };
+        return this.http.post<{success: boolean, draftId: string, message: string}>(BackendService.BASE_URL + 'imap/draft', draftData);
+    }
+
+    deleteDraft(draftId: string): Observable<{success: boolean, message: string}> {
+        return this.http.delete<{success: boolean, message: string}>(BackendService.BASE_URL + 'imap/draft/' + encodeURIComponent(draftId));
+    }
+
+    moveEmail(messageId: number, sourceFolder: string, targetFolder: string): Observable<{success: boolean}> {
+        return this.http.post<{success: boolean}>(BackendService.BASE_URL + 'imap/move', {
+            messageId: messageId,
+            sourceFolder: sourceFolder,
+            targetFolder: targetFolder
+        });
+    }
+
+    purgeFolder(folder: string): Observable<{success: boolean}> {
+        return this.http.post<{success: boolean}>(BackendService.BASE_URL + 'imap/purge', {
+            folder: folder
+        });
+    }
+
+    markEmail(messageId: number, folder: string, seen: boolean): Observable<{success: boolean, seen: boolean}> {
+        return this.http.post<{success: boolean, seen: boolean}>(BackendService.BASE_URL + 'imap/mark', {
+            messageId: messageId,
+            folder: folder,
+            seen: seen
+        });
+    }
+
+    getImapContacts(limit?: number): Observable<{email: string, name: string, type: string, count: number}[]> {
+        let params = new HttpParams();
+        if (limit !== undefined) {
+            params = params.set('limit', limit.toString());
+        }
+        return this.http.get<{email: string, name: string, type: string, count: number}[]>(BackendService.BASE_URL + 'imap/contacts', { params: params });
+    }
+
+    getAttachmentUrl(folder: string, messageId: number, attachmentIndex: number): string {
+        return BackendService.BASE_URL + 'imap/attachment/' + 
+               encodeURIComponent(folder) + '/' + 
+               messageId + '/' + 
+               attachmentIndex;
+    }
+
+    viewAttachment(folder: string, messageId: number, attachmentIndex: number): void {
+        const url = this.getAttachmentUrl(folder, messageId, attachmentIndex);
+        // Open in new tab/window to view content inline instead of downloading
+        window.open(url, '_blank', 'noopener,noreferrer');
     }
 
     private findPage(pages: Page[], page: Page): Page | null {

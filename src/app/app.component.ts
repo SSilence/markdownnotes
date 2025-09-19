@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, NavigationEnd, RouterModule } from '@angular/ro
 import { filter, first } from 'rxjs/operators';
 import { ClarityModule } from '@clr/angular';
 
-import { PageTreeComponent } from './components/page-tree.component';
+import { PageTreeComponent } from './components/page/page-tree.component';
 import { Page } from './models/page';
 import { BackendService } from './services/backend.service';
 
@@ -21,6 +21,9 @@ import { BackendService } from './services/backend.service';
                 </div>
                 <div class="header-nav">
                 <a class="nav-link nav-icon" (click)="add()"><cds-icon shape="add-text"></cds-icon></a>
+                @if(imapEnabled) {
+                    <a class="nav-link nav-icon" [routerLink]="['/email']"><cds-icon shape="envelope"></cds-icon></a>
+                }
                 <a class="nav-link nav-icon" [routerLink]="['/passwords']"><cds-icon shape="key"></cds-icon></a>
                 <a class="nav-link nav-icon" [routerLink]="['/filelist']"><cds-icon shape="upload-cloud"></cds-icon></a>
                 <a class="nav-link nav-icon" [routerLink]="['/vocabulary']"><cds-icon shape="talk-bubbles"></cds-icon></a>
@@ -79,6 +82,7 @@ export class AppComponent implements OnInit {
     loading = true;
     q = '';
     showNavigation: boolean = true;
+    imapEnabled: boolean = false;
 
     constructor(private backendService: BackendService,
                 private route: ActivatedRoute,
@@ -105,6 +109,7 @@ export class AppComponent implements OnInit {
             this.pages = this.backendService.filterSystemPages(pages).map(p => ({...p}));
         });
         this.backendService.getAllPages().subscribe(() => this.loading = false);
+        this.backendService.isImapEnabled().subscribe(enabled => this.imapEnabled = enabled);
     }
 
     add() {

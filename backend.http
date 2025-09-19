@@ -1,3 +1,157 @@
 GET http://localhost:8888/api/vocabulary/enrich?english=painkiller&german=Schmerzmittel
 
-GET http://localhost:8888/api/vocabulary/dictionary?q=play
+GET http://localhost### Alternative check for English Sent folder
+GET http://localhost:8888/api/imap/folder/Sent
+
+###
+
+# Draft Management Examples
+
+# Save a draft
+POST http://localhost:8888/api/imap/draft
+Content-Type: application/json
+
+{
+  "to": "test@example.com",
+  "subject": "Test Draft Email",
+  "message": "This is a test draft that should be saved automatically every minute."
+}
+
+###
+
+# Update an existing draft
+POST http://localhost:8888/api/imap/draft  
+Content-Type: application/json
+
+{
+  "draftId": "draft_12345_1640995200",
+  "to": "updated@example.com",
+  "cc": "cc@example.com",
+  "subject": "Updated Test Draft",
+  "message": "This draft has been updated with new content and recipients."
+}
+
+###
+
+# Delete a draft (replace with actual draft ID from save response)
+DELETE http://localhost:8888/api/imap/draft/draft_12345_1640995200
+
+###
+
+# Check drafts folder to see saved drafts
+GET http://localhost:8888/api/imap/folder/Drafts
+
+###
+
+# Check German drafts folder 
+GET http://localhost:8888/api/imap/folder/Entw%C3%BCrfe888/api/vocabulary/dictionary?q=play
+
+###
+
+# IMAP Examples
+
+# Get all IMAP folders with unread message counts
+GET http://localhost:8888/api/imap/folders
+
+###
+
+# Get emails from INBOX folder (default: 50 messages, DESC order)
+GET http://localhost:8888/api/imap/folder/INBOX
+
+###
+
+# Get emails from INBOX with pagination and custom limit
+GET http://localhost:8888/api/imap/folder/INBOX?limit=10&start=0&order=DESC
+
+###
+
+# Get emails from Sent folder (URL encoded folder name)
+GET http://localhost:8888/api/imap/folder/Gesendet
+
+###
+
+# Get emails from a folder with special characters (URL encoded)
+GET http://localhost:8888/api/imap/folder/Entwürfe
+
+###
+
+# Get specific email by ID from INBOX folder
+GET http://localhost:8888/api/imap/message/INBOX/1
+
+###
+
+# Get specific email by ID from Sent folder
+GET http://localhost:8888/api/imap/message/Sent/5
+
+###
+
+# Send a simple email
+POST http://localhost:8888/api/imap/send
+Content-Type: application/json
+
+{
+  "to": "recipient@example.com",
+  "subject": "Test Email from MarkdownNotes",
+  "message": "This is a test email sent from the MarkdownNotes application."
+}
+
+###
+
+# Send email with CC and BCC
+POST http://localhost:8888/api/imap/send
+Content-Type: application/json
+
+{
+  "to": "recipient@example.com",
+  "cc": "cc@example.com",
+  "bcc": "bcc@example.com",
+  "subject": "Email with CC and BCC",
+  "message": "This email includes CC and BCC recipients."
+}
+
+###
+
+# Send email with reply-to address
+POST http://localhost:8888/api/imap/send
+Content-Type: application/json
+
+{
+  "to": "recipient@example.com",
+  "subject": "Email with Reply-To",
+  "message": "Please reply to the specified reply-to address.",
+  "replyTo": "noreply@example.com"
+}
+
+###
+
+# Send HTML email
+POST http://localhost:8888/api/imap/send
+Content-Type: application/json
+
+{
+  "to": "recipient@example.com",
+  "subject": "HTML Email Test",
+  "message": "<html><body><h1>Hello!</h1><p>This is an <strong>HTML email</strong> with <em>formatting</em>.</p></body></html>"
+}
+
+###
+
+# Test sent email storage - Send email and then check Sent folder
+POST http://localhost:8888/api/imap/send
+Content-Type: application/json
+
+{
+  "to": "test@example.com",
+  "subject": "Test für Gesendet-Ordner",
+  "message": "Diese E-Mail sollte automatisch im Gesendet-Ordner gespeichert werden."
+}
+
+###
+
+# Check if email was saved to Sent folder (after sending above email)
+GET http://localhost:8888/api/imap/folder/Gesendet
+
+###
+
+# Alternative check for English Sent folder
+GET http://localhost:8888/api/imap/folder/Sent

@@ -11,6 +11,7 @@ MarkdownNotes is a self hosted tool for organizing notes, files, lists, ideas by
 * file manager
 * passwort manager
 * vocabulary trainer
+* email client with IMAP/SMTP support
 
 ## requirements
 

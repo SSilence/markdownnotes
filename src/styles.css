@@ -2,6 +2,47 @@ button:focus {
     outline:0;
 }
 
+/* Remove focus outline from email compose message field */
+app-auto-textarea textarea:focus,
+app-auto-textarea .auto-textarea:focus,
+.message-field:focus,
+.message-field:focus-visible {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Global Material Symbols Configuration */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    font-weight: 300 !important;
+    font-style: normal !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    direction: ltr !important;
+    font-feature-settings: 'liga' !important;
+    -webkit-font-feature-settings: 'liga' !important;
+    -webkit-font-smoothing: antialiased !important;
+    text-rendering: optimizeLegibility !important;
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 300,
+        'GRAD' 0,
+        'opsz' 20 !important;
+}
+
+/* Mobile Material Icons */
+@media (max-width: 768px) {
+    .material-symbols-outlined {
+        font-size: 14px !important;
+    }
+}
+
 .CodeMirror pre {
     font-family: monospace,monospace !important;
 }

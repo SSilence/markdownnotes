@@ -35,7 +35,8 @@
                 "node_modules/@cds/core/styles/theme.dark.min.css",
                 "node_modules/@clr/ui/clr-ui.min.css",
                 "node_modules/easymde/dist/easymde.min.css",
-                "node_modules/highlight.js/styles/atom-one-light.css"
+                "node_modules/highlight.js/styles/atom-one-light.css",
+                "node_modules/material-symbols/outlined.css"
               ],
               "scripts": [
                 "node_modules/@webcomponents/custom-elements/custom-elements.min.js"
@@ -53,7 +54,7 @@
                   {
                     "type": "anyComponentStyle",
                     "maximumWarning": "2kb",
-                    "maximumError": "4kb"
+                    "maximumError": "20kb"
                   }
                 ],
                 "fileReplacements": [

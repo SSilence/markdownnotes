@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, HostListener
 import { ClipboardService } from 'ngx-clipboard'
 import { timer, Subject, Subscription, Observable, switchMap, map, forkJoin } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { AlertErrorComponent } from './alert-error.component';
+import { AlertComponent } from './alert.component';
 import { ClarityModule } from '@clr/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -14,13 +14,13 @@ import { PasswordEntry } from 'src/app/models/password-entry';
 
 @Component({
     selector: 'app-passwords',
-    imports: [AlertErrorComponent, ClarityModule, CommonModule, RouterModule, FormsModule],
+    imports: [AlertComponent, ClarityModule, CommonModule, RouterModule, FormsModule],
     template: `
         <h1>Passwords</h1>
         @if (!page && !error) {
         <span class="spinner spinner-inline">Loading...</span>
         }
-        <app-alert-error [error]="error"></app-alert-error>
+        <app-alert [error]="error"></app-alert>
 
         <table class="table">
             @if (hasEntries()) {
@@ -162,7 +162,7 @@ import { PasswordEntry } from 'src/app/models/password-entry';
                             @if(saving) {
                                 <span class="spinner spinner-inline"></span>
                             }
-                            <app-alert-error [error]="errorPassword"></app-alert-error>
+                            <app-alert [error]="errorPassword"></app-alert>
                             <input type="password" class="password" placeholder="master password" #password [hidden]="saving">
                             <input type="password" class="password" placeholder="master password again" #password2 (keyup.enter)="save(password.value, password2.value);password.value='';password2.value=''" [hidden]="saving">
                         </div>
@@ -186,7 +186,7 @@ import { PasswordEntry } from 'src/app/models/password-entry';
                         <h3 class="modal-title">Please enter your master password</h3>
                     </div>
                     <div class="modal-body savepassword">
-                        <app-alert-error [error]="errorExport"></app-alert-error>
+                        <app-alert [error]="errorExport"></app-alert>
                         <input type="password" class="password" placeholder="master password" #exportPassword (keyup.enter)="exportToClipboard(exportPassword.value);exportPassword.value='';">
                     </div>
                     <div class="modal-footer">
