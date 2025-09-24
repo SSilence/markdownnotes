@@ -7,7 +7,7 @@ import { MarkdownPipe } from 'src/app/pipes/markdown.pipe';
 import { TocPipe } from 'src/app/pipes/toc.pipe';
 import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
-import { AlertComponent } from '../alert.component';
+import { AlertComponent } from '../shared/alert.component';
 
 @Component({
     selector: 'app-page-show',

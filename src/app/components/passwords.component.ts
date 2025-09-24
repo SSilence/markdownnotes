@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, HostListener
 import { ClipboardService } from 'ngx-clipboard'
 import { timer, Subject, Subscription, Observable, switchMap, map, forkJoin } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { AlertComponent } from './alert.component';
+import { AlertComponent } from './shared/alert.component';
 import { ClarityModule } from '@clr/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';

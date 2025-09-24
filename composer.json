@@ -1,6 +1,6 @@
 {
     "require": {
-        "ssilence/php-imap-client": "^3.0",
-        "phpmailer/phpmailer": "^6.10"
+        "phpmailer/phpmailer": "^6.10",
+        "directorytree/imapengine": "^1.17"
     }
 }

@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NgxFileDropEntry, FileSystemFileEntry, NgxFileDropModule } from 'ngx-file-drop';
 import { tap, map } from 'rxjs/operators';
-import { AlertComponent } from './alert.component';
+import { AlertComponent } from './shared/alert.component';
 import { CommonModule } from '@angular/common';
 import { CdsModule } from '@cds/angular';
 import { ClipboardModule } from 'ngx-clipboard';

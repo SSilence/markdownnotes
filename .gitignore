@@ -41,3 +41,5 @@ Thumbs.db
 backend_apikeys.php
 config.php
 /data/audio
+docker-dev/logs
+.claude/

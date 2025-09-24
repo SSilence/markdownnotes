@@ -8,7 +8,7 @@ import { DateTime } from "luxon";
 import { BackendService } from "src/app/services/backend.service";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
-import { AlertComponent } from "../alert.component";
+import { AlertComponent } from "../shared/alert.component";
 
 @Component({
     selector: 'app-vocabulary-exercise',

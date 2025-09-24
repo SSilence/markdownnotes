@@ -8,6 +8,7 @@ define("CONFIG_CHATGPT_API_KEY", "");
 define("CONFIG_PONS_API_KEY", "");
 
 define("CONFIG_IMAP_HOST", "");
+define("CONFIG_IMAP_PORT", 993);
 define("CONFIG_IMAP_ENCRYPTION", "SSL"); // SSL, TLS, NO_TLS
 define("CONFIG_IMAP_USER", "");
 define("CONFIG_IMAP_PASSWORD", "");

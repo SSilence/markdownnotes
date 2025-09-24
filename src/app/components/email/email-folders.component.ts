@@ -48,7 +48,7 @@ import { BackendService } from 'src/app/services/backend.service';
                 (dragleave)="onDragLeave($event)"
                 (drop)="onDrop($event, folder)">
                 <div class="folder-info">
-                  <cds-icon [shape]="getFolderIcon(folder.name)"></cds-icon>
+                  <cds-icon [shape]="getFolderIcon(folder)"></cds-icon>
                   <span class="folder-name">{{ folder.name }} <sub><span class="total-count">{{ folder.total }}</span></sub></span>
                   
                 </div>
@@ -61,19 +61,6 @@ import { BackendService } from 'src/app/services/backend.service';
                       </span>
                     }
                   </div>
-                  @if (isPurgeableFolder(folder.name)) {
-                    <button 
-                      class="btn btn-sm btn-icon purge-btn" 
-                      (click)="purgeFolder(folder, $event)"
-                      [disabled]="purgingFolder === folder.name"
-                      title="Purge all emails from this folder">
-                      @if (purgingFolder === folder.name) {
-                        <clr-spinner clrInline clrSmall>Purging...</clr-spinner>
-                      } @else {
-                        <cds-icon shape="trash"></cds-icon>
-                      }
-                    </button>
-                  }
                 </div>
               </div>
             }
@@ -208,29 +195,6 @@ import { BackendService } from 'src/app/services/backend.service';
       gap: 0.25rem;
     }
 
-    .purge-btn {
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      padding: 0.25rem;
-      background-color: transparent;
-      border: 1px solid transparent;
-      color: var(--clr-color-neutral-600);
-    }
-
-    .folder-item:hover .purge-btn {
-      opacity: 1;
-    }
-
-    .purge-btn:hover {
-      background-color: var(--clr-color-danger-100);
-      border-color: var(--clr-color-danger-300);
-      color: var(--clr-color-danger-700);
-    }
-
-    .purge-btn:disabled {
-      opacity: 1;
-      cursor: not-allowed;
-    }
 
     .total-count {
       display: inline-block;
@@ -255,14 +219,13 @@ import { BackendService } from 'src/app/services/backend.service';
 export class EmailFoldersComponent implements OnInit {
   @Input() selectedFolder: FolderDto | null = null;
   @Output() folderSelected = new EventEmitter<FolderDto>();
-  @Output() foldersLoaded = new EventEmitter<FolderDto[]>();
+  @Output() folderTrashLoaded = new EventEmitter<FolderDto>();
   @Output() errorOccurred = new EventEmitter<string>();
   @Output() messageMovedToFolder = new EventEmitter<{messageId: number, sourceFolder: string, targetFolder: string, wasUnread: boolean}>();
   @Output() composeRequested = new EventEmitter<void>();
 
   folders: FolderDto[] = [];
   loadingFolders = false;
-  purgingFolder: string | null = null;
 
   // Drag & Drop properties
   isDragOver = false;
@@ -276,16 +239,15 @@ export class EmailFoldersComponent implements OnInit {
 
   loadFolders(): void {
     this.loadingFolders = true;
-    
     this.backendService.getImapFolders().subscribe({
       next: (folders) => {
         this.folders = this.sortFolders(folders);
         this.loadingFolders = false;
-        this.foldersLoaded.emit(this.folders);
+        this.folderTrashLoaded.emit(this.folders.find(f => f.isTrash));
         
         // Auto-select INBOX if available and no folder is currently selected
         if (!this.selectedFolder) {
-          const inbox = this.folders.find(f => f.name.toLowerCase() === 'inbox');
+          const inbox = this.folders.find(f => f.isInbox);
           if (inbox) {
             this.selectFolder(inbox);
           }
@@ -299,32 +261,12 @@ export class EmailFoldersComponent implements OnInit {
   }
 
   private sortFolders(folders: FolderDto[]): FolderDto[] {
-    // Create a map for folder priorities
-    const folderPriorities = new Map<string, number>([
-      // Inbox variations
-      ...['inbox', 'posteingang'].map((name, i) => [name, 0] as [string, number]),
-      // Drafts variations  
-      ...['entwürfe', 'drafts', 'draft'].map(name => [name, 1] as [string, number]),
-      // Sent variations
-      ...['gesendet', 'sent', 'sent items', 'gesendete elemente'].map(name => [name, 2] as [string, number]),
-      // Deleted/Trash variations
-      ...['gelöscht', 'trash', 'deleted items', 'papierkorb', 'deleted'].map(name => [name, 3] as [string, number]),
-      // Archive variations
-      ...['archiv', 'archive'].map(name => [name, 4] as [string, number]),
-      // Spam variations
-      ...['spam', 'junk', 'junk-e-mail'].map(name => [name, 5] as [string, number])
-    ]);
-
     return folders.sort((a, b) => {
-      const aPriority = folderPriorities.get(a.name.toLowerCase()) ?? 999;
-      const bPriority = folderPriorities.get(b.name.toLowerCase()) ?? 999;
-      
-      if (aPriority !== bPriority) {
-        return aPriority - bPriority;
+      const priA = a.getPriority();
+      const priB = b.getPriority();
+      if (priA !== priB) {
+        return priA - priB;
       }
-      
-      // If both folders have the same priority (or are not in the predefined list),
-      // sort alphabetically
       return a.name.localeCompare(b.name);
     });
   }
@@ -334,108 +276,30 @@ export class EmailFoldersComponent implements OnInit {
     this.folderSelected.emit(folder);
   }
 
-  getFolderIcon(folderName: string): string {
-    const name = folderName.toLowerCase();
-    switch (name) {
-      case 'inbox': case 'posteingang': return 'inbox';
-      case 'sent': case 'gesendet': return 'export';
-      case 'drafts': case 'entwürfe': return 'note';
-      case 'trash': case 'deleted items': case 'papierkorb': return 'trash';
-      case 'spam': case 'junk': return 'ban';
-      default: return 'folder';
-    }
+  getFolderIcon(folder: FolderDto): string {
+    if (folder.isInbox) return 'inbox';
+    if (folder.isSent) return 'export';
+    if (folder.isDraft) return 'note';
+    if (folder.isTrash) return 'trash';
+    if (folder.isJunk) return 'ban';
+    return 'folder';
   }
 
   composeEmail(): void {
     this.composeRequested.emit();
   }
 
-  isPurgeableFolder(folderName: string): boolean {
-    const name = folderName.toLowerCase();
-    return ['spam', 'junk', 'junk-e-mail', 'trash', 'deleted items', 'papierkorb', 'gelöscht', 'deleted'].includes(name);
-  }
 
-  purgeFolder(folder: FolderDto, event: Event): void {
-    event.stopPropagation(); // Prevent folder selection
-    
-    // Show confirmation dialog
-    const folderName = folder.name;
-    const message = `Are you sure you want to permanently delete ALL ${folder.total} emails from the "${folderName}" folder? This action cannot be undone.`;
-    
-    if (!confirm(message)) {
-      return;
-    }
-    
-    this.purgingFolder = folderName;
-    
-    this.backendService.purgeFolder(folderName).subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Update folder counts to 0
-          folder.total = 0;
-          folder.unread = 0;
-          
-          // If this was the selected folder, refresh it
-          if (this.selectedFolder?.name === folderName) {
-            this.folderSelected.emit(folder);
-          }
-          
-          // Show success message could be emitted as an event
-          console.log(`Successfully purged folder "${folderName}"`);
-        }
-        this.purgingFolder = null;
-      },
-      error: (error) => {
-        this.purgingFolder = null;
-        this.errorOccurred.emit(`Failed to purge folder "${folderName}": ${error.message || error}`);
+  updateFolderCounts(): void {
+    this.backendService.getImapFolders().subscribe({
+      next: (folders) => {
+        this.folders = this.sortFolders(folders);
       }
     });
   }
 
-  updateFolderUnreadCount(folderName: string, increment: number): void {
-    const folder = this.folders.find(f => f.name === folderName);
-    if (folder) {
-      folder.unread = Math.max(0, folder.unread + increment);
-    }
-  }
-
-  updateFolderTotalCount(folderName: string, increment: number): void {
-    const folder = this.folders.find(f => f.name === folderName);
-    if (folder) {
-      folder.total = Math.max(0, folder.total + increment);
-    }
-  }
-
-  updateFolderCounts(folderName: string, unreadIncrement: number, totalIncrement: number): void {
-    const folder = this.folders.find(f => f.name === folderName);
-    if (folder) {
-      folder.unread = Math.max(0, folder.unread + unreadIncrement);
-      folder.total = Math.max(0, folder.total + totalIncrement);
-    }
-  }
-
-  findSentFolder(): FolderDto | null {
-    const sentFolderNames = ['Gesendet', 'Sent', 'Sent Items', 'Gesendete Elemente'];
-    
-    for (const folderName of sentFolderNames) {
-      const folder = this.folders.find(f => f.name === folderName);
-      if (folder) {
-        return folder;
-      }
-    }
-    return null;
-  }
-
-  findDraftFolder(): FolderDto | null {
-    const draftFolderNames = ['Drafts', 'Draft', 'Entwürfe', 'Entwurf'];
-    
-    for (const folderName of draftFolderNames) {
-      const folder = this.folders.find(f => f.name === folderName);
-      if (folder) {
-        return folder;
-      }
-    }
-    return null;
+  isDraftFolderSelected(): boolean {
+    return this.selectedFolder?.isDraft || false;
   }
 
   // Drag & Drop Methods

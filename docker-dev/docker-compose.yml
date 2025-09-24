@@ -8,3 +8,5 @@ services:
         - 8888:80
     volumes:
         - ./../:/var/www/html
+        - ./logs/apache2:/var/log/apache2
+        - ./logs/php:/var/log/php

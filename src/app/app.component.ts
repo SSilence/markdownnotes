@@ -4,12 +4,13 @@ import { filter, first } from 'rxjs/operators';
 import { ClarityModule } from '@clr/angular';
 
 import { PageTreeComponent } from './components/page/page-tree.component';
+import { ResizableSidebarComponent } from './components/shared/resizable-sidebar.component';
 import { Page } from './models/page';
 import { BackendService } from './services/backend.service';
 
 @Component({
     selector: 'app-root',
-    imports: [ClarityModule, RouterModule, PageTreeComponent],
+    imports: [ClarityModule, RouterModule, PageTreeComponent, ResizableSidebarComponent],
     template: `
         <div class="main-container">
             <header class="header header-6">
@@ -37,15 +38,19 @@ import { BackendService } from './services/backend.service';
 
             <div class="content-container">
                 @if (showNavigation) {
-                <nav class="sidenav">
-                    <section class="sidenav-content">
-                    @if (loading) {
-                        <span class="spinner spinner-inline">Loading Pages...</span>
-                    } @else {
-                        <app-page-tree [pages]="pages" [active]="active"></app-page-tree>
-                    }
-                    </section>
-                </nav>
+                    <app-resizable-sidebar
+                        [minWidth]="200"
+                        [maxWidth]="500"
+                        [defaultWidth]="300"
+                        storageKey="sidebar_width">
+                        <section class="sidenav-content">
+                        @if (loading) {
+                            <span class="spinner spinner-inline">Loading Pages...</span>
+                        } @else {
+                            <app-page-tree [pages]="pages" [active]="active"></app-page-tree>
+                        }
+                        </section>
+                    </app-resizable-sidebar>
                 }
                 <main class="content-area">
                 <router-outlet></router-outlet>
@@ -60,11 +65,10 @@ import { BackendService } from './services/backend.service';
             margin-right:1em;
         }
 
-        .sidenav {
+        .sidenav-content {
             padding-top:1em;
             overflow:auto;
-            min-width: 12rem;
-            width: 18%;
+            height: 100%;
         }
 
         .nav-link {

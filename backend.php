@@ -6,6 +6,7 @@ require_once("vendor/autoload.php");
 define("CONFIG_DATA_PATH", __DIR__ . "/data/pages/");
 define("CONFIG_FILES_PATH", __DIR__ . "/data/files/");
 define("CONFIG_AUDIO_PATH", __DIR__ . "/data/audio/");
+define("CONFIG_ATTACHMENT_PATH", __DIR__ . "/data/attachments/");
 define("CONFIG_META_SEPARATOR", "------------------------------------");
 
 if (!file_exists(CONFIG_DATA_PATH)) {
@@ -73,7 +74,7 @@ function parseString($data, $key) {
 }
 
 function gzip($json) {
-    if(strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip')!==FALSE) {
+    if(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'],'gzip')!==FALSE) {
         header('Content-Type: application/json');
         header('Content-Encoding: gzip');
         die(gzencode($json));

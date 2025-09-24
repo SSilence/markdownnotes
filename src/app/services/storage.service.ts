@@ -13,6 +13,7 @@ export interface PanelWidths {
 export class StorageService {
 
   private readonly PANEL_WIDTHS_KEY = 'email_panel_widths';
+  private readonly SIDEBAR_WIDTH_KEY = 'sidebar_width';
 
   constructor(private cookieService: CookieService) { }
 
@@ -77,5 +78,55 @@ export class StorageService {
    */
   hasPanelWidths(): boolean {
     return this.cookieService.check(this.PANEL_WIDTHS_KEY);
+  }
+
+  /**
+   * Get sidebar width from cookie, or return default value if not found
+   */
+  getSidebarWidth(): number {
+    const defaultWidth = 300;
+
+    try {
+      if (this.cookieService.check(this.SIDEBAR_WIDTH_KEY)) {
+        const cookieValue = this.cookieService.get(this.SIDEBAR_WIDTH_KEY);
+        const stored = parseInt(cookieValue, 10);
+        return isNaN(stored) ? defaultWidth : stored;
+      }
+    } catch (error) {
+      console.warn('Error reading sidebar width from cookie:', error);
+    }
+
+    return defaultWidth;
+  }
+
+  /**
+   * Save sidebar width to cookie
+   */
+  setSidebarWidth(width: number): void {
+    try {
+      const expirationDate = new Date();
+      expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+
+      this.cookieService.set(
+        this.SIDEBAR_WIDTH_KEY,
+        width.toString(),
+        expirationDate,
+        '/',
+        undefined,
+        true,
+        'Lax'
+      );
+    } catch (error) {
+      console.error('Error saving sidebar width to cookie:', error);
+    }
+  }
+
+  /**
+   * Delete sidebar width cookie (reset to default)
+   */
+  deleteSidebarWidth(): void {
+    if (this.cookieService.check(this.SIDEBAR_WIDTH_KEY)) {
+      this.cookieService.delete(this.SIDEBAR_WIDTH_KEY, '/');
+    }
   }
 }

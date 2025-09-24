@@ -4,10 +4,11 @@ import { ClarityModule } from '@clr/angular';
 import { FolderDto } from 'src/app/dtos/folder-dto';
 import { MessageDto } from 'src/app/dtos/message-dto';
 import { BackendService } from 'src/app/services/backend.service';
+import { FormatDateAgoPipe } from 'src/app/pipes/format-date-ago.pipe';
 
 @Component({
   selector: 'app-email-messages',
-  imports: [CommonModule, ClarityModule],
+  imports: [CommonModule, ClarityModule, FormatDateAgoPipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <div class="message-panel">
@@ -15,15 +16,44 @@ import { BackendService } from 'src/app/services/backend.service';
         <clr-card-title>
           <span>
               @if (selectedFolder) {
-                  {{ selectedFolder.name }}
+                {{ selectedFolder.name }}
               } @else {
-                  Messages
+                Messages
               }
           </span>
           <div class="header-actions">
-            <button 
-              class="btn btn-sm btn-link refresh-btn-header" 
-              (click)="resetAndLoadMessages()" 
+            @if (loadingMessages) {
+              <clr-spinner clrSmall>Loading messages...</clr-spinner>
+            }
+            @if (selectedFolder) {
+              <button
+                class="btn btn-sm btn-link mark-all-read-btn-header"
+                (click)="markAllAsSeen()"
+                [disabled]="markingAllAsSeen"
+                title="Mark all emails as read">
+                @if (markingAllAsSeen) {
+                  <clr-spinner clrInline clrSmall>Marking...</clr-spinner>
+                } @else {
+                  <cds-icon shape="eye"></cds-icon>
+                }
+              </button>
+            }
+            @if (selectedFolder && (selectedFolder.isJunk || selectedFolder.isTrash)) {
+              <button
+                class="btn btn-sm btn-link purge-btn-header"
+                (click)="purgeFolder($event)"
+                [disabled]="purgingFolder"
+                title="Purge all emails from this folder">
+                @if (purgingFolder) {
+                  <clr-spinner clrInline clrSmall>Purging...</clr-spinner>
+                } @else {
+                  <cds-icon shape="trash"></cds-icon>
+                }
+              </button>
+            }
+            <button
+              class="btn btn-sm btn-link refresh-btn-header"
+              (click)="resetAndLoadMessages()"
               [disabled]="loadingMessages || loadingMoreMessages || !selectedFolder">
               <cds-icon shape="refresh"></cds-icon>
             </button>
@@ -37,10 +67,6 @@ import { BackendService } from 'src/app/services/backend.service';
             <cds-icon shape="folder" size="48"></cds-icon>
             <p class="empty-text">Select a folder to view messages</p>
           </div>
-        } @else if (loadingMessages) {
-          <div class="loading-center">
-            <clr-spinner clrSmall>Loading messages...</clr-spinner>
-          </div>
         } @else if (messages.length === 0) {
           <div class="empty-state">
             <cds-icon shape="inbox" size="48"></cds-icon>
@@ -52,7 +78,7 @@ import { BackendService } from 'src/app/services/backend.service';
               <div 
                 class="message-item" 
                 [class.selected]="selectedMessage?.id === message.id"
-                [class.unread]="!message.seen"
+                [class.unread]="!message.isSeen"
                 [class.dragging]="isDragging && draggedMessage?.id === message.id"
                 draggable="true"
                 (dragstart)="onDragStart($event, message)"
@@ -61,12 +87,12 @@ import { BackendService } from 'src/app/services/backend.service';
                 
                 <div class="message-info">
                   <div class="message-header">
-                    <div class="sender-name" [title]="message.fromName + ' <' + message.from + '>'">
-                      {{ message.fromName + ' <' + message.from + '>' }}
+                    <div class="sender-name" [title]="(message.from.name || message.from.email) + ' <' + message.from.email + '>'">
+                      {{ (message.from.name || message.from.email) + ' <' + message.from.email + '>' }}
                     </div>
                     <div class="message-date-container">
                       <div class="message-indicators">
-                        @if (message.flagged) {
+                        @if (message.isFlagged) {
                           <cds-icon shape="flag" class="text-warning"></cds-icon>
                         }
                         @if (message.attachments && message.attachments.length > 0) {
@@ -74,7 +100,7 @@ import { BackendService } from 'src/app/services/backend.service';
                         }
                       </div>
                       <span class="message-date" [title]="formatFullDate(message.date)">
-                        {{ formatDateAgo(message.date) }}
+                        {{ message.date | formatDateAgo }}
                       </span>
                     </div>
                   </div>
@@ -130,8 +156,46 @@ import { BackendService } from 'src/app/services/backend.service';
       margin-left: auto;
     }
 
-    .refresh-btn-header {
+    .refresh-btn-header,
+    .purge-btn-header,
+    .mark-all-read-btn-header {
       padding: 0.25rem;
+      min-width: 0.10rem;
+      margin-right: 0.75rem;
+    }
+
+    .purge-btn-header {
+      color: var(--clr-color-danger-700);
+    }
+
+    .purge-btn-header:hover {
+      background-color: var(--clr-color-danger-100);
+      border-color: var(--clr-color-danger-300);
+    }
+
+    .purge-btn-header:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .mark-all-read-btn-header:hover {
+      background-color: var(--clr-color-neutral-100);
+      border-color: var(--clr-color-neutral-300);
+    }
+
+    .mark-all-read-btn-header:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .refresh-btn-header:hover {
+      background-color: var(--clr-color-neutral-100);
+      border-color: var(--clr-color-neutral-300);
+    }
+
+    .refresh-btn-header:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
     }
 
     clr-card-header {
@@ -163,7 +227,7 @@ import { BackendService } from 'src/app/services/backend.service';
 
     .message-list {
       overflow-y: auto;
-      max-height: calc(100vh - 200px);
+      max-height: calc(100vh - 110px);
     }
 
     .loading-more,
@@ -276,17 +340,19 @@ export class EmailMessagesComponent implements OnChanges {
   @Input() selectedFolder: FolderDto | null = null;
   @Input() selectedMessage: MessageDto | null = null;
   @Output() messageSelected = new EventEmitter<MessageDto>();
-  @Output() messagesLoaded = new EventEmitter<MessageDto[]>();
   @Output() errorOccurred = new EventEmitter<string>();
   @Output() messageStatusChanged = new EventEmitter<{messageId: number, seen: boolean}>();
-
+  @Output() folderPurged = new EventEmitter<string>();
+  @Output() markedAllAsSeen = new EventEmitter<string>();
 
   messages: MessageDto[] = [];
   loadingMessages = false;
   loadingMoreMessages = false;
   currentOffset = 0;
-  messagesPerPage = 10;
+  messagesPerPage = 30;
   hasMoreMessages = true;
+  purgingFolder = false;
+  markingAllAsSeen = false;
 
   // Drag & Drop properties
   isDragging = false;
@@ -313,7 +379,6 @@ export class EmailMessagesComponent implements OnChanges {
   resetAndLoadMessages(): void {
     this.currentOffset = 0;
     this.hasMoreMessages = true;
-    this.messages = [];
     this.loadMessages();
   }
 
@@ -324,31 +389,9 @@ export class EmailMessagesComponent implements OnChanges {
   loadMessages(folderName?: string): void {
     const folder = folderName || this.selectedFolder?.name;
     if (!folder || this.loadingMessages) return;
-    
+
     this.loadingMessages = true;
-    
-    this.backendService.getImapMessages(folder, this.messagesPerPage, this.currentOffset, 'DESC').subscribe({
-      next: (messages) => {
-        if (this.currentOffset === 0) {
-          // First load - replace messages
-          this.messages = messages;
-        } else {
-          // Subsequent loads - append messages
-          this.messages = [...this.messages, ...messages];
-        }
-        
-        // Check if we have more messages to load
-        this.hasMoreMessages = messages.length === this.messagesPerPage;
-        this.currentOffset += messages.length;
-        
-        this.loadingMessages = false;
-        this.messagesLoaded.emit(this.messages);
-      },
-      error: (err) => {
-        this.loadingMessages = false;
-        this.errorOccurred.emit('Failed to load messages: ' + err.message);
-      }
-    });
+    this.fetchMessages(folder, false);
   }
 
   loadMoreMessages(): void {
@@ -357,37 +400,53 @@ export class EmailMessagesComponent implements OnChanges {
     }
 
     this.loadingMoreMessages = true;
-    
-    this.backendService.getImapMessages(this.selectedFolder.name, this.messagesPerPage, this.currentOffset, 'DESC').subscribe({
+    this.fetchMessages(this.selectedFolder.name, true);
+  }
+
+  private fetchMessages(folderName: string, isLoadMore: boolean): void {
+    this.backendService.getImapMessages(folderName, this.messagesPerPage, this.currentOffset, 'DESC').subscribe({
       next: (messages) => {
-        this.messages = [...this.messages, ...messages];
-        
+        if (this.currentOffset === 0 && !isLoadMore) {
+          // First load - replace messages
+          this.messages = messages;
+        } else {
+          // Subsequent loads or load more - append messages
+          this.messages = [...this.messages, ...messages];
+        }
+
         // Check if we have more messages to load
         this.hasMoreMessages = messages.length === this.messagesPerPage;
         this.currentOffset += messages.length;
-        
-        this.loadingMoreMessages = false;
+
+        if (isLoadMore) {
+          this.loadingMoreMessages = false;
+        } else {
+          this.loadingMessages = false;
+        }
       },
       error: (err) => {
-        this.loadingMoreMessages = false;
-        this.errorOccurred.emit('Failed to load more messages: ' + err.message);
+        const errorMessage = isLoadMore ? 'Failed to load more messages: ' + err.message : 'Failed to load messages: ' + err.message;
+
+        if (isLoadMore) {
+          this.loadingMoreMessages = false;
+        } else {
+          this.loadingMessages = false;
+        }
+
+        this.errorOccurred.emit(errorMessage);
       }
     });
   }
 
-  selectMessage(message: MessageDto): void {
+  selectMessage(message: MessageDto, skipBackendCall: boolean = false): void {
     this.selectedMessage = message;
-    
-    if (!message.seen && this.selectedFolder) {
+
+    if (!skipBackendCall && !message.isSeen && this.selectedFolder) {
       this.backendService.markEmail(message.id, this.selectedFolder.name, true).subscribe({
         next: (response) => {
-          if (response.success) {
-            message.seen = true;
-            this.messageStatusChanged.emit({ messageId: message.id, seen: true });
-            this.messageSelected.emit(message);
-          } else {
-            this.messageSelected.emit(message);
-          }
+          message.isSeen = true;
+          this.messageStatusChanged.emit({ messageId: message.id, seen: true });
+          this.messageSelected.emit(message);
         },
         error: (err) => {
           this.errorOccurred.emit('Failed to mark email as read: ' + err.message);
@@ -405,37 +464,75 @@ export class EmailMessagesComponent implements OnChanges {
     return date.toLocaleString();
   }
 
-  formatDateAgo(dateString: string): string {
-    if (!dateString) return '';
-    
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
-    
-    if (diffInMinutes < 1) {
-      return 'just now';
-    } else if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    } else if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    } else if (diffInDays === 1) {
-      return 'yesterday';
-    } else if (diffInDays < 7) {
-      return `${diffInDays}d ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
-  }
-
   updateMessageStatus(messageId: number, seen: boolean): void {
     const message = this.messages.find(msg => msg.id === messageId);
     if (message) {
-      message.seen = seen;
+      message.isSeen = seen;
     }
   }
+
+  removeMessageOptimistically(messageId: number): void {
+    const messageIndex = this.messages.findIndex(msg => msg.id === messageId);
+    if (messageIndex > -1) {
+      this.messages.splice(messageIndex, 1);
+      // Update the count for pagination
+      this.currentOffset = Math.max(0, this.currentOffset - 1);
+    }
+  }
+
+  purgeFolder(event: Event): void {
+    event.stopPropagation();
+
+    if (!this.selectedFolder) return;
+
+    // Show confirmation dialog
+    const folderName = this.selectedFolder.name;
+    const message = `Are you sure you want to permanently delete ALL ${this.selectedFolder.total} emails from the "${folderName}" folder? This action cannot be undone.`;
+
+    if (!confirm(message)) {
+      return;
+    }
+
+    this.purgingFolder = true;
+
+    this.backendService.purgeFolder(folderName).subscribe({
+      next: (response) => {
+        // Clear the messages list
+        this.messages = [];
+        this.currentOffset = 0;
+        this.hasMoreMessages = false;
+
+        // Emit event to notify parent that folder was purged
+        this.folderPurged.emit(folderName);
+
+        this.purgingFolder = false;
+      },
+      error: (error) => {
+        this.purgingFolder = false;
+        this.errorOccurred.emit(`Failed to purge folder "${folderName}": ${error.message || error}`);
+      }
+    });
+  }
+
+  markAllAsSeen(): void {
+    if (!this.selectedFolder || this.markingAllAsSeen) return;
+
+    this.markingAllAsSeen = true;
+
+    this.backendService.markAllAsSeen(this.selectedFolder.name).subscribe({
+      next: () => {
+        // Mark all messages as seen locally
+        this.messages.forEach(message => message.isSeen = true);
+        this.markingAllAsSeen = false;
+        this.markedAllAsSeen.emit(this.selectedFolder!.name);
+      },
+      error: (err) => {
+        this.markingAllAsSeen = false;
+        this.errorOccurred.emit('Failed to mark all emails as read: ' + err.message);
+      }
+    });
+  }
+
 
   // Drag & Drop Methods
   onDragStart(event: DragEvent, message: MessageDto): void {
@@ -449,7 +546,7 @@ export class EmailMessagesComponent implements OnChanges {
         messageId: message.id,
         sourceFolder: this.selectedFolder?.name || '',
         messageSubject: message.subject || '(No Subject)',
-        wasUnread: !message.seen
+        wasUnread: !message.isSeen
       }));
     }
   }
@@ -458,8 +555,6 @@ export class EmailMessagesComponent implements OnChanges {
     this.isDragging = false;
     this.draggedMessage = null;
   }
-
-
 
   // Helper method to check if we're at the bottom of the scroll area
   private isNearBottom(element: HTMLElement, threshold: number = 100): boolean {

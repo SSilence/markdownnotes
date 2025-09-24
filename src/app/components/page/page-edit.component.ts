@@ -10,7 +10,7 @@ import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
 import { IconService } from 'src/app/services/icon.service';
 import { IconDialogComponent } from './icon-dialog.component';
-import { AlertComponent } from '../alert.component';
+import { AlertComponent } from '../shared/alert.component';
 
 @Component({
     selector: 'app-page-edit',

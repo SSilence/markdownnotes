@@ -1,157 +1,96 @@
 GET http://localhost:8888/api/vocabulary/enrich?english=painkiller&german=Schmerzmittel
 
-GET http://localhost### Alternative check for English Sent folder
-GET http://localhost:8888/api/imap/folder/Sent
+GET http://localhost:8888/api/imap/enabled
 
-###
-
-# Draft Management Examples
-
-# Save a draft
-POST http://localhost:8888/api/imap/draft
-Content-Type: application/json
-
-{
-  "to": "test@example.com",
-  "subject": "Test Draft Email",
-  "message": "This is a test draft that should be saved automatically every minute."
-}
-
-###
-
-# Update an existing draft
-POST http://localhost:8888/api/imap/draft  
-Content-Type: application/json
-
-{
-  "draftId": "draft_12345_1640995200",
-  "to": "updated@example.com",
-  "cc": "cc@example.com",
-  "subject": "Updated Test Draft",
-  "message": "This draft has been updated with new content and recipients."
-}
-
-###
-
-# Delete a draft (replace with actual draft ID from save response)
-DELETE http://localhost:8888/api/imap/draft/draft_12345_1640995200
-
-###
-
-# Check drafts folder to see saved drafts
-GET http://localhost:8888/api/imap/folder/Drafts
-
-###
-
-# Check German drafts folder 
-GET http://localhost:8888/api/imap/folder/Entw%C3%BCrfe888/api/vocabulary/dictionary?q=play
-
-###
-
-# IMAP Examples
-
-# Get all IMAP folders with unread message counts
 GET http://localhost:8888/api/imap/folders
 
-###
-
-# Get emails from INBOX folder (default: 50 messages, DESC order)
 GET http://localhost:8888/api/imap/folder/INBOX
 
-###
+GET http://localhost:8888/api/imap/message/INBOX/1018
 
-# Get emails from INBOX with pagination and custom limit
-GET http://localhost:8888/api/imap/folder/INBOX?limit=10&start=0&order=DESC
-
-###
-
-# Get emails from Sent folder (URL encoded folder name)
-GET http://localhost:8888/api/imap/folder/Gesendet
-
-###
-
-# Get emails from a folder with special characters (URL encoded)
-GET http://localhost:8888/api/imap/folder/Entwürfe
-
-###
-
-# Get specific email by ID from INBOX folder
-GET http://localhost:8888/api/imap/message/INBOX/1
-
-###
-
-# Get specific email by ID from Sent folder
-GET http://localhost:8888/api/imap/message/Sent/5
-
-###
-
-# Send a simple email
-POST http://localhost:8888/api/imap/send
-Content-Type: application/json
+POST http://localhost:8888/api/imap/mark
 
 {
-  "to": "recipient@example.com",
-  "subject": "Test Email from MarkdownNotes",
-  "message": "This is a test email sent from the MarkdownNotes application."
+    "messageId": 60,
+    "folder": "Entwürfe",
+    "seen": false
 }
 
-###
-
-# Send email with CC and BCC
-POST http://localhost:8888/api/imap/send
-Content-Type: application/json
+POST http://localhost:8888/api/imap/move
 
 {
-  "to": "recipient@example.com",
-  "cc": "cc@example.com",
-  "bcc": "bcc@example.com",
-  "subject": "Email with CC and BCC",
-  "message": "This email includes CC and BCC recipients."
+    "messageId": 121,
+    "sourceFolder": "Archiv",
+    "targetFolder": "INBOX"
 }
 
-###
-
-# Send email with reply-to address
-POST http://localhost:8888/api/imap/send
-Content-Type: application/json
+POST http://localhost:8888/api/imap/purge
 
 {
-  "to": "recipient@example.com",
-  "subject": "Email with Reply-To",
-  "message": "Please reply to the specified reply-to address.",
-  "replyTo": "noreply@example.com"
+    "folder": "Papierkorb"
 }
 
-###
-
-# Send HTML email
-POST http://localhost:8888/api/imap/send
-Content-Type: application/json
+POST http://localhost:8888/api/imap/draft
 
 {
-  "to": "recipient@example.com",
-  "subject": "HTML Email Test",
-  "message": "<html><body><h1>Hello!</h1><p>This is an <strong>HTML email</strong> with <em>formatting</em>.</p></body></html>"
+    "id": 67,
+    "subject": "Draft Subject2",
+    "from": {
+        "name": "Sender Name2",
+        "email": "sender2@example.com"
+    },
+    "to": [
+        {
+            "name": "Recipient Name",
+            "email": "recipient@example.com"
+        },
+        {
+            "email": "recipient2@example.com"
+        }
+    ],
+    "date": "2024-10-01T12:00:00Z",
+    "bodyText": "This is a draft body.2",
+    "attachments": [
+        {
+            "name": "attachment.txt",
+            "size": 1024,
+            "type": "text/plain",
+            "content": "SGVsbG8gd29ybGQh"
+        }
+    ]
 }
 
-###
+DELETE http://localhost:8888/api/imap/draft/64
 
-# Test sent email storage - Send email and then check Sent folder
+GET http://localhost:8888/api/imap/attachment/INBOX/1023/Signatur_KLEIN.jpg
+
+GET http://localhost:8888/api/imap/contacts
+
 POST http://localhost:8888/api/imap/send
-Content-Type: application/json
 
 {
-  "to": "test@example.com",
-  "subject": "Test für Gesendet-Ordner",
-  "message": "Diese E-Mail sollte automatisch im Gesendet-Ordner gespeichert werden."
+    "id": 67,
+    "subject": "Draft Subject23",
+    "to": [
+        {
+            "name": "Tobi",
+            "email": "tobias.zeising@aditu.de"
+        }
+    ],
+    "cc": [
+        {
+            "name": "Recipient Name",
+            "email": "info@lesestunden.de"
+        }
+    ],
+    "date": "2025-09-25T12:00:00Z",
+    "bodyText": "This is example body text.",
+    "attachments": [
+        {
+            "name": "attachment.txt",
+            "size": 1024,
+            "type": "text/plain",
+            "content": "SGVsbG8gd29ybGQh"
+        }
+    ]
 }
-
-###
-
-# Check if email was saved to Sent folder (after sending above email)
-GET http://localhost:8888/api/imap/folder/Gesendet
-
-###
-
-# Alternative check for English Sent folder
-GET http://localhost:8888/api/imap/folder/Sent

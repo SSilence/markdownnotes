@@ -9,7 +9,6 @@ import { FileUtilsService } from '../../services/file-utils.service';
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     <div class="attachment-container">
-      <!-- Hidden file input -->
       <input 
         type="file" 
         #fileInput
@@ -19,7 +18,6 @@ import { FileUtilsService } from '../../services/file-utils.service';
         (change)="onFileSelected($event)"
       />
       
-      <!-- Only show attachment list if there are attachments -->
       @if (attachments && attachments.length > 0) {
         <div class="attachment-grid">
           @for (attachment of attachments; track attachment.name; let i = $index) {
@@ -152,8 +150,6 @@ export class EmailAttachmentComponent {
   @Input() attachments: File[] = [];
   @Input() disabled: boolean = false;
   @Input() acceptedTypes: string = '';
-  @Input() maxFileSize: number = 0; // 0 = no limit, size in bytes
-  @Input() maxFiles: number = 0; // 0 = no limit
   
   @Output() attachmentsChange = new EventEmitter<File[]>();
   @Output() fileAdded = new EventEmitter<File>();
@@ -171,43 +167,24 @@ export class EmailAttachmentComponent {
     const newAttachments = [...this.attachments];
     let hasErrors = false;
 
-    // Process each selected file
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
-      // Check file size limit
-      if (!this.fileUtils.isFileSizeValid(file, this.maxFileSize)) {
-        this.error.emit(`File "${file.name}" exceeds maximum size limit of ${this.fileUtils.formatFileSize(this.maxFileSize)}`);
-        hasErrors = true;
-        continue;
-      }
-
-      // Check total file count limit
-      if (this.maxFiles > 0 && newAttachments.length >= this.maxFiles) {
-        this.error.emit(`Maximum number of files (${this.maxFiles}) reached`);
-        hasErrors = true;
-        break;
-      }
-
-      // Check if file already exists
       if (this.fileUtils.isDuplicateFile(file, newAttachments)) {
         this.error.emit(`File "${file.name}" is already attached`);
         hasErrors = true;
         continue;
       }
 
-      // Add file to attachments
       newAttachments.push(file);
       this.fileAdded.emit(file);
     }
 
-    // Update attachments if any files were added
     if (newAttachments.length !== this.attachments.length) {
       this.attachments = newAttachments;
       this.attachmentsChange.emit(this.attachments);
     }
 
-    // Clear the file input so the same file can be selected again if needed
     event.target.value = '';
   }
 
@@ -223,62 +200,6 @@ export class EmailAttachmentComponent {
     }
   }
 
-
-
-  // Public methods for external control
-  clearAttachments(): void {
-    if (this.attachments.length > 0) {
-      const clearedFiles = [...this.attachments];
-      this.attachments = [];
-      this.attachmentsChange.emit(this.attachments);
-      
-      // Emit removed event for each cleared file
-      clearedFiles.forEach(file => this.fileRemoved.emit(file));
-    }
-  }
-
-  // Set attachments programmatically (for loading from drafts)
-  setAttachments(files: File[]): void {
-    this.attachments = [...files]; // Create a copy to avoid reference issues
-    this.attachmentsChange.emit(this.attachments);
-  }
-
-  addAttachment(file: File): boolean {
-    // Check file size limit
-    if (!this.fileUtils.isFileSizeValid(file, this.maxFileSize)) {
-      this.error.emit(`File "${file.name}" exceeds maximum size limit of ${this.fileUtils.formatFileSize(this.maxFileSize)}`);
-      return false;
-    }
-
-    // Check total file count limit
-    if (this.maxFiles > 0 && this.attachments.length >= this.maxFiles) {
-      this.error.emit(`Maximum number of files (${this.maxFiles}) reached`);
-      return false;
-    }
-
-    // Check if file already exists
-    if (this.fileUtils.isDuplicateFile(file, this.attachments)) {
-      this.error.emit(`File "${file.name}" is already attached`);
-      return false;
-    }
-
-    // Add file
-    const newAttachments = [...this.attachments, file];
-    this.attachments = newAttachments;
-    this.attachmentsChange.emit(this.attachments);
-    this.fileAdded.emit(file);
-    return true;
-  }
-
-  getTotalSize(): number {
-    return this.fileUtils.getTotalFileSize(this.attachments);
-  }
-
-  getFormattedTotalSize(): string {
-    return this.fileUtils.formatFileSize(this.getTotalSize());
-  }
-
-  // Public method to trigger file selection
   openFileDialog(): void {
     if (this.fileInput) {
       this.fileInput.nativeElement.click();

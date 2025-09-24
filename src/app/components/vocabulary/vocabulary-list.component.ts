@@ -10,7 +10,7 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 import { from, of, timer } from "rxjs";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
 import { VocabularyExerciseComponent } from "./vocabulary-exercise.component";
-import { AlertComponent } from "../alert.component";
+import { AlertComponent } from "../shared/alert.component";
 import { VocabularyExerciseResultComponent } from "./vocabulary-exercise-result.component";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
 

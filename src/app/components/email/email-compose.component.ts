@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClarityModule } from '@clr/angular';
 import { BackendService } from 'src/app/services/backend.service';
-import { MessageDto, SendEmailDto } from 'src/app/dtos/message-dto';
-import { AutoTextareaComponent } from '../auto-textarea.component';
+import { MessageDto, AddressDto, AttachmentDto } from 'src/app/dtos/message-dto';
 import { RecipientInputComponent, RecipientChip, Contact } from './recipient-input.component';
 import { EmailAttachmentComponent } from './email-attachment.component';
+import { AutoTextareaComponent } from '../shared/auto-textarea.component';
+import { of, switchMap } from 'rxjs';
 
 export enum ComposeMode {
   NEW = 'new',
@@ -37,25 +38,25 @@ export interface ComposeData {
       <clr-card-header>
         <clr-card-title>
           <span>{{ getComposeTitle() }}</span>
-          
-          <!-- Auto-save status indicator -->
-          @if (draftSaveStatus === 'saving') {
-            <span class="draft-status saving">
-              <cds-icon shape="sync" class="spinning"></cds-icon>
-              Saving draft...
-            </span>
-          } @else if (draftSaveStatus === 'saved') {
-            <span class="draft-status saved">
-              <cds-icon shape="check"></cds-icon>
-              Draft saved
-            </span>
-          } @else if (draftSaveStatus === 'error') {
-            <span class="draft-status error">
-              <cds-icon shape="warning-triangle"></cds-icon>
-              Save failed
-            </span>
+
+          <!-- Draft Status -->
+          @if (draftSaveStatus !== 'idle') {
+            <div class="draft-status" [class.saving]="draftSaveStatus === 'saving'"
+                 [class.saved]="draftSaveStatus === 'saved'"
+                 [class.error]="draftSaveStatus === 'error'">
+              @if (draftSaveStatus === 'saving') {
+                <cds-icon shape="sync" class="spinning"></cds-icon>
+                Auto-saving...
+              } @else if (draftSaveStatus === 'saved') {
+                <cds-icon shape="check"></cds-icon>
+                Draft saved
+              } @else if (draftSaveStatus === 'error') {
+                <cds-icon shape="exclamation-triangle"></cds-icon>
+                Save failed
+              }
+            </div>
           }
-          
+
           <div class="header-actions">
             <button 
               class="btn btn-sm btn-outline" 
@@ -67,33 +68,27 @@ export interface ComposeData {
             <button 
               class="btn btn-sm btn-outline" 
               (click)="openAttachmentDialog()"
-              [disabled]="sending || savingDraft"
+              [disabled]="sending"
               title="Add attachments">
               <cds-icon shape="paperclip"></cds-icon>
               Attach
             </button>
-
-            <button 
-              class="btn btn-sm btn-outline" 
+            
+            <button
+              class="btn btn-sm btn-outline"
               (click)="saveDraft()"
-              [disabled]="sending || savingDraft"
-              [class.loading]="savingDraft">
+              [disabled]="savingDraft || sending"
+              title="Save draft">
               @if (savingDraft) {
                 <cds-icon shape="sync" class="spinning"></cds-icon>
                 Saving...
-              } @else if (draftSaveStatus === 'saved') {
-                <cds-icon shape="check"></cds-icon>
-                Saved
-              } @else if (draftSaveStatus === 'error') {
-                <cds-icon shape="warning-triangle"></cds-icon>
-                Error
               } @else {
                 <cds-icon shape="floppy"></cds-icon>
-                Save
+                Save Draft
               }
             </button>
-            
-            <button 
+
+            <button
               class="btn btn-sm btn-primary"
               type="submit"
               form="email-form"
@@ -127,7 +122,7 @@ export interface ComposeData {
                 type="button"
                 class="input-cc-toggle" 
                 [class.active]="showCc"
-                (click)="showCc = !showCc">
+                (click)="toggleShowCc()">
                 CC
               </button>
             </div>
@@ -148,7 +143,7 @@ export interface ComposeData {
                   type="button"
                   class="input-cc-toggle" 
                   [class.active]="showBcc"
-                  (click)="showBcc = !showBcc">
+                  (click)="toggleShowBcc()">
                   BCC
                 </button>
               </div>
@@ -187,13 +182,13 @@ export interface ComposeData {
           </div>
 
           <!-- Attachments Field (only show when attachments exist) -->
-          @if (emailData.attachments && emailData.attachments.length > 0) {
+          @if (attachmentFiles && attachmentFiles.length > 0) {
             <div class="input-row attachment-row">
               <label class="input-label">Files:</label>
               <app-email-attachment
                 #attachmentComponent
-                [attachments]="emailData.attachments || []"
-                [disabled]="sending || savingDraft"
+                [attachments]="attachmentFiles || []"
+                [disabled]="sending"
                 [maxFileSize]="maxAttachmentSize"
                 [maxFiles]="maxAttachmentCount"
                 (attachmentsChange)="onAttachmentsChange($event)"
@@ -203,11 +198,11 @@ export interface ComposeData {
           }
           
           <!-- Hidden attachment component for file dialog functionality -->
-          @if (!emailData.attachments || emailData.attachments.length === 0) {
+          @if (!attachmentFiles || attachmentFiles.length === 0) {
             <app-email-attachment
               #attachmentComponent
               [attachments]="[]"
-              [disabled]="sending || savingDraft"
+              [disabled]="sending"
               [maxFileSize]="maxAttachmentSize"
               [maxFiles]="maxAttachmentCount"
               (attachmentsChange)="onAttachmentsChange($event)"
@@ -222,7 +217,7 @@ export interface ComposeData {
             <div class="message-container">
               <app-auto-textarea
                 name="message"
-                [(ngModel)]="emailData.message"
+                [(ngModel)]="emailData.bodyText"
                 #messageField="ngModel"
                 required
                 [styleClass]="'message-field'"
@@ -249,7 +244,7 @@ export interface ComposeData {
               @if (!emailData.subject || emailData.subject.trim() === '') {
                 <div class="error-message">Subject is required</div>
               }
-              @if (!emailData.message || emailData.message.trim() === '') {
+              @if (!emailData.bodyText || emailData.bodyText.trim() === '') {
                 <div class="error-message">Message is required</div>
               }
             </div>
@@ -573,58 +568,66 @@ export interface ComposeData {
     }
   `]
 })
-export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
+export class EmailComposeComponent implements OnInit, OnDestroy, OnChanges {
   @Input() composeData: ComposeData | null = null;
-  @Output() emailSent = new EventEmitter<void>();
+  @Output() emailSent = new EventEmitter<{mode: ComposeMode}>();
   @Output() composeClosed = new EventEmitter<void>();
   @Output() errorOccurred = new EventEmitter<string>();
   @Output() draftSaved = new EventEmitter<{ isNew: boolean }>();
 
-  emailData: SendEmailDto = new SendEmailDto();
+  emailData: MessageDto = new MessageDto();
   sending = false;
   showCc = false;
   showBcc = false;
   showValidationErrors = false;
+
+  // Draft functionality
+  draftId: number | null = null;
+  savingDraft = false;
+  draftSaveStatus: 'idle' | 'saving' | 'saved' | 'error' = 'idle';
+  private autoSaveTimer: any = null;
   
-  // Contact autocomplete
-  contacts: Contact[] = [];
-  loadingContacts = false;
+  @Input() contacts: Contact[] = [];
 
   // Recipient chips
   toRecipients: RecipientChip[] = [];
   ccRecipients: RecipientChip[] = [];
   bccRecipients: RecipientChip[] = [];
 
-  // Auto-save draft functionality
-  private autoSaveTimer: any = null;
-  private currentDraftId: string | null = null;
-  private lastSavedContent: string = '';
-  savingDraft = false;
-  draftSaveStatus: 'none' | 'saving' | 'saved' | 'error' = 'none';
-  
-  // Draft editing
-  private originalDraftId: string | null = null;
-
   // Attachment configuration
   maxAttachmentSize: number = 25 * 1024 * 1024; // 25MB in bytes
   maxAttachmentCount: number = 10;
+  attachmentFiles: File[] = [];
 
   @ViewChild(EmailAttachmentComponent) attachmentComponent!: EmailAttachmentComponent;
 
   constructor(private backendService: BackendService) {}
 
   ngOnInit(): void {
-    this.loadContacts();
     this.startAutoSave();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['composeData'] && this.composeData) {
+      this.setupComposeMode();
+    }
   }
 
   ngOnDestroy(): void {
     this.stopAutoSave();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['composeData'] && this.composeData) {
-      this.setupComposeMode();
+  toggleShowCc(): void {
+    this.showCc = !this.showCc;
+    if (!this.showCc) {
+      this.ccRecipients = [];
+    }
+  }
+
+  toggleShowBcc(): void {
+    this.showBcc = !this.showBcc;
+    if (!this.showBcc) {
+      this.bccRecipients = [];
     }
   }
 
@@ -646,83 +649,17 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
 
   // Update emailData based on recipient chips
   private updateEmailData(): void {
-    this.emailData.to = this.toRecipients.map(r => this.formatRecipientForEmail(r)).join(', ');
-    this.emailData.cc = this.ccRecipients.map(r => this.formatRecipientForEmail(r)).join(', ');
-    this.emailData.bcc = this.bccRecipients.map(r => this.formatRecipientForEmail(r)).join(', ');
+    this.emailData.to = this.toRecipients.map(r => new AddressDto({email: r.email, name: r.name}));
+    this.emailData.cc = this.ccRecipients.map(r => new AddressDto({email: r.email, name: r.name}));
+    this.emailData.bcc = this.bccRecipients.map(r => new AddressDto({email: r.email, name: r.name}));
   }
 
-  // Format recipient with name and email for backend
-  private formatRecipientForEmail(recipient: RecipientChip): string {
-    if (recipient.name && recipient.name !== recipient.email) {
-      return `${recipient.name} <${recipient.email}>`;
-    }
-    return recipient.email;
-  }
+  // Parse recipient from AddressDto
+  private parseRecipientFromAddress(address: AddressDto): RecipientChip | null {
+    if (!address || !address.email || !address.email.trim()) return null;
 
-  // Parse recipient for setup methods
-  private parseRecipient(input: string): RecipientChip | null {
-    if (!input.trim()) return null;
-    
-    // Check if it matches "Name <email>" format
-    const nameEmailMatch = input.match(/^(.+?)\s*<([^>]+)>$/);
-    if (nameEmailMatch) {
-      const name = nameEmailMatch[1].trim();
-      const email = nameEmailMatch[2].trim();
-      // If name and email are identical, show only email
-      const displayText = name === email ? email : `${name} <${email}>`;
-      return {
-        email,
-        name: name === email ? undefined : name,
-        displayText,
-        isValid: this.isValidEmail(email)
-      };
-    }
-    
-    // Check if it's just an email
-    const email = input.trim();
-    if (this.isValidEmail(email)) {
-      // Try to find name in contacts
-      const contact = this.contacts.find(c => c.email.toLowerCase() === email.toLowerCase());
-      const name = contact?.name;
-      // If name and email are identical, show only email
-      const displayText = (name && name !== email) ? `${name} <${email}>` : email;
-      return {
-        email,
-        name: (name && name !== email) ? name : undefined,
-        displayText,
-        isValid: true
-      };
-    }
-    
-    // Invalid format
-    return {
-      email: input.trim(),
-      name: undefined,
-      displayText: input.trim(),
-      isValid: false
-    };
-  }
+    const cleanEmail = address.email.trim();
 
-  // Parse recipient with separate name and email (for draft loading)
-  private parseRecipientWithName(email: string, name?: string): RecipientChip | null {
-    if (!email || !email.trim()) return null;
-    
-    const cleanEmail = email.trim();
-    
-    // First check if the input already contains name in "Name <email>" format
-    const nameEmailMatch = cleanEmail.match(/^(.+?)\s*<([^>]+)>$/);
-    if (nameEmailMatch) {
-      const parsedName = nameEmailMatch[1].trim();
-      const parsedEmail = nameEmailMatch[2].trim();
-      const displayText = parsedName === parsedEmail ? parsedEmail : `${parsedName} <${parsedEmail}>`;
-      return {
-        email: parsedEmail,
-        name: parsedName === parsedEmail ? undefined : parsedName,
-        displayText,
-        isValid: this.isValidEmail(parsedEmail)
-      };
-    }
-    
     if (!this.isValidEmail(cleanEmail)) {
       return {
         email: cleanEmail,
@@ -731,18 +668,16 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
         isValid: false
       };
     }
-    
+
     // Use provided name if available and different from email
-    const recipientName = (name && name.trim() && name.trim() !== cleanEmail) ? name.trim() : undefined;
-    
+    const recipientName = (address.name && address.name.trim() && address.name.trim() !== cleanEmail) ? address.name.trim() : undefined;
+
     // If no name provided, try to find in contacts
     const finalName = recipientName || this.contacts.find(c => c.email.toLowerCase() === cleanEmail.toLowerCase())?.name;
-    
+
     // Create display text
     const displayText = (finalName && finalName !== cleanEmail) ? `${finalName} <${cleanEmail}>` : cleanEmail;
-    
 
-    
     return {
       email: cleanEmail,
       name: (finalName && finalName !== cleanEmail) ? finalName : undefined,
@@ -772,43 +707,46 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
     switch (mode) {
       case ComposeMode.REPLY:
         if (originalMessage) {
-          const toRecipient = this.parseRecipient(originalMessage.from);
+          const toRecipient = this.parseRecipientFromAddress(originalMessage.from);
           if (toRecipient) {
             this.toRecipients = [toRecipient];
           }
           this.emailData.subject = this.getReplySubject(originalMessage.subject);
-          this.emailData.message = this.getReplyMessage(originalMessage);
+          this.emailData.bodyText = this.getReplyMessage(originalMessage);
           this.updateEmailData();
         }
         break;
         
       case ComposeMode.REPLY_ALL:
         if (originalMessage) {
-          const toRecipient = this.parseRecipient(originalMessage.from);
+          const toRecipient = this.parseRecipientFromAddress(originalMessage.from);
           if (toRecipient) {
             this.toRecipients = [toRecipient];
           }
-          
+
           // Add CC recipients
           this.ccRecipients = [];
-          if (originalMessage.to !== originalMessage.from) {
-            const ccRecipient = this.parseRecipient(originalMessage.to);
-            if (ccRecipient) {
-              this.ccRecipients.push(ccRecipient);
-            }
+          if (originalMessage.to && originalMessage.to.length > 0) {
+            originalMessage.to.forEach(addr => {
+              if (addr.email !== originalMessage.from.email) {
+                const ccRecipient = this.parseRecipientFromAddress(addr);
+                if (ccRecipient) {
+                  this.ccRecipients.push(ccRecipient);
+                }
+              }
+            });
           }
-          if (originalMessage.cc) {
-            const ccEmails = originalMessage.cc.split(',').map(email => email.trim());
-            ccEmails.forEach(email => {
-              const ccRecipient = this.parseRecipient(email);
+          if (originalMessage.cc && originalMessage.cc.length > 0) {
+            originalMessage.cc.forEach(addr => {
+              const ccRecipient = this.parseRecipientFromAddress(addr);
               if (ccRecipient && !this.ccRecipients.find(r => r.email === ccRecipient.email)) {
                 this.ccRecipients.push(ccRecipient);
               }
             });
           }
-          
+
           this.emailData.subject = this.getReplySubject(originalMessage.subject);
-          this.emailData.message = this.getReplyMessage(originalMessage);
+          this.emailData.bodyText = this.getReplyMessage(originalMessage);
           this.showCc = this.ccRecipients.length > 0;
           this.showBcc = true;
           this.updateEmailData();
@@ -818,71 +756,14 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
       case ComposeMode.FORWARD:
         if (originalMessage) {
           this.emailData.subject = this.getForwardSubject(originalMessage.subject);
-          this.emailData.message = this.getForwardMessage(originalMessage);
+          this.emailData.bodyText = this.getForwardMessage(originalMessage);
         }
         break;
         
       case ComposeMode.EDIT_DRAFT:
-        if (originalMessage) {
-          // Load all draft data exactly as it was
-          if (originalMessage.to) {
-            const toEmails = originalMessage.to.split(',').map(email => email.trim());
-            this.toRecipients = [];
-            toEmails.forEach((email, index) => {
-              // Use toName only for the first recipient, as MessageDto only has one toName field
-              const name = (index === 0) ? originalMessage.toName : undefined;
-              const toRecipient = this.parseRecipientWithName(email, name);
-              if (toRecipient) {
-                this.toRecipients.push(toRecipient);
-              }
-            });
-          }
-          
-          if (originalMessage.cc) {
-            const ccEmails = originalMessage.cc.split(',').map(email => email.trim());
-            this.ccRecipients = [];
-            ccEmails.forEach(email => {
-              const ccRecipient = this.parseRecipientWithName(email);
-              if (ccRecipient) {
-                this.ccRecipients.push(ccRecipient);
-              }
-            });
-            this.showCc = this.ccRecipients.length > 0;
-          }
-          
-          if (originalMessage.bcc) {
-            const bccEmails = originalMessage.bcc.split(',').map(email => email.trim());
-            this.bccRecipients = [];
-            bccEmails.forEach(email => {
-              const bccRecipient = this.parseRecipientWithName(email);
-              if (bccRecipient) {
-                this.bccRecipients.push(bccRecipient);
-              }
-            });
-            this.showBcc = this.bccRecipients.length > 0;
-          }
-          
-          if (originalMessage.replyTo) {
-            this.emailData.replyTo = originalMessage.replyTo;
-          }
-          
-          this.emailData.subject = originalMessage.subject || '';
-          this.emailData.message = originalMessage.bodyText || this.stripHtml(originalMessage.bodyHtml?.body || '');
-          
-          // Draft attachments are no longer supported - they are ignored
-          if (originalMessage.attachments && originalMessage.attachments.length > 0) {
-            // Show info that attachments from drafts are not loaded
-            const attachmentNames = originalMessage.attachments.map(att => att.name).join(', ');
-            this.errorOccurred.emit(`This draft had ${originalMessage.attachments.length} attachment(s): ${attachmentNames}. Please re-add them if needed.`);
-          }
-          
-          // Store original draft ID for deletion after sending
-          this.originalDraftId = this.extractDraftId(originalMessage);
-          
-          this.updateEmailData();
-          
-          // Mark current content as already saved to prevent immediate re-save
-          this.lastSavedContent = this.getCurrentContentHash();
+        if (originalMessage && originalMessage.id) {
+          this.draftId = originalMessage.id;
+          this.loadDraftData(originalMessage);
         }
         break;
         
@@ -909,29 +790,24 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
 
   private getReplyMessage(originalMessage: MessageDto): string {
     const date = new Date(originalMessage.date).toLocaleString();
-    const originalText = originalMessage.bodyText || this.stripHtml(originalMessage.bodyHtml?.body || '');
-    
-    return `\n\n\n--- Original Message ---\nFrom: ${originalMessage.fromName} <${originalMessage.from}>\nDate: ${date}\nSubject: ${originalMessage.subject}\n\n${originalText}`;
+    const originalText = originalMessage.bodyText || this.stripHtml(originalMessage.bodyHtml || '');
+    const fromName = originalMessage.from.name || originalMessage.from.email;
+
+    return `\n\n\n--- Original Message ---\nFrom: ${fromName} <${originalMessage.from.email}>\nDate: ${date}\nSubject: ${originalMessage.subject}\n\n${originalText}`;
   }
 
   private getForwardMessage(originalMessage: MessageDto): string {
     const date = new Date(originalMessage.date).toLocaleString();
-    const originalText = originalMessage.bodyText || this.stripHtml(originalMessage.bodyHtml?.body || '');
-    
-    return `\n\n\n--- Forwarded Message ---\nFrom: ${originalMessage.fromName} <${originalMessage.from}>\nTo: ${originalMessage.toName} <${originalMessage.to}>\nDate: ${date}\nSubject: ${originalMessage.subject}\n\n${originalText}`;
+    const originalText = originalMessage.bodyText || this.stripHtml(originalMessage.bodyHtml || '');
+    const fromName = originalMessage.from.name || originalMessage.from.email;
+    const toList = originalMessage.to.map(addr => `${addr.name || addr.email} <${addr.email}>`).join(', ');
+
+    return `\n\n\n--- Forwarded Message ---\nFrom: ${fromName} <${originalMessage.from.email}>\nTo: ${toList}\nDate: ${date}\nSubject: ${originalMessage.subject}\n\n${originalText}`;
   }
 
   private stripHtml(html: string): string {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     return doc.body.textContent || '';
-  }
-
-  private extractDraftId(message: MessageDto): string | null {
-    // Try to extract draft ID from message-id or other headers
-    if (message.id) {
-      return `draft_msg_${message.id}`;
-    }
-    return null;
   }
 
   getComposeTitle(): string {
@@ -953,29 +829,15 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  private loadContacts(): void {
-    this.loadingContacts = true;
-    this.backendService.getImapContacts(50).subscribe({
-      next: (contacts) => {
-        this.contacts = contacts.sort((a, b) => b.count - a.count);
-        this.loadingContacts = false;
-      },
-      error: (error) => {
-        console.error('Failed to load contacts:', error);
-        this.loadingContacts = false;
-      }
-    });
-  }
-
   isFormValid(): boolean {
     return !!(this.toRecipients.length > 0 &&
              this.toRecipients.every(r => r.isValid) &&
              this.ccRecipients.every(r => r.isValid) &&
              this.bccRecipients.every(r => r.isValid) &&
-             this.emailData.subject && 
-             this.emailData.message &&
+             this.emailData.subject &&
+             this.emailData.bodyText &&
              this.emailData.subject.trim() !== '' &&
-             this.emailData.message.trim() !== '');
+             this.emailData.bodyText.trim() !== '');
   }
 
   isValidEmail(email: string): boolean {
@@ -983,7 +845,7 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
     return emailRegex.test(email);
   }
 
-  sendEmail(): void {
+  async sendEmail(): Promise<void> {
     if (this.sending) return;
 
     // Show validation errors if form is invalid
@@ -994,227 +856,68 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
 
     this.sending = true;
     this.showValidationErrors = false;
-    
-    this.backendService.sendEmail(this.emailData).subscribe({
-      next: (response) => {
-        this.sending = false;
-        if (response.success) {
-          // Delete the draft since email was sent successfully
-          this.deleteDraft();
-          this.emailSent.emit();
-          this.resetForm();
-        } else {
-          this.errorOccurred.emit('Failed to send email');
+
+    try {
+      if (this.attachmentFiles.length > 0) {
+        const unprocessedAttachments = this.emailData.attachments!.filter(att => !att.content);
+        if (unprocessedAttachments.length > 0) {
+          await this.onAttachmentsChange(this.attachmentFiles);
         }
-      },
-      error: (error) => {
-        this.sending = false;
-        this.errorOccurred.emit(`Failed to send email: ${error.message || error}`);
       }
-    });
-  }
 
-  saveDraft(): void {
-    this.saveDraftManual();
-  }
-
-  private saveDraftManual(): void {
-    console.log('saveDraftManual called');
-    if (this.savingDraft) {
-      console.log('Already saving draft, skipping');
-      return;
-    }
-    
-    const currentContent = this.getCurrentContentHash();
-    const hasContent = this.hasContentToSave();
-    const contentChanged = currentContent !== this.lastSavedContent;
-    
-    console.log('Draft save check:', {
-      hasContent,
-      contentChanged,
-      currentContent: currentContent.substring(0, 50) + '...',
-      lastSavedContent: this.lastSavedContent.substring(0, 50) + '...',
-      currentDraftId: this.currentDraftId
-    });
-    
-    if (!hasContent) {
-      console.log('No content to save, skipping');
-      this.draftSaveStatus = 'error';
-      setTimeout(() => this.draftSaveStatus = 'none', 2000);
-      return;
-    }
-    
-    if (!contentChanged) {
-      console.log('Content unchanged, draft already up to date');
-      // Show a brief "already saved" status
-      this.draftSaveStatus = 'saved';
-      setTimeout(() => this.draftSaveStatus = 'none', 2000);
-      return;
-    }
-
-    this.savingDraft = true;
-    this.draftSaveStatus = 'saving';
-    this.updateEmailData();
-
-    console.log('Sending draft save request with ID:', this.currentDraftId);
-    
-    this.backendService.saveDraft(this.emailData, this.currentDraftId || undefined).subscribe({
-      next: (response) => {
-        console.log('Draft save response:', response);
-        if (response.success) {
-          const wasNewDraft = !this.currentDraftId;
-          this.currentDraftId = response.draftId;
-          this.lastSavedContent = currentContent;
-          this.draftSaveStatus = 'saved';
-          console.log('Draft saved successfully with ID:', response.draftId);
-          
-          // Emit event to update folder count (only for new drafts)
-          this.draftSaved.emit({ isNew: wasNewDraft });
-        } else {
-          this.draftSaveStatus = 'error';
-          console.error('Failed to save draft:', response);
-        }
-        this.savingDraft = false;
-        
-        // Reset status after 3 seconds
-        setTimeout(() => {
-          if (this.draftSaveStatus === 'saved' || this.draftSaveStatus === 'error') {
-            this.draftSaveStatus = 'none';
+      this.backendService.sendEmail(this.emailData)
+        .pipe(
+          switchMap(() => this.draftId ? this.backendService.deleteDraft(this.draftId) : of(true))
+        )
+        .subscribe({
+          next: () => {
+            this.sending = false;
+            this.emailSent.emit();
+            this.resetForm();
+          },
+          error: (error) => {
+            this.sending = false;
+            this.errorOccurred.emit(`Failed to send email: ${error.message || error}`);
           }
-        }, 3000);
-      },
-      error: (error) => {
-        this.savingDraft = false;
-        this.draftSaveStatus = 'error';
-        console.error('Draft save error:', error);
-        
-        // Reset status after 3 seconds
-        setTimeout(() => {
-          this.draftSaveStatus = 'none';
-        }, 3000);
-      }
-    });
-  }
-
-  private startAutoSave(): void {
-    this.stopAutoSave(); // Clear any existing timer
-    this.autoSaveTimer = setInterval(() => {
-      this.saveDraftAuto();
-    }, 60000); // Save every 60 seconds (1 minute)
-  }
-
-  private stopAutoSave(): void {
-    if (this.autoSaveTimer) {
-      clearInterval(this.autoSaveTimer);
-      this.autoSaveTimer = null;
+        });
+    } catch (error) {
+      this.sending = false;
+      this.errorOccurred.emit(`Failed to process attachments: ${error}`);
     }
   }
 
-  private saveDraftAuto(): void {
-    if (this.sending || this.savingDraft) return;
-    
-    const currentContent = this.getCurrentContentHash();
-    if (!this.hasContentToSave() || currentContent === this.lastSavedContent) {
-      return;
-    }
-
-    this.savingDraft = true;
-    this.draftSaveStatus = 'saving';
-    this.updateEmailData();
-
-    this.backendService.saveDraft(this.emailData, this.currentDraftId || undefined).subscribe({
-      next: (response) => {
-        if (response.success) {
-          const wasNewDraft = !this.currentDraftId;
-          this.currentDraftId = response.draftId;
-          this.lastSavedContent = currentContent;
-          this.draftSaveStatus = 'saved';
-          
-          // Emit event to update folder count (for auto-save too, only for new drafts)
-          this.draftSaved.emit({ isNew: wasNewDraft });
-        } else {
-          this.draftSaveStatus = 'error';
-        }
-        this.savingDraft = false;
-        
-        // Reset status after 3 seconds for auto-save
-        setTimeout(() => {
-          if (this.draftSaveStatus === 'saved' || this.draftSaveStatus === 'error') {
-            this.draftSaveStatus = 'none';
-          }
-        }, 3000);
-      },
-      error: (error) => {
-        this.savingDraft = false;
-        this.draftSaveStatus = 'error';
-        console.error('Auto-save error:', error);
-        
-        // Reset status after 3 seconds
-        setTimeout(() => {
-          this.draftSaveStatus = 'none';
-        }, 3000);
-      }
-    });
-  }
-
-  private hasContentToSave(): boolean {
-    return !!(this.emailData.subject?.trim() || 
-              this.emailData.message?.trim() || 
-              this.toRecipients.length > 0 ||
-              this.ccRecipients.length > 0 ||
-              this.bccRecipients.length > 0 ||
-              (this.emailData.attachments && this.emailData.attachments.length > 0));
-  }
-
-  private getCurrentContentHash(): string {
-    // Create a simple hash of the current content for comparison
-    const content = JSON.stringify({
-      subject: this.emailData.subject || '',
-      message: this.emailData.message || '',
-      to: this.toRecipients.map(r => r.email).sort(),
-      cc: this.ccRecipients.map(r => r.email).sort(),
-      bcc: this.bccRecipients.map(r => r.email).sort(),
-      attachments: (this.emailData.attachments || []).map(f => f.name + f.size).sort()
-    });
-    return btoa(content);
-  }
-
-  private deleteDraft(): void {
-    // Delete current auto-saved draft
-    if (this.currentDraftId) {
-      this.backendService.deleteDraft(this.currentDraftId).subscribe({
-        next: (response) => {
-          if (response.success) {
-            console.log('Current draft deleted successfully:', response.message);
-            this.currentDraftId = null;
-            this.lastSavedContent = '';
-          }
-        },
-        error: (error) => {
-          console.error('Failed to delete current draft:', error);
-        }
-      });
-    }
-    
-    // Delete original draft if this was an edit operation
-    if (this.originalDraftId) {
-      this.backendService.deleteDraft(this.originalDraftId).subscribe({
-        next: (response) => {
-          if (response.success) {
-            console.log('Original draft deleted successfully:', response.message);
-            this.originalDraftId = null;
-          }
-        },
-        error: (error) => {
-          console.error('Failed to delete original draft:', error);
-        }
-      });
-    }
-  }
 
   // Attachment event handlers
-  onAttachmentsChange(attachments: File[]): void {
-    this.emailData.attachments = attachments;
+  async onAttachmentsChange(attachments: File[]): Promise<void> {
+    this.attachmentFiles = attachments;
+    this.emailData.attachments = [];
+
+    const attachmentPromises = attachments.map((file) => {
+      return new Promise<AttachmentDto>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64Content = e.target?.result as string;
+          // Remove the data URL prefix (e.g., "data:image/png;base64,")
+          const base64Data = base64Content.split(',')[1] || base64Content;
+
+          resolve(new AttachmentDto({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            content: base64Data
+          }));
+        };
+        reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+        reader.readAsDataURL(file);
+      });
+    });
+
+    try {
+      this.emailData.attachments = await Promise.all(attachmentPromises);
+    } catch (error) {
+      console.error('Error processing attachments:', error);
+      this.onAttachmentError('Failed to process one or more attachments');
+    }
   }
 
   onAttachmentError(errorMessage: string): void {
@@ -1228,30 +931,131 @@ export class EmailComposeComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   closeCompose(): void {
-    this.stopAutoSave();
     this.composeClosed.emit();
     this.resetForm();
   }
 
   private resetForm(): void {
-    // Stop auto-save when resetting form
-    this.stopAutoSave();
-    
-    this.emailData = new SendEmailDto();
+    this.emailData = new MessageDto();
     this.toRecipients = [];
     this.ccRecipients = [];
     this.bccRecipients = [];
+    this.attachmentFiles = [];
     this.showCc = false;
     this.showBcc = false;
     this.showValidationErrors = false;
-    
-    // Reset draft-related properties
-    this.currentDraftId = null;
-    this.lastSavedContent = '';
-    this.draftSaveStatus = 'none';
+    // Reset draft state
+    this.draftId = null;
+    this.draftSaveStatus = 'idle';
     this.savingDraft = false;
-    
-    // Restart auto-save for new composition
-    this.startAutoSave();
+  }
+
+  // Draft functionality methods
+  private startAutoSave(): void {
+    this.autoSaveTimer = setInterval(() => {
+      this.autoSaveDraft();
+    }, 30000); // 30 seconds
+  }
+
+  private stopAutoSave(): void {
+    if (this.autoSaveTimer) {
+      clearInterval(this.autoSaveTimer);
+      this.autoSaveTimer = null;
+    }
+  }
+
+  private autoSaveDraft(): void {
+    // Only auto-save if form has content and is not currently sending
+    if (!this.sending && this.shouldAutoSave()) {
+      this.draftSaveStatus = 'saving';
+      this.saveDraftInternal(false);
+    }
+  }
+
+  private shouldAutoSave(): boolean {
+    return !!(
+      (this.toRecipients.length > 0 || this.ccRecipients.length > 0 || this.bccRecipients.length > 0) ||
+      (this.emailData.subject && this.emailData.subject.trim()) ||
+      (this.emailData.bodyText && this.emailData.bodyText.trim()) ||
+      (this.attachmentFiles && this.attachmentFiles.length > 0)
+    );
+  }
+
+  saveDraft(): void {
+    if (this.savingDraft || this.sending) return;
+
+    this.savingDraft = true;
+    this.draftSaveStatus = 'saving';
+    this.saveDraftInternal(true);
+  }
+
+  private saveDraftInternal(isManualSave: boolean): void {
+    // Ensure email data is up to date
+    this.updateEmailData();
+
+    // Prepare draft message
+    const draftMessage = { ...this.emailData };
+    const wasNewDraft = !this.draftId;
+    draftMessage.id = this.draftId ? this.draftId : 0;
+    this.backendService.saveDraft(draftMessage).subscribe({
+      next: (newDraftId: number) => {
+        this.draftId = newDraftId;
+        this.draftSaveStatus = 'saved';
+        if (isManualSave) {
+          this.savingDraft = false;
+        }
+
+        // Emit draftSaved event to trigger message list and folder count updates
+        this.draftSaved.emit({ isNew: wasNewDraft });
+
+        // Clear saved status after 3 seconds
+        setTimeout(() => {
+          if (this.draftSaveStatus === 'saved') {
+            this.draftSaveStatus = 'idle';
+          }
+        }, 3000);
+      },
+      error: (error) => {
+        console.error('Failed to save draft:', error);
+        this.draftSaveStatus = 'error';
+        if (isManualSave) {
+          this.savingDraft = false;
+          this.errorOccurred.emit('Failed to save draft');
+        }
+
+        // Clear error status after 5 seconds
+        setTimeout(() => {
+          if (this.draftSaveStatus === 'error') {
+            this.draftSaveStatus = 'idle';
+          }
+        }, 5000);
+      }
+    });
+  }
+
+  private loadDraftData(draftMessage: MessageDto): void {
+    // Load recipients
+    if (draftMessage.to) {
+      this.toRecipients = draftMessage.to.map(addr => this.parseRecipientFromAddress(addr)).filter(r => r !== null) as RecipientChip[];
+    }
+    if (draftMessage.cc && draftMessage.cc.length > 0) {
+      this.ccRecipients = draftMessage.cc.map(addr => this.parseRecipientFromAddress(addr)).filter(r => r !== null) as RecipientChip[];
+      this.showCc = true;
+    }
+    if (draftMessage.bcc && draftMessage.bcc.length > 0) {
+      this.bccRecipients = draftMessage.bcc.map(addr => this.parseRecipientFromAddress(addr)).filter(r => r !== null) as RecipientChip[];
+      this.showBcc = true;
+    }
+
+    // Load other draft data
+    this.emailData = { ...draftMessage };
+
+    // Load attachments if any (Note: attachments in drafts might need special handling)
+    if (draftMessage.attachments && draftMessage.attachments.length > 0) {
+      // This might need additional implementation depending on how draft attachments are handled
+      this.emailData.attachments = draftMessage.attachments;
+    }
+
+    this.updateEmailData();
   }
 }

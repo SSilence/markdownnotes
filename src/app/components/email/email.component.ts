@@ -9,22 +9,25 @@ import { EmailFoldersComponent } from './email-folders.component';
 import { EmailMessagesComponent } from './email-messages.component';
 import { EmailMessageComponent } from './email-message.component';
 import { EmailComposeComponent, ComposeData, ComposeMode } from './email-compose.component';
-import { AlertComponent } from '../alert.component';
+import { AlertComponent } from '../shared/alert.component';
+import { ResizableEmailPanelsComponent } from '../shared/resizable-email-panels.component';
+import { Contact } from './recipient-input.component';
 
 @Component({
   selector: 'app-email',
   imports: [
-    CommonModule, 
-    ClarityModule, 
-    EmailFoldersComponent, 
-    EmailMessagesComponent, 
+    CommonModule,
+    ClarityModule,
+    EmailFoldersComponent,
+    EmailMessagesComponent,
     EmailMessageComponent,
     EmailComposeComponent,
-    AlertComponent
+    AlertComponent,
+    ResizableEmailPanelsComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <div class="email-client" [style]="clientStyles">
+    <div class="email-client">
       <!-- Loading Overlay -->
       @if (loading) {
         <div class="loading-overlay">
@@ -34,90 +37,83 @@ import { AlertComponent } from '../alert.component';
 
       <!-- Error Alert -->
       <app-alert [error]="error" [sticky]="true"></app-alert>
-      
+
       <!-- Success Alert -->
       <app-alert [message]="successMessage" [type]="'success'" [sticky]="true"></app-alert>
-      
-      <!-- Left Panel: Folders -->
-      <div class="panel-container folder-panel-container">
+
+      <!-- Resizable Email Panels -->
+      <app-resizable-email-panels>
+
+        <!-- Left Panel: Folders -->
         <app-email-folders
+          slot="folders"
           [selectedFolder]="selectedFolder"
           (folderSelected)="onFolderSelected($event)"
-          (foldersLoaded)="onFoldersLoaded($event)"
+          (folderTrashLoaded)="trashFolder = $event"
           (errorOccurred)="onFolderError($event)"
           (messageMovedToFolder)="onMessageMovedToFolder($event)"
           (composeRequested)="startNewEmail()">
         </app-email-folders>
-      </div>
 
-      <!-- Resizer between folders and messages -->
-      <div class="panel-resizer" 
-           (mousedown)="startResize($event, 'folder-message')"
-           title="Drag to resize panels">
-      </div>
-
-      <!-- Middle Panel: Messages -->
-      <div class="panel-container message-panel-container">
+        <!-- Middle Panel: Messages -->
         <app-email-messages
+          slot="messages"
           [selectedFolder]="selectedFolder"
           [selectedMessage]="selectedMessage"
           (messageSelected)="onMessageSelected($event)"
-          (messagesLoaded)="onMessagesLoaded($event)"
           (messageStatusChanged)="onMessageStatusChanged($event)"
+          (folderPurged)="onFolderPurged($event)"
+          (markedAllAsSeen)="onMarkedAllAsSeen($event)"
           (errorOccurred)="onMessageError($event)">
         </app-email-messages>
-      </div>
 
-      <!-- Resizer between messages and message detail -->
-      <div class="panel-resizer" 
-           (mousedown)="startResize($event, 'message-detail')"
-           title="Drag to resize panels">
-      </div>
-
-      <!-- Right Panel: Message Detail or Compose -->
-      <div class="panel-container message-detail-panel-container">
-        
-        <!-- Compose New Email Button -->
-        @if (!showCompose && !selectedMessage) {
-          <div class="empty-panel">
-            <div class="empty-state">
-              <cds-icon shape="envelope" size="48"></cds-icon>
-              <p class="empty-text">Select a message to view details</p>
-              <button 
-                class="btn btn-primary"
-                (click)="startNewEmail()">
-                <cds-icon shape="plus"></cds-icon>
-                Compose New Email
-              </button>
+        <!-- Right Panel: Message Detail or Compose -->
+        <div slot="message-detail">
+          @if (!showCompose && !selectedMessage) {
+            <div class="empty-panel">
+              <div class="empty-state">
+                <cds-icon shape="envelope" size="48"></cds-icon>
+                <p class="empty-text">Select a message to view details</p>
+                <button
+                  class="btn btn-primary"
+                  (click)="startNewEmail()">
+                  <cds-icon shape="plus"></cds-icon>
+                  Compose New Email
+                </button>
+              </div>
             </div>
-          </div>
-        }
+          }
 
-        @if (!showCompose && selectedMessage) {
-          <app-email-message
-            [selectedMessage]="selectedMessage"
-            [selectedFolder]="selectedFolder"
-            (messageDetailsLoaded)="onMessageDetailsLoaded($event)"
-            (messageStatusChanged)="onMessageStatusChanged($event)"
-            (messageDeleted)="onMessageDeleted($event)"
-            (replyRequested)="onReplyRequested($event)"
-            (replyAllRequested)="onReplyAllRequested($event)"
-            (forwardRequested)="onForwardRequested($event)"
-            (editDraftRequested)="onEditDraftRequested($event)"
-            (errorOccurred)="onMessageDetailError($event)">
-          </app-email-message>
-        }
+          @if (!showCompose && selectedMessage) {
+            <app-email-message
+              [selectedMessage]="selectedMessage"
+              [selectedFolder]="selectedFolder"
+              [trashFolder]="trashFolder"
+              (messageDetailsLoaded)="onMessageDetailsLoaded($event)"
+              (messageStatusChanged)="onMessageStatusChanged($event)"
+              (messageDeleted)="onMessageDeleted($event)"
+              (messageDeleteFailed)="onMessageDeleteFailed($event)"
+              (replyRequested)="onReplyRequested($event)"
+              (replyAllRequested)="onReplyAllRequested($event)"
+              (forwardRequested)="onForwardRequested($event)"
+              (editDraftRequested)="onEditDraftRequested($event)"
+              (errorOccurred)="onMessageDetailError($event)">
+            </app-email-message>
+          }
 
-        @if (showCompose) {
-          <app-email-compose
-            [composeData]="composeData"
-            (emailSent)="onEmailSent()"
-            (composeClosed)="onComposeClosed()"
-            (draftSaved)="onDraftSaved($event)"
-            (errorOccurred)="onComposeError($event)">
-          </app-email-compose>
-        }
-      </div>
+          @if (showCompose) {
+            <app-email-compose
+              [composeData]="composeData"
+              [contacts]="contacts"
+              (emailSent)="onEmailSent()"
+              (composeClosed)="onComposeClosed()"
+              (draftSaved)="onDraftSaved($event)"
+              (errorOccurred)="onComposeError($event)">
+            </app-email-compose>
+          }
+        </div>
+
+      </app-resizable-email-panels>
     </div>
   `,
   styles: [`
@@ -126,74 +122,19 @@ import { AlertComponent } from '../alert.component';
     }
 
     .email-client {
-      display: flex;
       height: 100vh;
       height: calc(100vh - 60px);
       background-color: var(--clr-global-app-background);
       position: relative;
     }
 
-    .panel-container {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .folder-panel-container,
-    .message-panel-container {
-      border-right: 1px solid var(--clr-color-neutral-300);
-    }
-
-    .folder-panel-container {
-      width: var(--folder-panel-width, 300px);
-      min-width: 200px;
-      max-width: 500px;
-    }
-
-    .message-panel-container {
-      width: var(--message-panel-width, 400px);
-      min-width: 300px;
-      max-width: 600px;
-    }
-
-    .message-detail-panel-container {
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .panel-container > * {
-      flex: 1;
-      height: 100%;
-    }
-
-    .panel-resizer {
-      width: 4px;
-      background: var(--clr-color-neutral-200);
-      cursor: col-resize;
-      position: relative;
-      transition: background-color 0.2s ease;
-      flex-shrink: 0;
-    }
-
-    .panel-resizer:hover {
-      background: var(--clr-color-action-600);
-    }
-
-    .panel-resizer.resizing {
-      background: var(--clr-color-action-600);
-    }
-
-    .email-client.resizing {
-      cursor: col-resize;
-      user-select: none;
-    }
-
     .empty-panel {
-      height: 100%;
+      height: calc(100vh - var(--clr-header-height));
       display: flex;
       align-items: center;
       justify-content: center;
       background: var(--clr-global-app-background);
+      flex: 1;
     }
 
     .empty-state {
@@ -226,10 +167,6 @@ import { AlertComponent } from '../alert.component';
       align-items: center;
     }
 
-    .email-client.resizing * {
-      pointer-events: none;
-    }
-
     .loading-overlay {
       position: absolute;
       top: 0;
@@ -242,33 +179,12 @@ import { AlertComponent } from '../alert.component';
       justify-content: center;
       z-index: 1000;
     }
-
-    @media (max-width: 768px) {
-      .email-client {
-        flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.25rem;
-      }
-
-      .panel-resizer {
-        display: none;
-      }
-
-      .folder-panel-container,
-      .message-panel-container,
-      .message-detail-panel-container {
-        width: 100% !important;
-        min-width: unset !important;
-        max-width: unset !important;
-        border-right: none;
-        border-bottom: 1px solid var(--clr-color-neutral-300);
-      }
-    }
   `]
 })
-export class EmailComponent implements OnInit, OnDestroy {
-
+export class EmailComponent implements OnInit {
+  
   selectedFolder: FolderDto | null = null;
+  trashFolder: FolderDto | null = null;
   selectedMessage: MessageDto | null = null;
   loading = false;
   error: string | null = null;
@@ -278,51 +194,36 @@ export class EmailComponent implements OnInit, OnDestroy {
   showCompose = false;
   composeData: ComposeData | null = null;
 
+  contacts: Contact[] = [];
+
   @ViewChild(EmailMessagesComponent) emailMessagesComponent!: EmailMessagesComponent;
   @ViewChild(EmailFoldersComponent) emailFoldersComponent!: EmailFoldersComponent;
-
-  // Panel resizing properties
-  private panelWidths: PanelWidths = { folderPanel: 300, messagePanel: 400, messageDetailPanel: -1 };
-  clientStyles = '';
-  private resizing = false;
-  private resizeType: 'folder-message' | 'message-detail' | null = null;
-  private startX = 0;
-  private startWidths = { folder: 0, message: 0 };
-
-  // Event listeners
-  private mouseMoveListener?: (event: MouseEvent) => void;
-  private mouseUpListener?: (event: MouseEvent) => void;
 
   constructor(private backendService: BackendService, private storageService: StorageService, private elementRef: ElementRef) { }
 
   ngOnInit(): void {
-    // Load saved panel widths
-    this.panelWidths = this.storageService.getPanelWidths();
-    this.updatePanelStyles();
-    
-    // Folders will be loaded by the EmailFoldersComponent
+    this.loadContacts();
   }
 
-  ngOnDestroy(): void {
-    // Clean up event listeners
-    this.removeEventListeners();
-  }
-
-  private updatePanelStyles(): void {
-    this.clientStyles = `
-      --folder-panel-width: ${this.panelWidths.folderPanel}px;
-      --message-panel-width: ${this.panelWidths.messagePanel}px;
-    `;
+  private loadContacts(): void {
+    this.backendService.getImapContacts().subscribe({
+      next: (contacts) => {
+        this.contacts = contacts.map(addr => ({
+          email: addr.email,
+          name: addr.name || addr.email,
+          type: 'contact' as const,
+          count: 1
+        }));
+      },
+      error: (error) => {
+        console.error('Failed to load contacts:', error);
+      }
+    });
   }
 
   onFolderSelected(folder: FolderDto): void {
     this.selectedFolder = folder;
     this.selectedMessage = null;
-  }
-
-  onFoldersLoaded(folders: FolderDto[]): void {
-    // Folders are now managed by the EmailFoldersComponent
-    // This event can be used if parent component needs to know when folders are loaded
   }
 
   onFolderError(errorMessage: string): void {
@@ -331,12 +232,6 @@ export class EmailComponent implements OnInit, OnDestroy {
 
   onMessageSelected(message: MessageDto): void {
     this.selectedMessage = message;
-    // Message details will be loaded by the EmailMessageComponent
-  }
-
-  onMessagesLoaded(messages: MessageDto[]): void {
-    // Messages are now managed by the EmailMessagesComponent
-    // This event can be used if parent component needs to know when messages are loaded
   }
 
   onMessageError(errorMessage: string): void {
@@ -344,7 +239,6 @@ export class EmailComponent implements OnInit, OnDestroy {
   }
 
   onMessageDetailsLoaded(message: MessageDto): void {
-    // Update the selectedMessage with the full details
     this.selectedMessage = message;
   }
 
@@ -355,7 +249,7 @@ export class EmailComponent implements OnInit, OnDestroy {
   onMessageStatusChanged(statusChange: {messageId: number, seen: boolean}): void {
     // Update the selectedMessage status
     if (this.selectedMessage && this.selectedMessage.id === statusChange.messageId) {
-      this.selectedMessage.seen = statusChange.seen;
+      this.selectedMessage.isSeen = statusChange.seen;
     }
     
     // Notify EmailMessagesComponent to update the message in the list
@@ -365,10 +259,7 @@ export class EmailComponent implements OnInit, OnDestroy {
 
     // Update folder unread count
     if (this.emailFoldersComponent && this.selectedFolder) {
-      // If message was marked as read, decrease unread count
-      // If message was marked as unread, increase unread count
-      const increment = statusChange.seen ? -1 : 1;
-      this.emailFoldersComponent.updateFolderUnreadCount(this.selectedFolder.name, increment);
+      this.emailFoldersComponent.updateFolderCounts();
     }
   }
 
@@ -376,134 +267,22 @@ export class EmailComponent implements OnInit, OnDestroy {
     this.error = null;
   }
 
-  /**
-   * Reset panel widths to default values
-   */
-  resetPanelWidths(): void {
-    this.storageService.deletePanelWidths();
-    this.panelWidths = this.storageService.getPanelWidths();
-    this.updatePanelStyles();
-  }
-
-  // Panel resizing methods
-  startResize(event: MouseEvent, type: 'folder-message' | 'message-detail'): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.resizing = true;
-    this.resizeType = type;
-    this.startX = event.clientX;
-    
-    // Store current widths
-    this.startWidths.folder = this.panelWidths.folderPanel;
-    this.startWidths.message = this.panelWidths.messagePanel;
-
-    // Add resizing class to client
-    const emailClient = this.elementRef.nativeElement.querySelector('.email-client');
-    if (emailClient) {
-      emailClient.classList.add('resizing');
-    }
-
-    // Add resizing class to the resizer
-    const target = event.target as HTMLElement;
-    target.classList.add('resizing');
-
-    // Add global event listeners
-    this.mouseMoveListener = this.onMouseMove.bind(this);
-    this.mouseUpListener = this.onMouseUp.bind(this);
-    
-    document.addEventListener('mousemove', this.mouseMoveListener);
-    document.addEventListener('mouseup', this.mouseUpListener);
-  }
-
-  private onMouseMove(event: MouseEvent): void {
-    if (!this.resizing || !this.resizeType) return;
-
-    event.preventDefault();
-    const deltaX = event.clientX - this.startX;
-
-    if (this.resizeType === 'folder-message') {
-      // Resize folder panel
-      const newFolderWidth = Math.max(200, Math.min(500, this.startWidths.folder + deltaX));
-      this.panelWidths.folderPanel = newFolderWidth;
-    } else if (this.resizeType === 'message-detail') {
-      // Resize message panel
-      const newMessageWidth = Math.max(300, Math.min(600, this.startWidths.message + deltaX));
-      this.panelWidths.messagePanel = newMessageWidth;
-    }
-
-    this.updatePanelStyles();
-  }
-
-  private onMouseUp(event: MouseEvent): void {
-    if (!this.resizing) return;
-
-    this.resizing = false;
-    this.resizeType = null;
-
-    // Remove resizing class
-    const emailClient = this.elementRef.nativeElement.querySelector('.email-client');
-    if (emailClient) {
-      emailClient.classList.remove('resizing');
-    }
-
-    // Remove resizing class from all resizers
-    const resizers = this.elementRef.nativeElement.querySelectorAll('.panel-resizer');
-    resizers.forEach((resizer: HTMLElement) => {
-      resizer.classList.remove('resizing');
-    });
-
-    // Save the new widths
-    this.storageService.setPanelWidths(this.panelWidths);
-
-    // Remove global event listeners
-    this.removeEventListeners();
-  }
-
-  private removeEventListeners(): void {
-    if (this.mouseMoveListener) {
-      document.removeEventListener('mousemove', this.mouseMoveListener);
-      this.mouseMoveListener = undefined;
-    }
-    if (this.mouseUpListener) {
-      document.removeEventListener('mouseup', this.mouseUpListener);
-      this.mouseUpListener = undefined;
-    }
-  }
-
   onMessageMovedToFolder(event: {messageId: number, sourceFolder: string, targetFolder: string, wasUnread: boolean}): void {
-    // Show loading state
     this.loading = true;
-    
     this.backendService.moveEmail(event.messageId, event.sourceFolder, event.targetFolder).subscribe({
       next: (response) => {
         this.loading = false;
-        
-        if (response.success) {
-          // Update folder counts for both source and target folders
-          if (this.emailFoldersComponent) {
-            // Source folder: decrease both total and unread counts (if applicable)
-            const unreadDecrement = event.wasUnread ? -1 : 0;
-            this.emailFoldersComponent.updateFolderCounts(event.sourceFolder, unreadDecrement, -1);
-            
-            // Target folder: increase both total and unread counts (if applicable)
-            const unreadIncrement = event.wasUnread ? 1 : 0;
-            this.emailFoldersComponent.updateFolderCounts(event.targetFolder, unreadIncrement, 1);
-          }
-          
-          // Refresh the messages list if we're currently viewing the source folder
-          if (this.selectedFolder && this.selectedFolder.name === event.sourceFolder) {
-            if (this.emailMessagesComponent) {
-              this.emailMessagesComponent.refreshMessages();
-            }
-          }
-          
-          // Clear the selected message if it was the one that was moved
-          if (this.selectedMessage && this.selectedMessage.id === event.messageId) {
-            this.selectedMessage = null;
-          }
-        } else {
-          this.error = 'Failed to move email';
+
+        if (this.emailFoldersComponent) {
+          this.emailFoldersComponent.updateFolderCounts();
+        }
+
+        if (this.selectedFolder && this.selectedFolder.name === event.sourceFolder && this.emailMessagesComponent) {
+          this.emailMessagesComponent.refreshMessages();
+        }
+
+        if (this.selectedMessage && this.selectedMessage.id === event.messageId) {
+          this.selectedMessage = null;
         }
       },
       error: (err) => {
@@ -514,31 +293,46 @@ export class EmailComponent implements OnInit, OnDestroy {
   }
 
   onMessageDeleted(event: {messageId: number, sourceFolder: string, targetFolder: string, wasUnread: boolean}): void {
-    // Update folder counts for both source and target folders
-    if (this.emailFoldersComponent) {
-      // Source folder: decrease both total and unread counts (if applicable)
-      const unreadDecrement = event.wasUnread ? -1 : 0;
-      this.emailFoldersComponent.updateFolderCounts(event.sourceFolder, unreadDecrement, -1);
-      
-      // Target folder (trash): increase both total and unread counts (if applicable)
-      const unreadIncrement = event.wasUnread ? 1 : 0;
-      this.emailFoldersComponent.updateFolderCounts(event.targetFolder, unreadIncrement, 1);
-    }
-    
-    // Refresh the messages list if we're currently viewing the source folder
-    if (this.selectedFolder && this.selectedFolder.name === event.sourceFolder) {
-      if (this.emailMessagesComponent) {
-        this.emailMessagesComponent.refreshMessages();
+    let nextMessage: MessageDto | null = null;
+
+    if (this.emailMessagesComponent && this.selectedFolder && this.selectedFolder.name === event.sourceFolder) {
+      const messageIndex = this.emailMessagesComponent.messages.findIndex(msg => msg.id === event.messageId);
+      if (messageIndex > -1) {
+        if (this.selectedMessage && this.selectedMessage.id === event.messageId) {
+          // Try to select the next message in the list (same index after deletion)
+          if (messageIndex < this.emailMessagesComponent.messages.length - 1) {
+            nextMessage = this.emailMessagesComponent.messages[messageIndex + 1];
+          }
+          // If we deleted the last message, select the previous one
+          else if (messageIndex > 0) {
+            nextMessage = this.emailMessagesComponent.messages[messageIndex - 1];
+          }
+        }
+        this.emailMessagesComponent.removeMessageOptimistically(event.messageId);
       }
     }
-    
-    // Clear the selected message if it was the one that was deleted
+
+    // Update selected message - either select next message or clear selection
     if (this.selectedMessage && this.selectedMessage.id === event.messageId) {
-      this.selectedMessage = null;
+      this.selectedMessage = nextMessage;
+
+      // If we selected a new message, trigger selection in the messages component
+      // Use skipBackendCall=true to avoid automatically marking as read during auto-selection
+      if (nextMessage && this.emailMessagesComponent) {
+        this.emailMessagesComponent.selectMessage(nextMessage, true);
+      }
+    }
+
+    // Update folder counts for both source and target folders
+    if (this.emailFoldersComponent) {
+      this.emailFoldersComponent.updateFolderCounts();
     }
   }
 
-  // Compose functionality methods
+  onMessageDeleteFailed(event: {messageId: number, sourceFolder: string, error: string}): void {
+    this.error = event.error;
+  }
+
   startNewEmail(): void {
     this.composeData = { mode: ComposeMode.NEW };
     this.showCompose = true;
@@ -568,34 +362,28 @@ export class EmailComponent implements OnInit, OnDestroy {
     this.showCompose = false;
     this.composeData = null;
     
-    // Clear any existing errors and show success message
     this.error = null;
     this.successMessage = 'Email sent successfully!';
     
-    // Clear success message after 5 seconds
     setTimeout(() => {
       this.successMessage = null;
     }, 5000);
     
-    // Update Sent folder count (+1 total)
     if (this.emailFoldersComponent) {
-      this.updateSentFolderCount();
+      this.emailFoldersComponent.updateFolderCounts();
     }
     
-    // Refresh messages list if we have a selected folder
     if (this.selectedFolder && this.emailMessagesComponent) {
       this.emailMessagesComponent.refreshMessages();
     }
   }
 
   onDraftSaved(event: { isNew: boolean }): void {
-    // Update Draft folder count (+1 total) only for new drafts
     if (event.isNew && this.emailFoldersComponent) {
-      this.updateDraftFolderCount();
+      this.emailFoldersComponent.updateFolderCounts();
     }
     
-    // Refresh messages list if we're viewing the drafts folder
-    if (this.selectedFolder && this.isDraftFolder(this.selectedFolder.name) && this.emailMessagesComponent) {
+    if (this.emailFoldersComponent.isDraftFolderSelected()) {
       this.emailMessagesComponent.refreshMessages();
     }
   }
@@ -609,25 +397,28 @@ export class EmailComponent implements OnInit, OnDestroy {
     this.error = error;
   }
 
-  private updateSentFolderCount(): void {
-    // Find and update the sent folder count
-    const sentFolder = this.emailFoldersComponent.findSentFolder();
-    if (sentFolder) {
-      this.emailFoldersComponent.updateFolderTotalCount(sentFolder.name, 1);
+  onFolderPurged(folderName: string): void {
+    // Update folder counts after purge
+    if (this.emailFoldersComponent) {
+      this.emailFoldersComponent.updateFolderCounts();
     }
+
+    // Clear selected message since all messages were purged
+    this.selectedMessage = null;
+
+    // Show success message
+    this.error = null;
+    this.successMessage = `Successfully purged all emails from "${folderName}" folder.`;
+
+    setTimeout(() => {
+      this.successMessage = null;
+    }, 5000);
   }
 
-  private updateDraftFolderCount(): void {
-    // Find and update the draft folder count
-    const draftFolder = this.emailFoldersComponent.findDraftFolder();
-    if (draftFolder) {
-      this.emailFoldersComponent.updateFolderTotalCount(draftFolder.name, 1);
+  onMarkedAllAsSeen(folderName: string): void {
+    if (this.emailFoldersComponent) {
+      this.emailFoldersComponent.updateFolderCounts();
     }
-  }
-
-  private isDraftFolder(folderName: string): boolean {
-    const draftFolderNames = ['Drafts', 'Draft', 'Entwürfe', 'Entwurf'];
-    return draftFolderNames.includes(folderName);
   }
 
 }

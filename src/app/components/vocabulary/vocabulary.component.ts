@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from "@angular/core";
 import { switchMap } from "rxjs";
 import { Page } from "src/app/models/page";
 import { BackendService } from "src/app/services/backend.service";
-import { AlertComponent } from "../alert.component";
+import { AlertComponent } from "../shared/alert.component";
 import { ClarityModule } from "@clr/angular";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
