@@ -53,8 +53,8 @@ import { AlertComponent } from '../shared/alert.component';
                     </select>
                 </div>
                 </div>
-                <button class="btn btn-primary" (click)="save(true)">save</button>
-                <button class="btn" (click)="save(false)" [ngClass]="{'btn-success-outline': success, 'btn-outline': !success}">save without show</button>
+                <button class="btn btn-success" (click)="save(false)">save</button>
+                <button class="btn btn-primary" (click)="save(true)">save & show</button>
                 @if (page.id) {
                     <button class="btn btn-link" [routerLink]="['/page', page!.id]">cancel</button>
                 }
