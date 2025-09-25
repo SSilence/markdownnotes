@@ -25,7 +25,11 @@
                 "src/favicon.ico",
                 "src/assets",
                 { "glob": "backend.php", "input": "./", "output": "./" },
-                { "glob": "backend_apikeys.php", "input": "./", "output": "./" },
+                { "glob": "backend_email.php", "input": "./", "output": "./" },
+                { "glob": "backend_pages.php", "input": "./", "output": "./" },
+                { "glob": "backend_vocabulary.php", "input": "./", "output": "./" },
+                { "glob": "config.php", "input": "./", "output": "./" },
+                { "glob": "**/*", "input": "./vendor", "output": "./vendor" },
                 { "glob": ".htaccess", "input": "./", "output": "./" },
                 { "glob": "**/*", "input": "./data", "output": "./data" }
               ],

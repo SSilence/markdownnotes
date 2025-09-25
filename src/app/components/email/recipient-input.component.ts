@@ -38,6 +38,7 @@ export interface Contact {
           #recipientInput
           type="text"
           class="recipient-input"
+          autocomplete="off"
           [placeholder]="placeholder"
           (input)="onInput($event)"
           (keydown)="onKeydown($event)"
