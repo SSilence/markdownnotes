@@ -20,6 +20,10 @@ import { firstValueFrom } from 'rxjs';
           scrolling="no"
           class="email-iframe">
         </iframe>
+      } @else if (message && message.bodyText) {
+        <div class="email-text-content">
+          <pre>{{ getSanitizedText() }}</pre>
+        </div>
       }
     </div>
   `,
@@ -33,6 +37,24 @@ import { firstValueFrom } from 'rxjs';
       min-height: 300px;
       border: none;
       overflow: hidden;
+    }
+
+    .email-text-content {
+      width: 100%;
+      padding: 0;
+      background: #fff;
+      border-radius: 4px;
+    }
+
+    .email-text-content pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+      color: #333;
+      border: none;
     }
   `]
 })
@@ -50,11 +72,15 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
   constructor(private sanitizer: DomSanitizer, private backendService: BackendService) {}
 
   ngAfterViewInit() {
-    this.updateIframeContent();
+    if (this.message?.bodyHtml) {
+      this.updateIframeContent();
+    }
   }
 
   ngOnChanges() {
-    this.updateIframeContent();
+    if (this.message?.bodyHtml) {
+      this.updateIframeContent();
+    }
   }
 
   private sanitizedContent(rawContent: string): string {
@@ -291,6 +317,60 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
   private setupMessageListener() {
     window.removeEventListener('message', this.messageListener);
     window.addEventListener('message', this.messageListener);
+  }
+
+  getSanitizedText(): string {
+    if (!this.message?.bodyText) {
+      return '';
+    }
+
+    let text = this.message.bodyText;
+
+    // Pre-sanitize text formatting for better readability
+    text = this.normalizeTextFormatting(text);
+
+    // Use DOMPurify to sanitize the text as plain text
+    // This handles any HTML-like content that might be present in plain text emails
+    const sanitizedText = DOMPurify.sanitize(text, {
+      // Allow absolutely no HTML tags - this is plain text only
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+      // Keep the text content even when tags are removed
+      KEEP_CONTENT: true,
+      // Remove all data attributes
+      ALLOW_DATA_ATTR: false,
+      // Forbid all potentially dangerous elements
+      FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'form', 'input', 'textarea', 'button', 'select', 'option', 'link', 'style'],
+      // Forbid all event handlers and dangerous attributes
+      FORBID_ATTR: ['onerror', 'onclick', 'onload', 'onmouseover', 'onmouseout', 'onfocus', 'onblur', 'onsubmit', 'onchange', 'style', 'href', 'src'],
+      // Return as text, not HTML
+      RETURN_DOM: false,
+      RETURN_DOM_FRAGMENT: false,
+      // Additional security measures
+      SANITIZE_DOM: true,
+      // Remove any URI schemes that could be dangerous
+      ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+    });
+
+    // Apply final text length limit to prevent DoS attacks
+    return sanitizedText.substring(0, 50000); // Max 50KB of text
+  }
+
+  private normalizeTextFormatting(text: string): string {
+    return text
+      // Remove null bytes that could be used for injection
+      .replace(/\0/g, '')
+      // Normalize line endings to Unix format
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      // Reduce excessive whitespace but preserve single spaces and newlines
+      .replace(/[ \t]{2,}/g, ' ')
+      // Remove trailing whitespace from each line
+      .replace(/[ \t]+$/gm, '')
+      // Limit consecutive newlines to maximum 3 for readability
+      .replace(/\n{4,}/g, '\n\n\n')
+      // Trim leading/trailing whitespace from entire text
+      .trim();
   }
 
   ngOnDestroy() {
