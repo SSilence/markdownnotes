@@ -69,7 +69,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
 
   @ViewChild('emailContent', { static: false }) emailContent!: ElementRef<HTMLDivElement>;
 
-  htmlContentUrl: SafeResourceUrl = '';
+  htmlContentUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl('');
 
   private headerHeightSignal = signal(0);
 
