@@ -6,6 +6,7 @@
     "start": "ng serve",
     "noreload": "ng serve --no-live-reload",
     "build": "ng build",
+    "builda": "ng build && sed -i '' 's/# RewriteBase \\/notes\\//RewriteBase \\/notes\\//' dist/browser/.htaccess && sed -i '' 's|<base href=\"/\">|<base href=\"/notes/\">|' dist/browser/index.html",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
