@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, CUSTOM_ELEMENTS_SCHEMA, ViewChild, ElementRef, AfterViewInit, AfterViewChecked, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClarityModule } from '@clr/angular';
 import { FolderDto } from 'src/app/dtos/folder-dto';
@@ -17,148 +17,149 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
     @if (!loadImages && hasExternalImages) {
-      <clr-alert [clrAlertAppLevel]="true" clrAlertType="warning">
-        <clr-alert-item>
-          <span class="alert-text">External images are blocked. Click here to load them.</span>
-          <div class="alert-actions">
-            <button class="btn alert-action" (click)="loadImages = true">Load Images</button>
-          </div>
-        </clr-alert-item>
-      </clr-alert>
-    }
-    <clr-card class="detail-panel">
-      <clr-card-content class="detail-content">
-        @if (!selectedMessage) {
-          <div class="empty-state">
-            <cds-icon shape="envelope" size="48"></cds-icon>
-            <p class="empty-text">Select a message to view details</p>
-          </div>
-        } @else {
-          @if (loadingMessageDetails) {
-            <div class="loading-center">
-              <clr-spinner clrSmall>Loading message details...</clr-spinner>
+      <div #imageAlert>
+        <clr-alert [clrAlertAppLevel]="true" clrAlertType="warning">
+          <clr-alert-item>
+            <span class="alert-text">External images are blocked. Click here to load them.</span>
+            <div class="alert-actions">
+              <button class="btn alert-action" (click)="loadImages = true">Load Images</button>
             </div>
-          } @else if (messageDetails) {
-            <div class="message-header-section">
-                <div class="subject-line-container">
-                  <h4 class="info-title">{{ messageDetails.subject || '(No Subject)' }}</h4>
-                  <button 
-                    class="read-status-button" 
-                    (click)="toggleReadStatus()"
-                    [class.unread]="!messageDetails.isSeen"
-                    [class.read]="messageDetails.isSeen"
-                    [title]="messageDetails.isSeen ? 'Mark as unread' : 'Mark as read'"
-                  >
-                  </button>
+          </clr-alert-item>
+        </clr-alert>
+      </div>
+    }
+    @if (!selectedMessage) {
+      <div class="empty-state">
+        <cds-icon shape="envelope" size="48"></cds-icon>
+        <p class="empty-text">Select a message to view details</p>
+      </div>
+    } @else {
+      @if (loadingMessageDetails) {
+        <div class="loading-center">
+          <clr-spinner clrSmall>Loading message details...</clr-spinner>
+        </div>
+      } @else if (messageDetails) {
+        <div class="message-header-section" #headerSection>
+            <div class="subject-line-container">
+              <h4 class="info-title">{{ messageDetails.subject || '(No Subject)' }}</h4>
+              <button 
+                class="read-status-button" 
+                (click)="toggleReadStatus()"
+                [class.unread]="!messageDetails.isSeen"
+                [class.read]="messageDetails.isSeen"
+                [title]="messageDetails.isSeen ? 'Mark as unread' : 'Mark as read'"
+              >
+              </button>
+            </div>
+            <div class="message-meta-container">
+              <div class="message-meta-grid">
+                <div class="meta-item">
+                    <label class="meta-label">From:</label>
+                    <span class="meta-value">{{ (messageDetails.from.name || messageDetails.from.email) + ' <' + messageDetails.from.email + '>' }}</span>
                 </div>
-                <div class="message-meta-container">
-                  <div class="message-meta-grid">
-                    <div class="meta-item">
-                        <label class="meta-label">From:</label>
-                        <span class="meta-value">{{ (messageDetails.from.name || messageDetails.from.email) + ' <' + messageDetails.from.email + '>' }}</span>
-                    </div>
-                    <div class="meta-item">
-                        <label class="meta-label">To:</label>
-                        <span class="meta-value">{{ getToDisplayText() }}</span>
-                    </div>
-                    @if (messageDetails.cc && messageDetails.cc.length > 0) {
-                        <div class="meta-item">
-                        <label class="meta-label">CC:</label>
-                        <span class="meta-value">{{ getCcDisplayText() }}</span>
-                        </div>
-                    }
-                    <div class="meta-item">
-                        <label class="meta-label">Date:</label>
-                        <span class="meta-value">{{ formatFullDate(messageDetails.date) }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Email Action Buttons -->
-                  <div class="email-actions">
-                    <clr-button-group>
-                      @if (messageDetails.isDraft) {
-                        <clr-button 
-                          class="btn btn-sm btn-primary"
-                          (click)="editDraft()"
-                          title="Edit Draft"
-                        >
-                          <span class="material-symbols-outlined">edit</span>
-                          Edit Draft
-                        </clr-button>
-                      }
-                      @if (!messageDetails.isDraft) {
-                        <clr-button 
-                          class="btn btn-sm btn-outline"
-                          (click)="replyToEmail()"
-                          title="Reply"
-                        >
-                          <span class="material-symbols-outlined">reply</span>
-                        </clr-button>
-                        <clr-button 
-                          class="btn btn-sm btn-outline"
-                          (click)="replyAllToEmail()"
-                          title="Reply All"
-                        >
-                          <span class="material-symbols-outlined">reply_all</span>
-                        </clr-button>
-                        <clr-button 
-                          class="btn btn-sm btn-outline"
-                          (click)="forwardEmail()"
-                          title="Forward"
-                        >
-                          <span class="material-symbols-outlined">forward</span>
-                        </clr-button>
-                      }
-                      <clr-button 
-                        class="btn btn-sm btn-danger-outline"
-                        (click)="deleteEmail()"
-                        title="Delete"
-                      >
-                        <span class="material-symbols-outlined btn-danger">delete</span>
-                      </clr-button>
-                    </clr-button-group>
-                  </div>
+                <div class="meta-item">
+                    <label class="meta-label">To:</label>
+                    <span class="meta-value">{{ getToDisplayText() }}</span>
                 </div>
-               
-                @if (messageDetails.attachments && messageDetails.attachments.length > 0) {
-                  <div class="attachments-section">
-                    <div class="attachment-grid">
-                      @for (attachment of messageDetails.attachments; track attachment.name; let i = $index) {
-                        <div class="attachment-card clickable" 
-                             (click)="viewAttachment(i)"
-                             [title]="'Click to view ' + attachment.name">
-                          <cds-icon shape="paperclip" class="attachment-icon"></cds-icon>
-                          <div class="attachment-info">
-                            <span class="attachment-name">{{ attachment.name }}</span>
-                            <span class="attachment-size">{{ fileUtils.formatFileSize(attachment.size) }}</span>
-                          </div>
-                          <cds-icon shape="eye" class="view-icon"></cds-icon>
-                        </div>
-                      }
+                @if (messageDetails.cc && messageDetails.cc.length > 0) {
+                    <div class="meta-item">
+                    <label class="meta-label">CC:</label>
+                    <span class="meta-value">{{ getCcDisplayText() }}</span>
                     </div>
-                  </div>
                 }
+                <div class="meta-item">
+                    <label class="meta-label">Date:</label>
+                    <span class="meta-value">{{ formatFullDate(messageDetails.date) }}</span>
+                </div>
               </div>
 
-            <div class="message-body-container">
-              @if (messageDetails.bodyHtml || messageDetails.bodyText) {
-                <app-email-message-content [message]="messageDetails" [folder]="selectedFolder?.name || ''" [(loadImages)]="loadImages"></app-email-message-content>
-              } @else {
-                <div class="empty-state">
-                  <cds-icon shape="warning-standard" size="36"></cds-icon>
-                  <p class="empty-text">No content available</p>
+              <!-- Email Action Buttons -->
+              <div class="email-actions">
+                <clr-button-group>
+                  @if (messageDetails.isDraft) {
+                    <clr-button 
+                      class="btn btn-sm btn-primary"
+                      (click)="editDraft()"
+                      title="Edit Draft"
+                    >
+                      <span class="material-symbols-outlined">edit</span>
+                      Edit Draft
+                    </clr-button>
+                  }
+                  @if (!messageDetails.isDraft) {
+                    <clr-button 
+                      class="btn btn-sm btn-outline"
+                      (click)="replyToEmail()"
+                      title="Reply"
+                    >
+                      <span class="material-symbols-outlined">reply</span>
+                    </clr-button>
+                    <clr-button 
+                      class="btn btn-sm btn-outline"
+                      (click)="replyAllToEmail()"
+                      title="Reply All"
+                    >
+                      <span class="material-symbols-outlined">reply_all</span>
+                    </clr-button>
+                    <clr-button 
+                      class="btn btn-sm btn-outline"
+                      (click)="forwardEmail()"
+                      title="Forward"
+                    >
+                      <span class="material-symbols-outlined">forward</span>
+                    </clr-button>
+                  }
+                  <clr-button 
+                    class="btn btn-sm btn-danger-outline"
+                    (click)="deleteEmail()"
+                    title="Delete"
+                  >
+                    <span class="material-symbols-outlined btn-danger">delete</span>
+                  </clr-button>
+                </clr-button-group>
+              </div>
+            </div>
+            
+            @if (messageDetails.attachments && messageDetails.attachments.length > 0) {
+              <div class="attachments-section">
+                <div class="attachment-grid">
+                  @for (attachment of messageDetails.attachments; track attachment.name; let i = $index) {
+                    <div class="attachment-card clickable" 
+                          (click)="viewAttachment(i)"
+                          [title]="'Click to view ' + attachment.name">
+                      <cds-icon shape="paperclip" class="attachment-icon"></cds-icon>
+                      <div class="attachment-info">
+                        <span class="attachment-name">{{ attachment.name }}</span>
+                        <span class="attachment-size">{{ fileUtils.formatFileSize(attachment.size) }}</span>
+                      </div>
+                      <cds-icon shape="eye" class="view-icon"></cds-icon>
+                    </div>
+                  }
                 </div>
-              }
-            </div>
-          } @else {
-            <div class="empty-state">
-              <cds-icon shape="warning-standard" size="36"></cds-icon>
-              <p class="empty-text">Failed to load message details</p>
-            </div>
-          }
+              </div>
+            }
+          </div>
+
+        @if (messageDetails.bodyHtml || messageDetails.bodyText) {
+          <app-email-message-content 
+            [message]="messageDetails" 
+            [folder]="selectedFolder?.name || ''" 
+            [(loadImages)]="loadImages"
+            [headerAreaHeightInPx]="headerAreaHeightInPx()">
+          </app-email-message-content>
+        } @else {
+          <div class="empty-state">
+            <cds-icon shape="warning-standard" size="36"></cds-icon>
+            <p class="empty-text">No content available</p>
+          </div>
         }
-      </clr-card-content>
-    </clr-card>
+      } @else {
+        <div class="empty-state">
+          <cds-icon shape="warning-standard" size="36"></cds-icon>
+          <p class="empty-text">Failed to load message details</p>
+        </div>
+      }
+    }
   `,
   styles: [`
     clr-card {
@@ -210,17 +211,8 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
     }
 
     .message-header-section {
-      margin-bottom: 1rem;
       flex-shrink: 0;
-      padding: 1rem 1rem 0 1rem;
-    }
-
-    .message-body-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      padding: 0 1rem 1rem 1rem;
+      padding: 1rem;
     }
 
     /* Email Action Buttons */
@@ -458,7 +450,7 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
     }
   `]
 })
-export class EmailMessageComponent implements OnChanges {
+export class EmailMessageComponent implements OnChanges, AfterViewChecked {
   @Input() selectedMessage: MessageDto | null = null;
   @Input() selectedFolder: FolderDto | null = null;
   @Input() trashFolder: FolderDto | null = null;
@@ -476,6 +468,11 @@ export class EmailMessageComponent implements OnChanges {
   messageDetails: MessageDto | null = null;
   loadImages = false;
   hasExternalImages = false;
+
+  headerAreaHeightInPx = signal(0);
+
+  @ViewChild('headerSection', { static: false }) headerSection!: ElementRef;
+  @ViewChild('imageAlert', { static: false }) imageAlert!: ElementRef;
 
   constructor(
     private backendService: BackendService,
@@ -498,6 +495,30 @@ export class EmailMessageComponent implements OnChanges {
         this.messageDetails = null;
       }
     }
+    if (changes['loadImages']) {
+      // Update header height when loadImages changes, as it affects the imageAlert visibility
+      this.updateHeaderHeight();
+    }
+  }
+
+  ngAfterViewChecked() {
+    this.updateHeaderHeight();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.updateHeaderHeight();
+  }
+
+  private updateHeaderHeight() {
+    let height = 0;
+    if (this.headerSection) {
+      height += this.headerSection.nativeElement.offsetHeight;
+    }
+    if (this.imageAlert) {
+      height += this.imageAlert.nativeElement.offsetHeight;
+    }
+    this.headerAreaHeightInPx.set(height);
   }
 
   loadMessageDetails(): void {

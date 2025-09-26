@@ -69,7 +69,7 @@ import { StorageService, PanelWidths } from 'src/app/services/storage.service';
     .message-detail-panel-container {
       flex: 1;
       min-width: 300px;
-      overflow: scroll;
+      overflow: hidden;
     }
 
     .panel-container > :ng-deep * {

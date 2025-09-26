@@ -1,4 +1,4 @@
-import { Component, Input, computed, signal, Signal, ViewChild, ElementRef, AfterViewInit, OnChanges, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, Input, computed, signal, Signal, ViewChild, ElementRef, AfterViewInit, OnChanges, OnDestroy, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MessageDto } from 'src/app/dtos/message-dto';
@@ -18,7 +18,8 @@ import { firstValueFrom } from 'rxjs';
           [src]="htmlContentUrl"
           frameborder="0"
           sandbox="allow-popups"
-          class="email-iframe">
+          class="email-iframe"
+          [style.height]="iframeHeight()">
         </iframe>
       } @else if (message && message.bodyText) {
         <div class="email-text-content">
@@ -34,9 +35,9 @@ import { firstValueFrom } from 'rxjs';
 
     .email-iframe {
       width: 100%;
-      height: 100%;
       border: none;
       overflow: hidden;
+      padding: 0 1rem 0 1rem;
     }
 
     .email-text-content {
@@ -64,10 +65,15 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
   @Input() folder: string = '';
   @Input() loadImages: boolean = false;
   @Output() loadImagesChange = new EventEmitter<boolean>();
+  @Input() headerAreaHeightInPx: number = 0;
 
   @ViewChild('emailContent', { static: false }) emailContent!: ElementRef<HTMLDivElement>;
 
   htmlContentUrl: SafeResourceUrl = '';
+
+  private headerHeightSignal = signal(0);
+
+  iframeHeight = computed(() => `calc(100vh - var(--clr-header-height) - ${this.headerHeightSignal()}px)`);
 
   constructor(private sanitizer: DomSanitizer, private backendService: BackendService) {}
 
@@ -77,7 +83,10 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
     }
   }
 
-  ngOnChanges() {
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['headerAreaHeightInPx']) {
+      this.headerHeightSignal.set(this.headerAreaHeightInPx);
+    }
     if (this.message?.bodyHtml) {
       this.updateIframeContent();
     }
