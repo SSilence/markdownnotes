@@ -11,13 +11,13 @@ import { firstValueFrom } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="email-content">
+    <div #emailContent class="email-content">
       @if (message && message.bodyHtml) {
         <iframe
           #emailFrame
           [src]="htmlContentUrl"
           frameborder="0"
-          scrolling="no"
+          sandbox="allow-popups"
           class="email-iframe">
         </iframe>
       } @else if (message && message.bodyText) {
@@ -34,7 +34,7 @@ import { firstValueFrom } from 'rxjs';
 
     .email-iframe {
       width: 100%;
-      min-height: 300px;
+      height: 100%;
       border: none;
       overflow: hidden;
     }
@@ -65,7 +65,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
   @Input() loadImages: boolean = false;
   @Output() loadImagesChange = new EventEmitter<boolean>();
 
-  @ViewChild('emailFrame', { static: false }) emailFrame!: ElementRef<HTMLIFrameElement>;
+  @ViewChild('emailContent', { static: false }) emailContent!: ElementRef<HTMLDivElement>;
 
   htmlContentUrl: SafeResourceUrl = '';
 
@@ -84,7 +84,11 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
   }
 
   private sanitizedContent(rawContent: string): string {
-    const cleanHtml = DOMPurify.sanitize(rawContent, {
+    let filteredContent = rawContent.replace(/<svg[\s\S]*?<\/svg>/gi, '');
+    // remove all Data-URLs except data:image/*
+    filteredContent = filteredContent.replace(/src=["']data:((?!image)[^"']*)["']/gi, 'src=""');
+
+    const cleanHtml = DOMPurify.sanitize(filteredContent, {
       ALLOWED_TAGS: [
         'p', 'div', 'span', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li',
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'table', 'tr', 'td', 'th',
@@ -103,7 +107,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
         'datetime', 'cite', 'start', 'reversed', 'wrap', 'span'
       ],
       ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-      FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button', 'select', 'option'],
+      FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'button', 'select', 'option', 'svg'],
       FORBID_ATTR: ['onerror', 'onclick', 'onload', 'onmouseover', 'onmouseout', 'onfocus', 'onblur', 'onsubmit', 'onchange'],
       KEEP_CONTENT: true,
       ALLOW_DATA_ATTR: false
@@ -245,55 +249,19 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
       // Sanitize the HTML
       const sanitizedHtml = this.sanitizedContent(processedHtml);
 
-      // Add a script for height communication
+      // Generate HTML without script
       const htmlWithScript = `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data: https: http:;">
           <style>
-            body { margin: 0; padding: 10px; font-family: Arial, sans-serif; }
+            body { margin: 0; padding: 0; font-family: Arial, sans-serif; height: 100%; overflow: auto; }
           </style>
         </head>
         <body>
           <div id="email-content">${sanitizedHtml}</div>
-          <script>
-            function sendHeight() {
-              const height = Math.max(
-                document.body.scrollHeight,
-                document.body.offsetHeight,
-                document.documentElement.clientHeight,
-                document.documentElement.scrollHeight,
-                document.documentElement.offsetHeight
-              );
-              window.parent.postMessage({ type: 'iframe-height', height: height }, '*');
-            }
-
-            // Send height after loading
-            window.addEventListener('load', sendHeight);
-
-            // Monitor changes
-            if (window.ResizeObserver) {
-              const resizeObserver = new ResizeObserver(sendHeight);
-              resizeObserver.observe(document.body);
-            }
-
-            // Fallback with MutationObserver
-            if (window.MutationObserver) {
-              const mutationObserver = new MutationObserver(sendHeight);
-              mutationObserver.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true,
-                attributeOldValue: true,
-                characterData: true,
-                characterDataOldValue: true
-              });
-            }
-
-            // Send height immediately
-            sendHeight();
-          </script>
         </body>
         </html>
       `;
@@ -301,22 +269,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
       const blob = new Blob([htmlWithScript], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       this.htmlContentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-
-      // Message listener for height changes
-      this.setupMessageListener();
     }
-  }
-
-  private messageListener = (event: MessageEvent) => {
-    if (event.data.type === 'iframe-height' && this.emailFrame?.nativeElement) {
-      const iframe = this.emailFrame.nativeElement;
-      iframe.style.height = event.data.height + 'px';
-    }
-  };
-
-  private setupMessageListener() {
-    window.removeEventListener('message', this.messageListener);
-    window.addEventListener('message', this.messageListener);
   }
 
   getSanitizedText(): string {
@@ -374,7 +327,6 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
   }
 
   ngOnDestroy() {
-    window.removeEventListener('message', this.messageListener);
     if (this.htmlContentUrl) {
       URL.revokeObjectURL(this.htmlContentUrl as string);
     }
