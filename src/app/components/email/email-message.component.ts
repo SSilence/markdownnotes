@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClarityModule } from '@clr/angular';
-import { signal } from '@angular/core';
 import { FolderDto } from 'src/app/dtos/folder-dto';
 import { MessageDto } from 'src/app/dtos/message-dto';
 import { BackendService } from 'src/app/services/backend.service';
@@ -17,12 +16,12 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    @if (!loadImages() && hasExternalImages) {
+    @if (!loadImages && hasExternalImages) {
       <clr-alert [clrAlertAppLevel]="true" clrAlertType="warning">
         <clr-alert-item>
           <span class="alert-text">External images are blocked. Click here to load them.</span>
           <div class="alert-actions">
-            <button class="btn alert-action" (click)="loadImages.set(true)">Load Images</button>
+            <button class="btn alert-action" (click)="loadImages = true">Load Images</button>
           </div>
         </clr-alert-item>
       </clr-alert>
@@ -143,7 +142,7 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
 
             <div class="message-body-container">
               @if (messageDetails.bodyHtml || messageDetails.bodyText) {
-                <app-email-message-content [message]="messageDetails" [folder]="selectedFolder?.name || ''" [loadImages]="loadImages"></app-email-message-content>
+                <app-email-message-content [message]="messageDetails" [folder]="selectedFolder?.name || ''" [(loadImages)]="loadImages"></app-email-message-content>
               } @else {
                 <div class="empty-state">
                   <cds-icon shape="warning-standard" size="36"></cds-icon>
@@ -475,7 +474,7 @@ export class EmailMessageComponent implements OnChanges {
 
   loadingMessageDetails = false;
   messageDetails: MessageDto | null = null;
-  loadImages = signal(false);
+  loadImages = false;
   hasExternalImages = false;
 
   constructor(
@@ -490,7 +489,7 @@ export class EmailMessageComponent implements OnChanges {
         // Only load details if it's actually a different message
         const newMessage = changes['selectedMessage'].currentValue;
         if (!this.messageDetails || this.messageDetails.id !== newMessage.id) {
-          this.loadImages.set(false);
+          this.loadImages = false;
           this.loadMessageDetails();
         }
       } else {

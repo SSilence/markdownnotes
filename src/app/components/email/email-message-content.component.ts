@@ -1,4 +1,4 @@
-import { Component, Input, computed, signal, Signal, ViewChild, ElementRef, AfterViewInit, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, computed, signal, Signal, ViewChild, ElementRef, AfterViewInit, OnChanges, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MessageDto } from 'src/app/dtos/message-dto';
@@ -17,7 +17,7 @@ import { firstValueFrom } from 'rxjs';
           #emailFrame
           [src]="htmlContentUrl"
           frameborder="0"
-          scrolling="auto"
+          scrolling="no"
           class="email-iframe">
         </iframe>
       }
@@ -32,6 +32,7 @@ import { firstValueFrom } from 'rxjs';
       width: 100%;
       min-height: 300px;
       border: none;
+      overflow: hidden;
     }
   `]
 })
@@ -39,7 +40,8 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
 
   @Input() message: MessageDto | null = null;
   @Input() folder: string = '';
-  @Input() loadImages!: Signal<boolean>;
+  @Input() loadImages: boolean = false;
+  @Output() loadImagesChange = new EventEmitter<boolean>();
 
   @ViewChild('emailFrame', { static: false }) emailFrame!: ElementRef<HTMLIFrameElement>;
 
@@ -89,9 +91,10 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
     }
 
     let processedHtml = html;
+
     const cidMatches = new Map<string, string>();
 
-    // Sammle alle CID-Referenzen
+    // Collect all CID references
     const cidRegex = /cid:([^"'\s)]+)/gi;
     let match;
     while ((match = cidRegex.exec(html)) !== null) {
@@ -101,7 +104,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
       }
     }
 
-    // Lade alle Attachments parallel
+    // Load all attachments in parallel
     const loadPromises = Array.from(cidMatches.keys()).map(async (cid) => {
       const attachment = this.message!.attachments!.find(att => att.cid === cid);
       if (attachment && attachment.name) {
@@ -123,14 +126,14 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
 
     const loadedAttachments = await Promise.all(loadPromises);
 
-    // Aktualisiere die CID-Map mit den Data-URLs
+    // Update the CID map with the data URLs
     loadedAttachments.forEach(({ cid, dataUrl }) => {
       if (dataUrl) {
         cidMatches.set(cid, dataUrl);
       }
     });
 
-    // Ersetze alle CID-Referenzen durch Data-URLs
+    // Replace all CID references with data URLs
     cidMatches.forEach((dataUrl, cid) => {
       if (dataUrl) {
         const cidPattern = new RegExp(`cid:${cid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi');
@@ -141,19 +144,46 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
     return processedHtml;
   }
 
+  private handleExternalResources(html: string): string {
+    let processedHtml = html;
+
+    if (!this.loadImages) {
+      // Remove external images
+      processedHtml = processedHtml.replace(/<img[^>]*src=["']https?:\/\/[^"']*["'][^>]*>/gi, (match) => {
+        return match.replace(/src=["']https?:\/\/[^"']*["']/gi, 'src=""');
+      });
+
+      // Remove external CSS background images
+      processedHtml = processedHtml.replace(/background-image:\s*url\(['"]?https?:\/\/[^'"]*['"]?\)/gi, '');
+
+      // Remove external CSS @import
+      processedHtml = processedHtml.replace(/@import\s+url\(['"]?https?:\/\/[^'"]*['"]?\);?/gi, '');
+
+      // Remove external <link> tags (CSS, Fonts, etc.)
+      processedHtml = processedHtml.replace(/<link[^>]*href=["']https?:\/\/[^"']*["'][^>]*>/gi, '');
+
+      // Remove external <style> imports
+      processedHtml = processedHtml.replace(/<style[^>]*>[\s\S]*?@import[^;]*;[\s\S]*?<\/style>/gi, (match) => {
+        return match.replace(/@import[^;]*;/gi, '');
+      });
+    }
+
+    return processedHtml;
+  }
+
   private addSecurityToLinks(html: string): string {
-    // Füge target="_blank" und rel="noopener noreferrer" zu allen Links hinzu
+    // Add target="_blank" and rel="noopener noreferrer" to all links
     return html.replace(/<a\s+([^>]*href=[^>]*)>/gi, (match, attributes) => {
       let newAttributes = attributes;
 
-      // Stelle sicher, dass target="_blank" vorhanden ist
+      // Ensure that target="_blank" is present
       if (!/target\s*=/i.test(newAttributes)) {
         newAttributes += ' target="_blank"';
       } else {
         newAttributes = newAttributes.replace(/target\s*=\s*["']?[^"'\s]*["']?/gi, 'target="_blank"');
       }
 
-      // Füge rel="noopener noreferrer" hinzu oder erweitere es
+      // Add or extend rel="noopener noreferrer"
       if (!/rel\s*=/i.test(newAttributes)) {
         newAttributes += ' rel="noopener noreferrer"';
       } else {
@@ -180,13 +210,16 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
       // Ersetze CID-Referenzen durch Data-URLs
       processedHtml = await this.replaceCidReferences(processedHtml);
 
+      // Behandle externe Ressourcen basierend auf loadImages Flag
+      processedHtml = this.handleExternalResources(processedHtml);
+
       // Füge Sicherheitsattribute zu Links hinzu
       processedHtml = this.addSecurityToLinks(processedHtml);
 
-      // Bereinige das HTML
+      // Sanitize the HTML
       const sanitizedHtml = this.sanitizedContent(processedHtml);
 
-      // Füge ein Script für die Höhenkommunikation hinzu
+      // Add a script for height communication
       const htmlWithScript = `
         <!DOCTYPE html>
         <html>
@@ -210,16 +243,16 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
               window.parent.postMessage({ type: 'iframe-height', height: height }, '*');
             }
 
-            // Sende Höhe nach dem Laden
+            // Send height after loading
             window.addEventListener('load', sendHeight);
 
-            // Überwache Änderungen
+            // Monitor changes
             if (window.ResizeObserver) {
               const resizeObserver = new ResizeObserver(sendHeight);
               resizeObserver.observe(document.body);
             }
 
-            // Fallback mit MutationObserver
+            // Fallback with MutationObserver
             if (window.MutationObserver) {
               const mutationObserver = new MutationObserver(sendHeight);
               mutationObserver.observe(document.body, {
@@ -232,7 +265,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
               });
             }
 
-            // Sofortige Höhe senden
+            // Send height immediately
             sendHeight();
           </script>
         </body>
@@ -243,7 +276,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
       const url = URL.createObjectURL(blob);
       this.htmlContentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
 
-      // Message Listener für Höhenänderungen
+      // Message listener for height changes
       this.setupMessageListener();
     }
   }
