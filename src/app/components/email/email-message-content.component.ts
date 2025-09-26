@@ -141,12 +141,47 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
     return processedHtml;
   }
 
+  private addSecurityToLinks(html: string): string {
+    // Füge target="_blank" und rel="noopener noreferrer" zu allen Links hinzu
+    return html.replace(/<a\s+([^>]*href=[^>]*)>/gi, (match, attributes) => {
+      let newAttributes = attributes;
+
+      // Stelle sicher, dass target="_blank" vorhanden ist
+      if (!/target\s*=/i.test(newAttributes)) {
+        newAttributes += ' target="_blank"';
+      } else {
+        newAttributes = newAttributes.replace(/target\s*=\s*["']?[^"'\s]*["']?/gi, 'target="_blank"');
+      }
+
+      // Füge rel="noopener noreferrer" hinzu oder erweitere es
+      if (!/rel\s*=/i.test(newAttributes)) {
+        newAttributes += ' rel="noopener noreferrer"';
+      } else {
+        newAttributes = newAttributes.replace(/rel\s*=\s*["']?([^"']*)["']?/gi, (relMatch: string, relValue: string) => {
+          const relValues = relValue.toLowerCase().split(/\s+/).filter(Boolean);
+          if (!relValues.includes('noopener')) {
+            relValues.push('noopener');
+          }
+          if (!relValues.includes('noreferrer')) {
+            relValues.push('noreferrer');
+          }
+          return `rel="${relValues.join(' ')}"`;
+        });
+      }
+
+      return `<a ${newAttributes}>`;
+    });
+  }
+
   private async updateIframeContent() {
     if (this.message?.bodyHtml) {
       let processedHtml = this.message.bodyHtml;
 
       // Ersetze CID-Referenzen durch Data-URLs
       processedHtml = await this.replaceCidReferences(processedHtml);
+
+      // Füge Sicherheitsattribute zu Links hinzu
+      processedHtml = this.addSecurityToLinks(processedHtml);
 
       // Bereinige das HTML
       const sanitizedHtml = this.sanitizedContent(processedHtml);
