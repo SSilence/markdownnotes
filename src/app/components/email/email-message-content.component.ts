@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MessageDto } from 'src/app/dtos/message-dto';
 import { BackendService } from 'src/app/services/backend.service';
 import DOMPurify from 'dompurify';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-email-message-content',
@@ -44,7 +45,7 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
 
   htmlContentUrl: SafeResourceUrl = '';
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer, private backendService: BackendService) {}
 
   ngAfterViewInit() {
     this.updateIframeContent();
@@ -82,9 +83,73 @@ export class EmailMessageContentComponent implements AfterViewInit, OnChanges, O
     return cleanHtml;
   }
 
-  private updateIframeContent() {
+  private async replaceCidReferences(html: string): Promise<string> {
+    if (!this.message?.attachments || !this.folder || !this.message.id) {
+      return html;
+    }
+
+    let processedHtml = html;
+    const cidMatches = new Map<string, string>();
+
+    // Sammle alle CID-Referenzen
+    const cidRegex = /cid:([^"'\s)]+)/gi;
+    let match;
+    while ((match = cidRegex.exec(html)) !== null) {
+      const cid = match[1];
+      if (!cidMatches.has(cid)) {
+        cidMatches.set(cid, '');
+      }
+    }
+
+    // Lade alle Attachments parallel
+    const loadPromises = Array.from(cidMatches.keys()).map(async (cid) => {
+      const attachment = this.message!.attachments!.find(att => att.cid === cid);
+      if (attachment && attachment.name) {
+        try {
+          const blob = await firstValueFrom(this.backendService.getAttachmentBlob(this.folder, this.message!.id, attachment.name));
+          if (blob) {
+            return new Promise<{ cid: string, dataUrl: string }>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve({ cid, dataUrl: reader.result as string });
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (error) {
+          console.warn(`Failed to load attachment for cid:${cid}`, error);
+        }
+      }
+      return { cid, dataUrl: '' };
+    });
+
+    const loadedAttachments = await Promise.all(loadPromises);
+
+    // Aktualisiere die CID-Map mit den Data-URLs
+    loadedAttachments.forEach(({ cid, dataUrl }) => {
+      if (dataUrl) {
+        cidMatches.set(cid, dataUrl);
+      }
+    });
+
+    // Ersetze alle CID-Referenzen durch Data-URLs
+    cidMatches.forEach((dataUrl, cid) => {
+      if (dataUrl) {
+        const cidPattern = new RegExp(`cid:${cid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi');
+        processedHtml = processedHtml.replace(cidPattern, dataUrl);
+      }
+    });
+
+    return processedHtml;
+  }
+
+  private async updateIframeContent() {
     if (this.message?.bodyHtml) {
-      const sanitizedHtml = this.sanitizedContent(this.message.bodyHtml);
+      let processedHtml = this.message.bodyHtml;
+
+      // Ersetze CID-Referenzen durch Data-URLs
+      processedHtml = await this.replaceCidReferences(processedHtml);
+
+      // Bereinige das HTML
+      const sanitizedHtml = this.sanitizedContent(processedHtml);
 
       // Füge ein Script für die Höhenkommunikation hinzu
       const htmlWithScript = `

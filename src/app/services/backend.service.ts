@@ -248,10 +248,15 @@ export class BackendService {
     }
 
     getAttachmentUrl(folder: string, messageId: number, attachmentName: string): string {
-        return BackendService.BASE_URL + 'imap/attachment/' + 
-               encodeURIComponent(folder) + '/' + 
-               messageId + '/' + 
+        return BackendService.BASE_URL + 'imap/attachment/' +
+               encodeURIComponent(folder) + '/' +
+               messageId + '/' +
                encodeURIComponent(attachmentName);
+    }
+
+    getAttachmentBlob(folder: string, messageId: number, attachmentName: string): Observable<Blob> {
+        const url = this.getAttachmentUrl(folder, messageId, attachmentName);
+        return this.http.get(url, { responseType: 'blob' });
     }
 
     viewAttachment(folder: string, messageId: number, attachmentName: string): void {
