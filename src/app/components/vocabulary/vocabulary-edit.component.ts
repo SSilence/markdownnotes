@@ -16,10 +16,6 @@ import { FormsModule } from "@angular/forms";
             <label>Image</label>
             <input clrInput type="text" [(ngModel)]="page!.icon" name="example" placeholder="image for the vocabulary" />
         </clr-input-container>
-        <clr-input-container>
-            <label>Language</label>
-            <input clrInput type="text" [(ngModel)]="page!.language" name="de" placeholder="language for the vocabulary" />
-        </clr-input-container>
         <clr-checkbox-wrapper>
             <input clrCheckbox type="checkbox" [(ngModel)]="page!.disabled" />
             <label>Disabled</label>

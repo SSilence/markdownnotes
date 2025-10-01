@@ -5,6 +5,7 @@
 define("CONFIG_AZURE_TEXT_TO_SPEECH_API_KEY", "");
 define("CONFIG_CHATGPT_URL", "");
 define("CONFIG_CHATGPT_API_KEY", "");
+define("CONFIG_CHATGPT_MODEL", "");
 define("CONFIG_PONS_API_KEY", "");
 
 define("CONFIG_IMAP_HOST", "");

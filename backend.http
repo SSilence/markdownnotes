@@ -1,4 +1,4 @@
-GET http://localhost:8888/api/vocabulary/enrich?english=painkiller&german=Schmerzmittel
+GET http://localhost:8888/api/vocabulary/enrich?english=tree&german=Baum
 
 GET http://localhost:8888/api/imap/enabled
 

@@ -438,10 +438,10 @@ export class EmailMessagesComponent implements OnChanges {
     });
   }
 
-  selectMessage(message: MessageDto, skipBackendCall: boolean = false): void {
+  selectMessage(message: MessageDto): void {
     this.selectedMessage = message;
 
-    if (!skipBackendCall && !message.isSeen && this.selectedFolder) {
+    if (!message.isSeen && this.selectedFolder) {
       this.backendService.markEmail(message.id, this.selectedFolder.name, true).subscribe({
         next: (response) => {
           message.isSeen = true;

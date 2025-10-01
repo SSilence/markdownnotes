@@ -289,7 +289,6 @@ export class EmailFoldersComponent implements OnInit {
     this.composeRequested.emit();
   }
 
-
   updateFolderCounts(): void {
     this.backendService.getImapFolders().subscribe({
       next: (folders) => {

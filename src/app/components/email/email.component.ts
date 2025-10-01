@@ -319,7 +319,7 @@ export class EmailComponent implements OnInit {
       // If we selected a new message, trigger selection in the messages component
       // Use skipBackendCall=true to avoid automatically marking as read during auto-selection
       if (nextMessage && this.emailMessagesComponent) {
-        this.emailMessagesComponent.selectMessage(nextMessage, true);
+        this.emailMessagesComponent.selectMessage(nextMessage);
       }
     }
 

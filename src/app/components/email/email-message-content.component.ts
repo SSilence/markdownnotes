@@ -56,6 +56,7 @@ import { firstValueFrom } from 'rxjs';
       margin: 0;
       color: #333;
       border: none;
+      padding: 1rem;
     }
   `]
 })

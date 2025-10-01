@@ -510,6 +510,13 @@ export class EmailMessageComponent implements OnChanges, AfterViewChecked {
     this.updateHeaderHeight();
   }
 
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    if ((event.metaKey && event.key === 'Backspace') || event.key === 'Delete') {
+      this.deleteEmail();
+    }
+  }
+
   private updateHeaderHeight() {
     let height = 0;
     if (this.headerSection) {

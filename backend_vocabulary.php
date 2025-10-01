@@ -42,27 +42,34 @@ function text2Speech($text, $lang) {
 function chatgpt($prompt) {
     $context = stream_context_create([
         'http' => [
-            'header' => "Authorization: Bearer " . CONFIG_CHATGPT_API_KEY . "\r\nContent-Type: application/json",
+            'header' => "api-key: " . CONFIG_CHATGPT_API_KEY . "\r\nContent-Type: application/json",
             'method' => 'POST',
             'content' => json_encode(array(
-                "model" => "gpt-35-turbo",
-                "max_tokens" => 4096,
-                "temperature" => 0,
-                "top_p" => 0.1,
+                "model" => CONFIG_CHATGPT_MODEL,
                 "messages" => array(
                     array(
                         "role" => "user",
                         "content" => $prompt
                     )
                 )
-            ))
+            )),
+            'ignore_errors' => true
         ],
     ]);
     
     $result = file_get_contents(CONFIG_CHATGPT_URL, false, $context);
-    
     if ($result === false) {
-        error(500, "error");
+        if (isset($http_response_header) && is_array($http_response_header)) {
+            $status_line = $http_response_header[0];
+            if (preg_match('/HTTP\/\d+\.\d+ (\d+)/', $status_line, $matches)) {
+                $status_code = $matches[1];
+                error(500, "HTTP Error: " . $status_code);
+            } else {
+                error(500, "Unknown HTTP error");
+            }
+        } else {
+            error(500, "Connection error");
+        }
     }
     
     $responseArray = json_decode($result, true);
