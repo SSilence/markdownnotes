@@ -213,7 +213,6 @@ export interface ComposeData {
 
           <!-- Message Body -->
           <div class="input-row message-row">
-            <label class="input-label">Message:</label>
             <div class="message-container">
               <app-auto-textarea
                 name="message"
