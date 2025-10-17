@@ -143,6 +143,7 @@ import { BackendService } from 'src/app/services/backend.service';
 
     .folder-list {
       overflow-y: auto;
+      overflow-x: hidden;
       max-height: calc(100vh - 200px);
     }
 
