@@ -1,6 +1,5 @@
 title: JavaScript Snippets
 icon: scroll
-language: 
 disabled: 
 expanded: 1
 ------------------------------------

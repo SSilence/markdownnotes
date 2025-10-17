@@ -5,7 +5,6 @@ export class Page {
     title: string = "";
     icon: string = "";
     content: string = "";
-    language: string = "";
     disabled: boolean = false;
     expanded: boolean = false;
     updated: Date | null = null;
@@ -19,7 +18,6 @@ export class Page {
             this.title = pageDto.title;
             this.icon = pageDto.icon;
             this.content = pageDto.content;
-            this.language = pageDto.language;
             this.disabled = pageDto.disabled;
             this.expanded = pageDto.expanded;
             this.parent = null;

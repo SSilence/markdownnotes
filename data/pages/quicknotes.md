@@ -1,6 +1,5 @@
 title: quick notes
 icon: details
-language: 
 disabled: 
 expanded: 1
 ------------------------------------

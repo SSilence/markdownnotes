@@ -24,7 +24,6 @@ function readPageByFilename($filename) {
         'id' => basename($filename, ".md"),
         'title' => $meta['title'],
         'icon' => $meta['icon'],
-        'language' => isset($meta['language']) ? $meta['language'] : '',
         'disabled' => isset($meta['disabled']) ? $meta['disabled'] == 1 : false,
         'expanded' => isset($meta['expanded']) ? $meta['expanded'] == 1 : false,
         'content' => trim($parts[1]),
@@ -36,8 +35,8 @@ function readPageById($id) {
     return readPageByFilename(toFilename($id));
 }
 
-function writePage($id, $title, $icon, $language, $disabled, $expanded, $content) {
-    file_put_contents(toFilename($id), "title: $title\nicon: $icon\nlanguage: $language\ndisabled: $disabled\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
+function writePage($id, $title, $icon, $disabled, $expanded, $content) {
+    file_put_contents(toFilename($id), "title: $title\nicon: $icon\ndisabled: $disabled\nexpanded: $expanded\n" . CONFIG_META_SEPARATOR . "\n$content");
 }
 
 // add/edit page
@@ -46,7 +45,6 @@ router('POST', '/page$', function() {
     $id = parseString($data, 'id');
     $title = parseString($data, 'title');
     $icon = parseString($data, 'icon');
-    $language = parseString($data, 'language');
     $disabled = $data['disabled'] === true;
     $expanded = $data['expanded'] === true;
     $content = isset($data['content']) ? $data['content'] : readPageById($id)["content"];
@@ -55,7 +53,7 @@ router('POST', '/page$', function() {
         error(404, "invalid id");
     }
 
-    writePage($id, $title, $icon, $language, $disabled, $expanded, $content);
+    writePage($id, $title, $icon, $disabled, $expanded, $content);
     json(readPageById($id));
 });
 

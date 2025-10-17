@@ -99,10 +99,6 @@ router('GET', '/text2speech$', function() {
         $lang = "en-US";
     } else if ($lang == "de") {
         $lang = "de-DE";
-    } else if ($lang == "fr") {
-        $lang = "fr-FR";
-    } else if ($lang == "hr") {
-        $lang = "hr-HR";
     } else {
         $lang = "en-US";
     }

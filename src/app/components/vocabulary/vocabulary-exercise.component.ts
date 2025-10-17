@@ -325,7 +325,7 @@ export class VocabularyExerciseComponent {
     play(word: string) {
         try {
             const base = document.querySelector('base')!!.getAttribute('href');
-            this._audio.src= `${base}api/api/text2speech?text=${word}&language=${this.page?.language}`;
+            this._audio.src= `${base}api/api/text2speech?text=${word}`;
             this._audio.play();
         } catch(ex) {
             // ignore error on init

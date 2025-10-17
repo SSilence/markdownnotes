@@ -1,6 +1,5 @@
 title: markdown syntax
 icon: file
-language: 
 expanded: 
 ------------------------------------
 ---

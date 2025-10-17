@@ -447,6 +447,6 @@ export class VocabularyListComponent implements OnInit {
 
     playUrl(word: String): string {
         const base = document.querySelector('base')!!.getAttribute('href');
-        return `${base}api/api/text2speech?text=${word}&language=${this.page?.language}`;
+        return `${base}api/api/text2speech?text=${word}`;
     }
 }
