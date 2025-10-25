@@ -130,3 +130,28 @@ router('GET', '/search$', function() {
 
     json($pages);
 });
+
+// file upload
+router('POST', '/file$', function() {
+    move_uploaded_file($_FILES['file']['tmp_name'], CONFIG_FILES_PATH . sanitizeFilename($_FILES['file']['name']));
+});
+
+// file delete
+router('DELETE', '/file/(?<filename>.+)$', function($params) {
+    @unlink(CONFIG_FILES_PATH . sanitizeFilename($params["filename"]));
+});
+
+// get all files
+router('GET', '/file$', function() {
+    $files = array();
+    foreach (scandir(CONFIG_FILES_PATH) as $file) {
+        if (is_file(CONFIG_FILES_PATH . $file) && $file != '.' && $file != '..') {
+            $files[] = array(
+                "name" => $file,
+                "size" => filesize(CONFIG_FILES_PATH . $file),
+                "date" => filemtime(CONFIG_FILES_PATH . $file) * 1000
+            );
+        }
+    }
+    json($files);
+});
