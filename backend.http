@@ -94,3 +94,5 @@ POST http://localhost:8888/api/imap/send
         }
     ]
 }
+
+GET http://localhost:8888/api/news/update

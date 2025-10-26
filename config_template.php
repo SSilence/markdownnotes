@@ -20,3 +20,18 @@ define("CONFIG_SMTP_USER", "");
 define("CONFIG_SMTP_PASSWORD", "");
 define("CONFIG_SMTP_NAME", "");
 define("CONFIG_SMTP_EMAIL", "");
+
+define("CONFIG_NEWS_SOURCES", ["https://www.tagesschau.de"]);
+define("CONFIG_NEWS_PROMPT", <<<EOD
+* This is the homepage of a news website.
+* Extract the most important news headlines and summarize them in a list.
+* Only extract the absolutely most important news. I only want news about books, literature, the book market, or authors.
+* Think carefully about which news items are truly important.
+* You want to bother me as little as possible, so you’re very cautious about what you return to me.
+* Output the news as JSON in the following format: 
+    [{"title": "News headline", "summary": "Short summary of the news", "url": "Link to the news"}]
+* Output only the JSON, nothing else.
+    
+The HTML content of the page is here:
+%html%
+EOD);

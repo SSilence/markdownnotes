@@ -98,6 +98,50 @@ function body() {
     return json_decode(file_get_contents('php://input'), true);
 }
 
+function chatgpt($prompt) {
+    $context = stream_context_create([
+        'http' => [
+            'header' => "api-key: " . CONFIG_CHATGPT_API_KEY . "\r\nContent-Type: application/json",
+            'method' => 'POST',
+            'content' => json_encode(array(
+                "model" => CONFIG_CHATGPT_MODEL,
+                "messages" => array(
+                    array(
+                        "role" => "user",
+                        "content" => $prompt
+                    )
+                )
+            )),
+            'ignore_errors' => true
+        ],
+    ]);
+    
+    $result = file_get_contents(CONFIG_CHATGPT_URL, false, $context);
+    if ($result === false) {
+        if (isset($http_response_header) && is_array($http_response_header)) {
+            $status_line = $http_response_header[0];
+            if (preg_match('/HTTP\/\d+\.\d+ (\d+)/', $status_line, $matches)) {
+                $status_code = $matches[1];
+                error(500, "HTTP Error: " . $status_code);
+            } else {
+                error(500, "Unknown HTTP error");
+            }
+        } else {
+            error(500, "Connection error");
+        }
+    }
+    
+    $responseArray = json_decode($result, true);
+    if ($responseArray !== null && isset($responseArray['choices'][0]['message']['content'])) {
+        $content = $responseArray['choices'][0]['message']['content'];
+        return $content;
+    } else if ($responseArray !== null && isset($responseArray['choices'][0]['content_filter_results'])) {
+        return false;
+    } else {
+        error(500, "invalid response from chatgpt" . json_encode($responseArray));
+    }
+}
+
 // time
 router('GET', '/$', function() {
     die("".time());
@@ -106,6 +150,7 @@ router('GET', '/$', function() {
 include("backend_pages.php");
 include("backend_vocabulary.php");
 include("backend_email.php");
+include("backend_news.php");
 
 header("HTTP/1.0 404 Not Found");
 echo '404 Not Found';

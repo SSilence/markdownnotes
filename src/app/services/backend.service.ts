@@ -134,6 +134,10 @@ export class BackendService {
         return this.http.post<void>(BackendService.BASE_URL + 'page', new PageDto(page));
     }
 
+    updateNews(): Observable<any> {
+        return this.http.post<any>(BackendService.BASE_URL + 'news/update', {});
+    }
+
 
 
 

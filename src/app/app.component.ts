@@ -22,6 +22,9 @@ import { BackendService } from './services/backend.service';
                 </div>
                 <div class="header-nav">
                 <a class="nav-link nav-icon" (click)="add()"><cds-icon shape="add-text"></cds-icon></a>
+                @if(newsEnabled) {
+                    <a class="nav-link nav-icon" [routerLink]="['/page', 'news']"><cds-icon shape="help-info"></cds-icon></a>
+                }
                 @if(imapEnabled) {
                     <a class="nav-link nav-icon" [routerLink]="['/email']"><cds-icon shape="envelope"></cds-icon></a>
                 }
@@ -87,6 +90,7 @@ export class AppComponent implements OnInit {
     q = '';
     showNavigation: boolean = true;
     imapEnabled: boolean = false;
+    newsEnabled: boolean = false;
 
     constructor(private backendService: BackendService,
                 private route: ActivatedRoute,
@@ -111,9 +115,14 @@ export class AppComponent implements OnInit {
         });
         this.backendService.pagesChanged.subscribe(pages => {
             this.pages = this.backendService.filterSystemPages(pages).map(p => ({...p}));
+            this.checkNewsEnabled(pages);
         });
         this.backendService.getAllPages().subscribe(() => this.loading = false);
         this.backendService.isImapEnabled().subscribe(enabled => this.imapEnabled = enabled);
+    }
+
+    checkNewsEnabled(pages: Page[]) {
+        this.newsEnabled = pages.some(page => page.id === 'news');
     }
 
     add() {
