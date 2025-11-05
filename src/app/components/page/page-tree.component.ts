@@ -1,7 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { ClarityModule } from '@clr/angular';
 
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CdsModule } from '@cds/angular';
 import { Page } from 'src/app/models/page';
 import { BackendService } from 'src/app/services/backend.service';
@@ -15,12 +15,23 @@ import { BackendService } from 'src/app/services/backend.service';
                         [clrExpandable]="page.children.length > 0"
                         (clrExpandedChange)="toggle(page)"
                         [clrExpanded]="page.expanded">
-                <button [routerLink]="['page', page.id]" class="clr-treenode-link" [class.active]="page.id==active">
-                    <cds-icon [attr.shape]="page.icon" [title]="page.icon"></cds-icon> {{page.title}}
-                </button>
+                <a [routerLink]="['page', page.id]" 
+                   class="group !flex items-center justify-between w-full gap-0 clr-treenode-link" 
+                   [class.active]="page.id==active">
+                    <span class="flex items-center gap-0 flex-1 min-w-0">
+                        <cds-icon [attr.shape]="page.icon" [title]="page.icon"></cds-icon>
+                        <span class="overflow-hidden text-ellipsis whitespace-nowrap">{{page.title}}</span>
+                    </span>
+                    <span (click)="navigateToEdit($event, page.id)" 
+                          class="flex items-center justify-center w-5 h-5 bg-transparent cursor-pointer opacity-0 transition-opacity duration-200 ease-in-out shrink-0 rounded group-hover:opacity-100"
+                          title="Edit">
+                        <cds-icon shape="pencil"></cds-icon>
+                    </span>
+                </a>
             </clr-tree-node>
         </clr-tree>
-    `
+    `,
+    styles: []
 })
 export class PageTreeComponent {
 
@@ -30,6 +41,7 @@ export class PageTreeComponent {
     active: string | null = null;
 
     private backendService = inject(BackendService);
+    private router = inject(Router);
 
     @Input()
     get pages() {
@@ -45,5 +57,11 @@ export class PageTreeComponent {
     toggle(page: Page) {
         page.expanded = !page.expanded;
         this.backendService.savePage(page).subscribe();
+    }
+
+    navigateToEdit(event: Event, pageId: string) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.router.navigate(['page', 'edit', pageId]);
     }
 }

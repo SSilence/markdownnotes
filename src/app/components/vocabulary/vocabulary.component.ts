@@ -80,10 +80,10 @@ import { VocabularyCard } from "src/app/models/vocabulary-card";
                 </div>
             }
             @if (!page.edit && page.phases) {
-                <div class="mt-4 inline-flex -space-x-px">
-                    <button class="btn btn-primary" [routerLink]="['/vocabulary', 'vocabular', page.id]"><cds-icon shape="view-list"></cds-icon> view</button>
-                    <button class="btn btn-success" (click)="page.edit = true"><cds-icon shape="pencil"></cds-icon> edit</button>
-                    <button class="btn btn-danger" (click)="entryToDelete=page"><cds-icon shape="trash"></cds-icon> delete</button>
+                <div class="mt-3 inline-flex -space-x-px border border-border-blue rounded overflow-hidden">
+                    <button class="!m-0 !p-3 btn btn-outline !border-0 !rounded-none" [routerLink]="['/vocabulary', 'vocabular', page.id]"><cds-icon shape="view-list"></cds-icon> view</button>
+                    <button class="!m-0 !p-3 btn btn-outline !border-0 !rounded-none !border-l !border-border-blue" (click)="page.edit = true"><cds-icon shape="pencil"></cds-icon> edit</button>
+                    <button class="!m-0 !p-3 btn btn-outline !border-0 !rounded-none !border-l !border-border-blue" (click)="entryToDelete=page"><cds-icon shape="trash"></cds-icon> delete</button>
                 </div>
             }
             @if (page.edit) {
