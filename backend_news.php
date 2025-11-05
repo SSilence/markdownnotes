@@ -58,10 +58,10 @@ router('GET', '/news/update$', function() {
         }
     }
     
-    // Delete news older than 2 weeks
-    $twoWeeksAgo = time() - (14 * 24 * 60 * 60);
-    $existingNews = array_filter($existingNews, function($item) use ($twoWeeksAgo) {
-        return !empty($item['timestamp']) && $item['timestamp'] >= $twoWeeksAgo;
+    // Delete news older than 1 week
+    $oneWeekAgo = time() - (7 * 24 * 60 * 60);
+    $existingNews = array_filter($existingNews, function($item) use ($oneWeekAgo) {
+        return !empty($item['timestamp']) && $item['timestamp'] >= $oneWeekAgo;
     });
     // Reindex array
     $existingNews = array_values($existingNews);
