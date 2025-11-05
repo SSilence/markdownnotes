@@ -19,7 +19,7 @@ import { BackendService } from 'src/app/services/backend.service';
                 @for (page of pages; track page) {
                     <div class="mt-6">
                         <a [routerLink]="['/page', page.id]" class="text-2xl no-underline"><cds-icon [attr.shape]="page.icon" size="md"></cds-icon> <span class="pl-2" [innerHTML]="page.title | highlight:q"></span></a>
-                        <pre class="p-4 bg-bg-code" [innerHTML]="page.content | searchResult:q | nl2br | highlight:q"></pre>
+                        <pre class="p-4 bg-bg-code" [innerHTML]="page.content | searchResult:q | highlight:q | nl2br"></pre>
                     </div>
                 }
             </div>

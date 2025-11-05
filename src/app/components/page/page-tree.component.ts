@@ -30,8 +30,7 @@ import { BackendService } from 'src/app/services/backend.service';
                 </a>
             </clr-tree-node>
         </clr-tree>
-    `,
-    styles: []
+    `
 })
 export class PageTreeComponent {
 

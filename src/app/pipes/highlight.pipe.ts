@@ -1,27 +1,44 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
     name: 'highlight',
     standalone: true
 })
 export class HighlightPipe implements PipeTransform {
-  constructor(private sanitizer: DomSanitizer){}
 
-  transform(value: any, args: any): any {
-    if (!args) {
-      return value;
-    }
-    // Match in a case insensitive maneer
-    const re = new RegExp(args, 'gi');
-    const match = value.match(re);
+  transform(value: any, args: any): string {
+    const input = typeof value === 'string' ? value : '';
+    const query = typeof args === 'string' && args.length > 0 ? args : null;
 
-    // If there's no match, just return the original value.
-    if (!match) {
-      return value;
+    if (!query) {
+      return this.escapeHtml(input);
     }
 
-    const replacedValue = value.replace(re, "<mark>" + match[0] + "</mark>")
-    return this.sanitizer.bypassSecurityTrustHtml(replacedValue)
+    const regex = new RegExp(this.escapeRegExp(query), 'gi');
+    let lastIndex = 0;
+    let result = '';
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(input)) !== null) {
+      result += this.escapeHtml(input.slice(lastIndex, match.index));
+      result += `<mark>${this.escapeHtml(match[0])}</mark>`;
+      lastIndex = match.index + match[0].length;
+    }
+
+    result += this.escapeHtml(input.slice(lastIndex));
+    return result;
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }

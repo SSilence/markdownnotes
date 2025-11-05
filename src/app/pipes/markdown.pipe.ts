@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { marked } from 'marked';
 import highlightjs from 'highlight.js';
+import DOMPurify from 'dompurify';
 
 @Pipe({
     name: 'markdown',
@@ -15,7 +16,8 @@ export class MarkdownPipe implements PipeTransform {
             return value;
         }
         this.configureMarked();
-        return marked(value) as string;
+        const rendered = marked(value) as string;
+        return DOMPurify.sanitize(rendered, { USE_PROFILES: { html: true } });
     }
 
     private configureMarked(): void {

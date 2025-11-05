@@ -48,7 +48,7 @@ import { AlertComponent } from '../shared/alert.component';
                     <select name="options" [(ngModel)]="page.parent">
                     <option [ngValue]="null">no parent</option>
                     @for (page of flattenPages(); track page) {
-                        <option [ngValue]="page" [innerHtml]="flattenPageTitle(page)"></option>
+                        <option [ngValue]="page" [textContent]="flattenPageTitle(page)"></option>
                     }
                     </select>
                 </div>
@@ -173,11 +173,9 @@ export class PageEditComponent implements OnInit {
     }
 
     flattenPageTitle(page: Page): string {
-        const spaces = (page.id!.split(BackendService.ID_SEPARATOR).length - 1) * 4;
-        if (spaces > 0) {
-            return "&nbsp;".repeat(spaces) + "&rarr; " + page.title;
-        }
-        return page.title!;
+        const depth = Math.max(0, page.id!.split(BackendService.ID_SEPARATOR).length - 1);
+        const indent = depth > 0 ? `${'  '.repeat(depth)}-> ` : '';
+        return `${indent}${page.title ?? ''}`;
     }
 
     openIconDialog() {
