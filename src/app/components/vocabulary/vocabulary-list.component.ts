@@ -93,7 +93,7 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
                                 }
                                 @for (entry of selected; track entry) {
                                     <tr>
-                                        <td class="!p-0"><input type="text" [(ngModel)]="entry.german" class="w-full border-0 m-0 p-3"></td>
+                                        <td class="!p-0"><input type="text" [(ngModel)]="entry.german" class="w-full border-0 !m-0 p-3"></td>
                                         <td class="!p-0"><input type="text" [(ngModel)]="entry.english" class="w-full border-0 m-0 p-3"></td>
                                         <td class="!p-0"><input type="text" [(ngModel)]="entry.section" class="w-full border-0 m-0 p-3"></td>
                                         <td class="!p-0 text-left !pl-3 !pt-2">
@@ -107,7 +107,7 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
                                             }">
                                             {{entry.score}}
                                         </td>
-                                        <td class="text-center !p-3">
+                                        <td class="text-center !p-2.5">
                                             @if (hasImage(entry)) {
                                                 <span class="badge badge-success !p-2">Bild</span>
                                             } @else {

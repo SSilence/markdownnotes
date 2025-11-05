@@ -181,8 +181,8 @@ export class BackendService {
         return this.http.get<string[]>(BackendService.BASE_URL + 'images', { params: params });
     }
 
-    uploadVocabularyImage(vocabulary: string, imageBase64: string): Observable<{ success: boolean; filename: string }> {
-        return this.http.post<{ success: boolean; filename: string }>(BackendService.BASE_URL + 'image', {
+    uploadVocabularyImage(vocabulary: string, imageBase64: string): Observable<void> {
+        return this.http.post<void>(BackendService.BASE_URL + 'image', {
             vocabulary: vocabulary,
             image: imageBase64
         });
@@ -200,8 +200,8 @@ export class BackendService {
         return this.http.post<Record<string, boolean>>(BackendService.BASE_URL + 'image_has', vocabularyList);
     }
 
-    deleteVocabularyImage(vocabulary: string): Observable<{ success: boolean }> {
-        return this.http.delete<{ success: boolean }>(BackendService.BASE_URL + 'image/' + encodeURIComponent(vocabulary));
+    deleteVocabularyImage(vocabulary: string): Observable<void> {
+        return this.http.delete<void>(BackendService.BASE_URL + 'image/' + encodeURIComponent(vocabulary));
     }
 
     

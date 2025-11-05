@@ -305,11 +305,6 @@ router('POST', '/image$', function() {
     if (file_put_contents($filename, $imageData) === false) {
         error(500, "unable to save image");
     }
-
-    json(array(
-        "success" => true,
-        "filename" => basename($filename)
-    ));
 });
 
 router('GET', '/image/(?<vocabulary>.+)$', function($params) {
@@ -343,10 +338,6 @@ router('DELETE', '/image/(?<vocabulary>.+)$', function($params) {
     if (!unlink($filename)) {
         error(500, "unable to delete image");
     }
-
-    json(array(
-        "success" => true
-    ));
 });
 
 router('POST', '/image_has$', function() {
