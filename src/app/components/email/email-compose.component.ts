@@ -34,39 +34,43 @@ export interface ComposeData {
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <div class="compose-panel">
-      <clr-card-header>
-        <clr-card-title>
-          <span>{{ getComposeTitle() }}</span>
+    <div class="flex flex-col h-full bg-gray-50">
+      <div class="border-b border-gray-300 p-2">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-sm">{{ getComposeTitle() }}</span>
 
           <!-- Draft Status -->
           @if (draftSaveStatus !== 'idle') {
-            <div class="draft-status" [class.saving]="draftSaveStatus === 'saving'"
-                 [class.saved]="draftSaveStatus === 'saved'"
-                 [class.error]="draftSaveStatus === 'error'">
+            <div class="text-xs font-medium flex items-center gap-1 px-2 py-1 rounded"
+                 [class.text-gray-700]="draftSaveStatus === 'saving'"
+                 [class.bg-gray-100]="draftSaveStatus === 'saving'"
+                 [class.text-green-700]="draftSaveStatus === 'saved'"
+                 [class.bg-green-100]="draftSaveStatus === 'saved'"
+                 [class.text-red-700]="draftSaveStatus === 'error'"
+                 [class.bg-red-100]="draftSaveStatus === 'error'">
               @if (draftSaveStatus === 'saving') {
-                <cds-icon shape="sync" class="spinning"></cds-icon>
+                <cds-icon shape="sync" class="animate-spin text-sm"></cds-icon>
                 Auto-saving...
               } @else if (draftSaveStatus === 'saved') {
-                <cds-icon shape="check"></cds-icon>
+                <cds-icon shape="check" class="text-sm"></cds-icon>
                 Draft saved
               } @else if (draftSaveStatus === 'error') {
-                <cds-icon shape="exclamation-triangle"></cds-icon>
+                <cds-icon shape="exclamation-triangle" class="text-sm"></cds-icon>
                 Save failed
               }
             </div>
           }
 
-          <div class="header-actions">
+          <div class="flex gap-1 items-center">
             <button 
-              class="btn btn-sm btn-outline" 
+              class="btn btn-icon btn-sm btn-outline" 
               (click)="closeCompose()">
               <cds-icon shape="times"></cds-icon>
               Cancel
             </button>
             
             <button 
-              class="btn btn-sm btn-outline" 
+              class="btn btn-icon btn-sm btn-outline" 
               (click)="openAttachmentDialog()"
               [disabled]="sending"
               title="Add attachments">
@@ -75,12 +79,12 @@ export interface ComposeData {
             </button>
             
             <button
-              class="btn btn-sm btn-outline"
+              class="btn btn-icon btn-sm btn-outline"
               (click)="saveDraft()"
               [disabled]="savingDraft || sending"
               title="Save draft">
               @if (savingDraft) {
-                <cds-icon shape="sync" class="spinning"></cds-icon>
+                <cds-icon shape="sync" class="animate-spin"></cds-icon>
                 Saving...
               } @else {
                 <cds-icon shape="floppy"></cds-icon>
@@ -89,12 +93,12 @@ export interface ComposeData {
             </button>
 
             <button
-              class="btn btn-sm btn-primary"
+              class="btn btn-icon btn-sm btn-primary"
               type="submit"
               form="email-form"
-              [class.loading]="sending">
+              [disabled]="sending">
               @if (sending) {
-                <cds-icon shape="sync" class="spinning"></cds-icon>
+                <cds-icon shape="sync" class="animate-spin"></cds-icon>
                 Sending...
               } @else {
                 <cds-icon shape="envelope"></cds-icon>
@@ -102,16 +106,16 @@ export interface ComposeData {
               }
             </button>
           </div>
-        </clr-card-title>
-      </clr-card-header>
+        </div>
+      </div>
       
-      <div class="compose-content">
-        <form id="email-form" (ngSubmit)="sendEmail()" #emailForm="ngForm">
+      <div class="flex-1 overflow-y-auto bg-white">
+        <form id="email-form" (ngSubmit)="sendEmail()" #emailForm="ngForm" class="flex flex-col h-full">
           
           <!-- To Field with CC Toggle -->
-          <div class="input-row">
-            <label class="input-label">To:</label>
-            <div class="recipient-container">
+          <div class="border-b border-gray-300 grid grid-cols-[80px_1fr] gap-0">
+            <label class="font-bold text-xs px-3 py-3 text-left">To:</label>
+            <div class="flex items-center justify-between gap-2 pr-3 min-h-10">
               <app-recipient-input
                 [recipients]="toRecipients"
                 [contacts]="contacts"
@@ -120,8 +124,10 @@ export interface ComposeData {
               </app-recipient-input>
               <button 
                 type="button"
-                class="input-cc-toggle" 
-                [class.active]="showCc"
+                class="btn btn-icon btn-sm px-2 py-1 border border-gray-400 bg-transparent hover:bg-gray-100 text-xs font-medium text-gray-700 hover:text-gray-800 uppercase tracking-wider flex-shrink-0 rounded"
+                [class.bg-blue-50]="showCc"
+                [class.border-blue-400]="showCc"
+                [class.text-blue-700]="showCc"
                 (click)="toggleShowCc()">
                 CC
               </button>
@@ -130,9 +136,9 @@ export interface ComposeData {
 
           <!-- CC Field with BCC Toggle -->
           @if (showCc) {
-            <div class="input-row">
-              <label class="input-label">CC:</label>
-              <div class="recipient-container">
+            <div class="border-b border-gray-300 grid grid-cols-[80px_1fr] gap-0">
+              <label class="font-bold text-xs px-3 py-3 text-left">CC:</label>
+              <div class="flex items-center justify-between gap-2 pr-3 min-h-10">
                 <app-recipient-input
                   [recipients]="ccRecipients"
                   [contacts]="contacts"
@@ -141,8 +147,10 @@ export interface ComposeData {
                 </app-recipient-input>
                 <button 
                   type="button"
-                  class="input-cc-toggle" 
-                  [class.active]="showBcc"
+                  class="btn btn-icon btn-sm px-2 py-1 border border-gray-400 bg-transparent hover:bg-gray-100 text-xs font-medium text-gray-700 hover:text-gray-800 uppercase tracking-wider flex-shrink-0 rounded"
+                  [class.bg-blue-50]="showBcc"
+                  [class.border-blue-400]="showBcc"
+                  [class.text-blue-700]="showBcc"
                   (click)="toggleShowBcc()">
                   BCC
                 </button>
@@ -152,9 +160,9 @@ export interface ComposeData {
 
           <!-- BCC Field -->
           @if (showBcc) {
-            <div class="input-row">
-              <label class="input-label">BCC:</label>
-              <div class="recipient-container">
+            <div class="border-b border-gray-300 grid grid-cols-[80px_1fr] gap-0">
+              <label class="font-bold text-xs px-3 py-3 text-left">BCC:</label>
+              <div class="flex items-center justify-between gap-2 pr-3 min-h-10">
                 <app-recipient-input
                   [recipients]="bccRecipients"
                   [contacts]="contacts"
@@ -166,16 +174,16 @@ export interface ComposeData {
           }
 
           <!-- Subject Field -->
-          <div class="input-row">
-            <label class="input-label">Subject:</label>
-            <div class="input-container">
+          <div class="border-b border-gray-300 grid grid-cols-[80px_1fr] gap-0">
+            <label class="font-bold text-xs px-3 py-3 text-left">Subject:</label>
+            <div class="flex items-center px-3 pr-3 min-h-10">
               <input 
                 type="text" 
                 name="subject"
                 [(ngModel)]="emailData.subject"
                 #subjectField="ngModel"
                 required
-                class="input-field"
+                class="w-full text-xs bg-white border-none outline-none py-2"
                 placeholder="Email subject"
               />
             </div>
@@ -183,8 +191,8 @@ export interface ComposeData {
 
           <!-- Attachments Field (only show when attachments exist) -->
           @if (attachmentFiles && attachmentFiles.length > 0) {
-            <div class="input-row attachment-row">
-              <label class="input-label">Files:</label>
+            <div class="border-b border-gray-300 grid grid-cols-[80px_1fr] gap-0 py-2 pl-3">
+              <label class="font-bold text-xs py-2">Files:</label>
               <app-email-attachment
                 #attachmentComponent
                 [attachments]="attachmentFiles || []"
@@ -212,14 +220,14 @@ export interface ComposeData {
           }
 
           <!-- Message Body -->
-          <div class="input-row message-row">
-            <div class="message-container">
+          <div class="flex-1 border-b border-gray-300 overflow-hidden min-h-64">
+            <div class="flex flex-col flex-1 overflow-hidden">
               <app-auto-textarea
                 name="message"
                 [(ngModel)]="emailData.bodyText"
                 #messageField="ngModel"
                 required
-                [styleClass]="'message-field'"
+                [styleClass]="'flex-1 w-full p-3 text-xs bg-white border-none outline-none resize-vertical leading-6 font-system'"
                 placeholder="Compose your message...">
               </app-auto-textarea>
             </div>
@@ -227,345 +235,31 @@ export interface ComposeData {
 
           <!-- Validation Errors (only shown after submit attempt) -->
           @if (showValidationErrors) {
-            <div class="validation-errors">
+            <div class="bg-red-100 border-t border-red-300 border-b border-red-300 p-3">
               @if (toRecipients.length === 0) {
-                <div class="error-message">At least one recipient is required</div>
+                <div class="text-red-700 text-xs font-medium mb-1">At least one recipient is required</div>
               }
               @if (hasInvalidToRecipients) {
-                <div class="error-message">Please correct invalid email addresses in To field</div>
+                <div class="text-red-700 text-xs font-medium mb-1">Please correct invalid email addresses in To field</div>
               }
               @if (hasInvalidCcRecipients) {
-                <div class="error-message">Please correct invalid email addresses in CC field</div>
+                <div class="text-red-700 text-xs font-medium mb-1">Please correct invalid email addresses in CC field</div>
               }
               @if (hasInvalidBccRecipients) {
-                <div class="error-message">Please correct invalid email addresses in BCC field</div>
+                <div class="text-red-700 text-xs font-medium mb-1">Please correct invalid email addresses in BCC field</div>
               }
               @if (!emailData.subject || emailData.subject.trim() === '') {
-                <div class="error-message">Subject is required</div>
+                <div class="text-red-700 text-xs font-medium mb-1">Subject is required</div>
               }
               @if (!emailData.bodyText || emailData.bodyText.trim() === '') {
-                <div class="error-message">Message is required</div>
+                <div class="text-red-700 text-xs font-medium">Message is required</div>
               }
             </div>
           }
         </form>
       </div>
     </div>
-  `,
-  styles: [`
-    .compose-panel {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      background: var(--clr-global-app-background, #fafafa);
-    }
-
-    clr-card-header {
-      padding: 0.5em;
-      border-bottom: 1px solid var(--clr-color-neutral-300);
-    }
-
-    clr-card-title {
-      display: flex !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      width: 100% !important;
-      margin-left: 10px;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
-
-    .draft-status {
-      font-size: 0.65rem;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 3px;
-      font-weight: 500;
-      margin-right: 0.5rem;
-    }
-
-    .draft-status.saving {
-      color: var(--clr-color-neutral-700, #666);
-      background: var(--clr-color-neutral-100, #f5f5f5);
-    }
-
-    .draft-status.saved {
-      color: var(--clr-color-success-700, #2e8b57);
-      background: var(--clr-color-success-100, #e8f5e8);
-    }
-
-    .draft-status.error {
-      color: var(--clr-color-danger-700, #d63031);
-      background: var(--clr-color-danger-100, #ffeaea);
-    }
-
-    .draft-status cds-icon {
-      font-size: 12px;
-      width: 12px;
-      height: 12px;
-    }
-
-    .spinning {
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .compose-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0;
-      background: white;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      height: 100%;
-    }
-
-    .input-row {
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 0;
-      align-items: start;
-      border-bottom: 1px solid var(--clr-color-neutral-300, #e0e0e0);
-    }
-
-    /* Special styling for attachment row to prevent overlap */
-    .attachment-row {
-      align-items: start;
-      padding: 0.5rem 0;
-    }
-
-    .attachment-row .input-label {
-      padding-top: 0.75rem;
-      padding-bottom: 0.75rem;
-      align-self: start;
-      position: relative;
-      z-index: 1;
-    }
-
-    .message-row {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 0;
-      align-items: start;
-    }
-
-    .input-label {
-      font-weight: 600;
-      color: var(--clr-color-neutral-800, #2c3e50);
-      font-size: 0.7rem;
-      margin: 0;
-      padding: 0.75rem;
-      text-align: left;
-    }
-
-    .input-container,
-    .recipient-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 0.5rem;
-      padding-right: 0.75rem;
-      min-height: 2.5rem;
-    }
-
-    .input-container {
-      justify-content: flex-start;
-    }
-
-    .recipient-container {
-      justify-content: space-between;
-    }
-
-    .recipient-container app-recipient-input {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .input-cc-toggle {
-      background: transparent;
-      border: 1px solid var(--clr-color-neutral-400, #ccc);
-      border-radius: 3px;
-      padding: 0.25rem 0.5rem;
-      font-size: 0.65rem;
-      color: var(--clr-color-neutral-700, #666);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      flex-shrink: 0;
-      margin-left: auto;
-      height: 1.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .input-cc-toggle:hover {
-      background: var(--clr-color-neutral-100, #f5f5f5);
-      border-color: var(--clr-color-neutral-500, #999);
-      color: var(--clr-color-neutral-800, #333);
-    }
-
-    .input-cc-toggle.active {
-      background: var(--clr-color-primary-200, #e3f2fd);
-      border-color: var(--clr-color-primary-400, #42a5f5);
-      color: var(--clr-color-primary-700, #1976d2);
-    }
-
-    .input-cc-toggle:focus {
-      outline: 2px solid var(--clr-color-primary-400, #42a5f5);
-      outline-offset: 1px;
-    }
-
-    .input-field,
-    .message-field {
-      width: 100%;
-      padding: 0.5rem;
-      border: none;
-      border-radius: 0;
-      font-size: 0.7rem;
-      background: white;
-      box-sizing: border-box;
-      outline: none;
-      height: 2rem;
-      line-height: 1.2;
-    }
-
-    .message-row {
-      padding-top: 0.5rem;
-      display:block;
-    }
-
-    .message-container {
-      display: flex;
-      flex: 1;
-      flex-direction: column;
-      min-height: 250px;
-    }
-    
-    ::ng-deep .message-field {
-      flex: 1;
-      resize: vertical;
-      line-height: 1.5;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      border: 0 !important;
-      width: 100% !important;
-      padding: 0.5rem;
-      padding-left: 0.75rem;
-    }
-
-    .input-field::placeholder,
-    ::ng-deep .message-field::placeholder {
-      color: #bababa;
-    }
-
-    .btn-icon {
-      padding: 0.25rem !important;
-      min-width: auto !important;
-      width: 2rem;
-      height: 2rem;
-      flex-shrink: 0;
-    }
-
-    .validation-errors {
-      grid-column: 1 / -1;
-      background: var(--clr-color-danger-100, #ffeaea);
-      border-top: 1px solid var(--clr-color-danger-300, #ff6b6b);
-      border-bottom: 1px solid var(--clr-color-danger-300, #ff6b6b);
-      padding: 0.75rem;
-    }
-
-    .error-message {
-      color: var(--clr-color-danger-700, #d63031);
-      font-size: 0.75rem;
-      font-weight: 500;
-      margin: 0.25rem 0;
-    }
-
-    .error-message:first-child {
-      margin-top: 0;
-    }
-
-    .error-message:last-child {
-      margin-bottom: 0;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .input-row,
-      .message-row {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-
-      .input-label {
-        padding: 0.5rem;
-        border-right: none;
-        border-bottom: 1px solid var(--clr-color-neutral-300, #e0e0e0);
-      }
-      
-      .header-actions {
-        flex-wrap: wrap;
-        gap: 0.25rem;
-      }
-
-      ::ng-deep .message-field {
-        min-height: 200px !important;
-        height: 200px !important;
-      }
-
-      .input-container,
-      .recipient-container {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
-        padding-right: 0.5rem;
-      }
-
-      .input-cc-toggle {
-        align-self: flex-end;
-        margin-left: 0;
-        margin-top: 0.25rem;
-      }
-    }
-
-    /* Datalist styling improvements */
-    datalist {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    /* Focus and interaction improvements */
-    .compose-content:focus-within {
-      outline: none;
-    }
-
-    /* Loading state improvements */
-    .loading {
-      position: relative;
-    }
-
-    .loading:disabled {
-      opacity: 0.8;
-    }
-  `]
+  `
 })
 export class EmailComposeComponent implements OnInit, OnDestroy, OnChanges {
   @Input() composeData: ComposeData | null = null;

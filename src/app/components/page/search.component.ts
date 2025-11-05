@@ -15,39 +15,16 @@ import { BackendService } from 'src/app/services/backend.service';
     template: `
         @if (pages.length>0) {
             <div>
-                <span class="q">searchresults for <span>"{{q}}"</span></span>
+                <span class="font-normal">searchresults for <span class="font-bold">"{{q}}"</span></span>
                 @for (page of pages; track page) {
-                    <div class="result">
-                        <a [routerLink]="['/page', page.id]"><cds-icon [attr.shape]="page.icon" size="md"></cds-icon> <span [innerHTML]="page.title | highlight:q"></span></a>
-                        <pre [innerHTML]="page.content | searchResult:q | nl2br | highlight:q"></pre>
+                    <div class="mt-6">
+                        <a [routerLink]="['/page', page.id]" class="text-2xl no-underline"><cds-icon [attr.shape]="page.icon" size="md"></cds-icon> <span class="pl-2" [innerHTML]="page.title | highlight:q"></span></a>
+                        <pre class="p-4 bg-bg-code" [innerHTML]="page.content | searchResult:q | nl2br | highlight:q"></pre>
                     </div>
                 }
             </div>
         }    
-    `,
-    styles: [`
-        .q span {
-            font-weight: bold;
-        }
-
-        .result {
-            margin-top:1.5em;
-        }
-
-        .result a {
-            font-size:1.4em;
-            text-decoration: none;
-        }
-
-        .result span {
-            padding-left:0.4em;
-        }
-
-        pre {
-            padding:1em;
-            background:#eeeeee;
-        }
-    `]
+    `
 })
 export class SearchComponent implements OnInit, OnDestroy {
 

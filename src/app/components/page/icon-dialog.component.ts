@@ -15,22 +15,22 @@ import { IconService } from 'src/app/services/icon.service';
         @if (isOpen) {
             <div class="modal selectIconDialog">
                 <div class="modal-dialog modal-xl" role="dialog" aria-hidden="true">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div class="search-container">
+                <div class="modal-content min-h-[500px]">
+                    <div class="modal-body flex flex-col h-full">
+                        <div class="mb-4">
                             <input #searchInput 
                                    type="text" 
-                                   class="clr-input" 
+                                   class="clr-input w-full text-base m-0" 
                                    placeholder="Search icons..." 
                                    [(ngModel)]="iconSearchTerm"
                                    autofocus>
                         </div>
-                        <div class="icons-container">
+                        <div class="h-[400px] overflow-y-auto border border-border-light p-4 rounded">
                             @for (icon of getFilteredIcons(); track icon) {
-                                <cds-icon class="selectIcon" [attr.shape]="icon" size="24" (click)="selectIcon(icon)" [title]="icon"></cds-icon>
+                                <cds-icon class="cursor-pointer m-1" [attr.shape]="icon" size="24" (click)="selectIcon(icon)" [title]="icon"></cds-icon>
                             }
                             @if (getFilteredIcons().length === 0) {
-                                <div class="no-results">No icons found matching "{{iconSearchTerm}}"</div>
+                                <div class="text-center p-8 text-text-secondary italic">No icons found matching "{{iconSearchTerm}}"</div>
                             }
                         </div>
                     </div>
@@ -45,48 +45,7 @@ import { IconService } from 'src/app/services/icon.service';
         @if (isOpen) {
             <div class="modal-backdrop" aria-hidden="true"></div>
         }
-    `,
-    styles: [`
-        .selectIcon  {
-            cursor: pointer;
-            margin:0.2em;
-        }
-
-        .search-container {
-            margin-bottom: 1em;
-        }
-
-        .search-container input {
-            width: 100%;
-            font-size: 1rem;
-            margin: 0;
-        }
-
-        .icons-container {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 1em;
-            border-radius: 4px;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 2em;
-            color: #666;
-            font-style: italic;
-        }
-
-        .modal-content {
-            min-height: 500px;
-        }
-
-        .modal-body {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-    `]
+    `
 })
 export class IconDialogComponent implements AfterViewInit, OnChanges {
     private _isOpen = false;

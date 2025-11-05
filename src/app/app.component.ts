@@ -15,22 +15,22 @@ import { BackendService } from './services/backend.service';
         <div class="main-container">
             <header class="header header-6">
                 <div class="branding">
-                <a class="nav-link" [routerLink]="['/']">
-                    <img class="logo" src="assets/logo.png">
+                <a class="nav-link cursor-pointer" [routerLink]="['/']">
+                    <img class="w-8 h-8 mr-4" src="assets/logo.png">
                     <span class="title">MarkdownNotes</span>
                 </a>
                 </div>
                 <div class="header-nav">
-                <a class="nav-link nav-icon" (click)="add()"><cds-icon shape="add-text"></cds-icon></a>
+                <a class="nav-link nav-icon cursor-pointer" (click)="add()"><cds-icon shape="add-text"></cds-icon></a>
                 @if(newsEnabled) {
-                    <a class="nav-link nav-icon" [routerLink]="['/page', 'news']"><cds-icon shape="help-info"></cds-icon></a>
+                    <a class="nav-link nav-icon cursor-pointer" [routerLink]="['/page', 'news']"><cds-icon shape="help-info"></cds-icon></a>
                 }
                 @if(imapEnabled) {
-                    <a class="nav-link nav-icon" [routerLink]="['/email']"><cds-icon shape="envelope"></cds-icon></a>
+                    <a class="nav-link nav-icon cursor-pointer" [routerLink]="['/email']"><cds-icon shape="envelope"></cds-icon></a>
                 }
-                <a class="nav-link nav-icon" [routerLink]="['/passwords']"><cds-icon shape="key"></cds-icon></a>
-                <a class="nav-link nav-icon" [routerLink]="['/filelist']"><cds-icon shape="upload-cloud"></cds-icon></a>
-                <a class="nav-link nav-icon" [routerLink]="['/vocabulary']"><cds-icon shape="talk-bubbles"></cds-icon></a>
+                <a class="nav-link nav-icon cursor-pointer" [routerLink]="['/passwords']"><cds-icon shape="key"></cds-icon></a>
+                <a class="nav-link nav-icon cursor-pointer" [routerLink]="['/filelist']"><cds-icon shape="upload-cloud"></cds-icon></a>
+                <a class="nav-link nav-icon cursor-pointer" [routerLink]="['/vocabulary']"><cds-icon shape="talk-bubbles"></cds-icon></a>
                 </div>
                 <div class="search">
                 <label for="search-input-sidenav-ng">
@@ -46,7 +46,7 @@ import { BackendService } from './services/backend.service';
                         [maxWidth]="500"
                         [defaultWidth]="300"
                         storageKey="sidebar_width">
-                        <section class="sidenav-content">
+                        <section class="pt-4 overflow-auto h-full">
                         @if (loading) {
                             <span class="spinner spinner-inline">Loading Pages...</span>
                         } @else {
@@ -60,28 +60,7 @@ import { BackendService } from './services/backend.service';
                 </main>
             </div>
         </div>
-    `,
-    styles: [`
-        .logo {
-            width:2em;
-            height:2em;
-            margin-right:1em;
-        }
-
-        .sidenav-content {
-            padding-top:1em;
-            overflow:auto;
-            height: 100%;
-        }
-
-        .nav-link {
-            cursor: pointer;
-        }
-
-        #search_input {
-            padding-left:0.5em;
-        }        
-    `]
+    `
 })
 export class AppComponent implements OnInit {
     pages: Page[] = [];

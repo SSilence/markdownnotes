@@ -20,19 +20,7 @@ import { BackendService } from 'src/app/services/backend.service';
                 </button>
             </clr-tree-node>
         </clr-tree>
-    `,
-    styles: [`
-        .example-tree-invisible {
-            display: none;
-        }
-
-        .example-tree ul,
-        .example-tree li {
-            margin-top: 0;
-            margin-bottom: 0;
-            list-style-type: none;
-        }        
-    `]
+    `
 })
 export class PageTreeComponent {
 

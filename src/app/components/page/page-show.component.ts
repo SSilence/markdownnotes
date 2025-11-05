@@ -27,20 +27,22 @@ import { PageShowNewsComponent } from './page-show-news.component';
         }
         <app-alert [error]="error"></app-alert>
         @if (page) {
-            <div class="page">
-                @if (page.id === 'news') {
-                    <button class="btn btn-outline" (click)="reloadNews()" [disabled]="reloading">
-                        @if (reloading) {
-                            <span class="spinner spinner-inline">Loading...</span>
-                        } @else {
-                            Reload
-                        }
-                    </button>
-                } @else {
-                    <button class="btn btn-outline" [routerLink]="['/page', 'edit', page.id]">edit</button>
-                }
-                <cds-icon [attr.shape]="page.icon" size="28"> </cds-icon>
-                <h1 class="title">{{page.title}}</h1>
+            <div class="relative">
+                <div class="flex items-center gap-3 mb-4">
+                    <cds-icon [attr.shape]="page.icon" size="28"></cds-icon>
+                    <h1 class="!m-0 flex-1">{{page.title}}</h1>
+                    @if (page.id === 'news') {
+                        <button class="btn btn-outline" (click)="reloadNews()" [disabled]="reloading">
+                            @if (reloading) {
+                                <span class="spinner spinner-inline">Loading...</span>
+                            } @else {
+                                Reload
+                            }
+                        </button>
+                    } @else {
+                        <button class="btn btn-outline" [routerLink]="['/page', 'edit', page.id]">edit</button>
+                    }
+                </div>
                 @if (page.id === 'news') {
                     <app-page-show-news [content]="page.content"></app-page-show-news>
                 } @else if (page.content) {
@@ -48,27 +50,7 @@ import { PageShowNewsComponent } from './page-show-news.component';
                 }
             </div>
         }    
-    `,
-    styles: [`
-        .title {
-            margin-left:1.2em;
-            margin-top:0;
-            margin-bottom:0.5em;
-        }
-
-        button {
-            float:right;
-        }
-
-        .page {
-            position: relative;
-        }
-
-        cds-icon {
-            position: absolute;
-            top:0.6em;
-        }
-    `]
+    `
 })
 export class PageShowComponent implements OnInit {
     page: Page | null = null;

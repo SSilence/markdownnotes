@@ -2,7 +2,6 @@ import { Component, AfterViewInit, Output, EventEmitter, Input, ViewChildren, in
 import EasyMDE from 'easymde/dist/easymde.min.js';
 import { MarkdownPipe } from 'src/app/pipes/markdown.pipe';
 import { CdsModule } from '@cds/angular';
-import { highlightAll } from '@speed-highlight/core';
 
 @Component({
     selector: 'markdown-editor',

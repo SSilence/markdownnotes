@@ -1,10 +1,10 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClarityModule } from '@clr/angular';
 import { FolderDto } from 'src/app/dtos/folder-dto';
 import { MessageDto } from 'src/app/dtos/message-dto';
 import { BackendService } from 'src/app/services/backend.service';
-import { StorageService, PanelWidths } from 'src/app/services/storage.service';
+import { StorageService } from 'src/app/services/storage.service';
 import { EmailFoldersComponent } from './email-folders.component';
 import { EmailMessagesComponent } from './email-messages.component';
 import { EmailMessageComponent } from './email-message.component';
@@ -27,10 +27,10 @@ import { Contact } from './recipient-input.component';
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <div class="email-client">
+    <div class="h-screen h-[calc(100vh-60px)] bg-[var(--clr-global-app-background)] relative">
       <!-- Loading Overlay -->
       @if (loading) {
-        <div class="loading-overlay">
+        <div class="absolute top-0 left-0 right-0 bottom-0 bg-white/80 flex items-center justify-center z-[1000]">
           <clr-spinner clrMedium>Loading...</clr-spinner>
         </div>
       }
@@ -70,14 +70,14 @@ import { Contact } from './recipient-input.component';
         <!-- Right Panel: Message Detail or Compose -->
         <div slot="message-detail">
           @if (!showCompose && !selectedMessage) {
-            <div class="empty-panel">
-              <div class="empty-state">
-                <cds-icon shape="envelope" size="48"></cds-icon>
-                <p class="empty-text">Select a message to view details</p>
+            <div class="h-[calc(100vh-var(--clr-header-height))] flex items-center justify-center bg-[var(--clr-global-app-background)]">
+              <div class="text-center text-[var(--clr-color-neutral-600)]">
+                <cds-icon shape="envelope" size="48" class="text-[var(--clr-color-neutral-400)]"></cds-icon>
+                <p class="text-lg !mb-2 text-[var(--clr-color-neutral-700)]">Select a message to view details</p>
                 <button
-                  class="btn btn-primary"
+                  class="btn btn-primary inline-flex items-center justify-center gap-2"
                   (click)="startNewEmail()">
-                  <cds-icon shape="plus"></cds-icon>
+                  <cds-icon shape="plus" class="m-0 flex items-center"></cds-icon>
                   Compose New Email
                 </button>
               </div>
@@ -119,65 +119,6 @@ import { Contact } from './recipient-input.component';
   styles: [`
     ::ng-deep .content-area {
       padding: 0 !important;
-    }
-
-    .email-client {
-      height: 100vh;
-      height: calc(100vh - 60px);
-      background-color: var(--clr-global-app-background);
-      position: relative;
-    }
-
-    .empty-panel {
-      height: calc(100vh - var(--clr-header-height));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--clr-global-app-background);
-      flex: 1;
-    }
-
-    .empty-state {
-      text-align: center;
-      color: var(--clr-color-neutral-600);
-    }
-
-    .empty-state cds-icon {
-      margin-bottom: 1rem;
-      color: var(--clr-color-neutral-400);
-    }
-
-    .empty-text {
-      font-size: 1.1rem;
-      margin-bottom: 1.5rem;
-      color: var(--clr-color-neutral-700);
-    }
-
-    .empty-state .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin: 0 auto;
-    }
-
-    .empty-state .btn cds-icon {
-      margin: 0;
-      display: flex;
-      align-items: center;
-    }
-
-    .loading-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
     }
   `]
 })

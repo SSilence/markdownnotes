@@ -22,16 +22,9 @@ import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/f
         (blur)="onTouched()"
         (click)="onClicked()"
         [attr.rows]="minRows"
-        [ngClass]="['auto-textarea', styleClass]">
+        [ngClass]="['resize-none overflow-hidden min-h-[1.5em]', styleClass]">
       </textarea>
-  `,
-  styles: [`
-    .auto-textarea {
-      resize: none;
-      overflow: hidden;
-      min-height: 1.5em;
-    }
-  `]
+  `
 })
 export class AutoTextareaComponent implements ControlValueAccessor, AfterViewInit {
   @Input() label: string = '';

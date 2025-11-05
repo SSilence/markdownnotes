@@ -4,48 +4,30 @@ import { CdsModule } from '@cds/angular';
 import { ClrAlertModule } from '@clr/angular';
 
 @Component({
-        selector: 'app-alert',
-        imports: [CdsModule, ClrAlertModule, NgClass],
-        template: `
-            @if (show()) {
-                <clr-alert [clrAlertType]="type" [ngClass]="{'sticky': sticky}" role="alert" (clrAlertClosedChange)="onAlertClosed()">
-                    <clr-alert-item>
-                        <span class="alert-text">
-                            @if (type === 'danger') {
-                                Error: {{getMessage()}}
-                            } @else {
-                                {{getMessage()}}
-                            }
-                        </span>
-                    </clr-alert-item>
-                </clr-alert>
-            }
-        `,
-        styles: [`
-            clr-alert {
-                display:block;
-                margin-bottom: 1em;
-            }
-            .sticky {
-                position:fixed;
-                right:0.5rem;
-                top:0.1rem;
-                width:30rem;
-                z-index:1000;
-                animation: slideInRight 0.3s ease-out;
-            }
-            
-            @keyframes slideInRight {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-        `]
+    selector: 'app-alert',
+    imports: [CdsModule, ClrAlertModule, NgClass],
+    template: `
+        @if (show()) {
+            <clr-alert 
+                [clrAlertType]="type" 
+                [ngClass]="{
+                    'fixed right-2 top-0.5 w-[30rem] z-[1000] animate-slide-in-right': sticky, 
+                    'block mb-4': !sticky
+                    }" 
+                role="alert" 
+                (clrAlertClosedChange)="onAlertClosed()">
+                <clr-alert-item>
+                    <span class="alert-text">
+                        @if (type === 'danger') {
+                            Error: {{getMessage()}}
+                        } @else {
+                            {{getMessage()}}
+                        }
+                    </span>
+                </clr-alert-item>
+            </clr-alert>
+        }
+    `
 })
 export class AlertComponent {
 

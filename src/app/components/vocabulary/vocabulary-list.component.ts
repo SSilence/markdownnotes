@@ -8,11 +8,7 @@ import { ActivatedRoute, RouterModule } from "@angular/router";
 import { switchMap, map, tap, concatMap, catchError, finalize } from 'rxjs/operators';
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 import { from, of, timer } from "rxjs";
-import { VocabularyCard } from "src/app/models/vocabulary-card";
-import { VocabularyExerciseComponent } from "./vocabulary-exercise.component";
 import { AlertComponent } from "../shared/alert.component";
-import { VocabularyExerciseResultComponent } from "./vocabulary-exercise-result.component";
-import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
 import { VocabularyImageComponent } from "./vocabulary-image.component";
 
 @Component({
@@ -23,8 +19,6 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
         CommonModule,
         FormsModule,
         RouterModule,
-        VocabularyExerciseComponent,
-        VocabularyExerciseResultComponent,
         VocabularyImageComponent
     ],
     template: `
@@ -34,37 +28,33 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
         <app-alert [error]="error"></app-alert>
 
         @if (page) {
-            <div class="page">
-                @if (train.length > 0) {
-                    <app-vocabulary-exercise [train]="true" [page]="page" [cards]="train" (finished)="exerciseResult = $event"></app-vocabulary-exercise>
-                }
-                @if (successSave) {
-                    <app-alert message="successfully saved" [sticky]="true" [type]="'success'"></app-alert>
-                }
-                <div class="top">
-                <h1>{{page.title}}</h1>
-                <div>
+        
+            @if (successSave) {
+                <app-alert message="successfully saved" [sticky]="true" [type]="'success'"></app-alert>
+            }
+            <div class="flex justify-between items-center">
+                <h1 class="text-4xl font-bold !m-0">{{page.title}}</h1>
+                <div class="flex gap-2 items-center">
                     @if (successSave) {
-                        <span class="success">successfully saved</span>
+                        <span class="text-green-600 font-medium">successfully saved</span>
                     }
                     <button class="btn btn-outline" (click)="add()">add</button>
-                    <button class="btn btn-success-outline" (click)="exercise()">exercise</button>
-                    <button class="btn" (click)="saveClick()" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}">save</button>
+                    <button class="btn" [ngClass]="{'btn-success': successSave, 'btn-primary': !successSave}" (click)="saveClick()">save</button>
                 </div>
-                </div>
-                <div class="clr-row">
-                <div class="clr-col-2">
+            </div>
+            <div class="flex gap-4">
+                <div class="w-32 flex-shrink-0">
                     <clr-input-container>
-                    <input clrInput class="search" placeholder="search" [(ngModel)]="q" (ngModelChange)="filterSearch()" />
+                        <input clrInput class="w-full" placeholder="search" [(ngModel)]="q" (ngModelChange)="filterSearch()" />
                     </clr-input-container>
-                    <h4>Phase</h4>
+                    <h4 class="text-xs font-semibold mt-3 mb-2">Phase</h4>
                     @for (i of [0,1,2,3,4,5,6]; track i) {
                         <clr-checkbox-wrapper>
                             <label>{{i}}</label>
                             <input clrCheckbox type="checkbox" (change)="filterPhase(i)" [checked]="phase.includes(i)" />
                         </clr-checkbox-wrapper>
                     }
-                    <h4>Section</h4>
+                    <h4 class="text-xs font-semibold mt-3 mb-2">Section</h4>
                     @for (sec of sections; track sec) {
                         <clr-checkbox-wrapper>
                             <label>{{sec}}</label>
@@ -72,253 +62,115 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
                         </clr-checkbox-wrapper>
                     }
                 </div>
-                <div class="clr-col">
-                    <table class="table">
-                    <thead>
-                        <tr>
-                        <th class="left"><span>German</span></th>
-                        <th class="left">English</th>
-                        <th class="left">Section</th>
-                        <th class="left">Phase</th>
-                        <th class="centered">Score</th>
-                        <th class="centered">Image</th>
-                        <th class="left"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (toAdd) {
-                            <tr class="add">
-                                <td><input type="text" [(ngModel)]="toAdd.german" (keydown)="onAddKeypress($event)" #addGermanInput></td>
-                                <td><input type="text" [(ngModel)]="toAdd.english" (keydown)="onAddKeypress($event)"></td>
-                                <td><input type="text" [(ngModel)]="toAdd.section" (keydown)="onAddKeypress($event)"></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td class="left">
-                                    <button class="btn" (click)="addSave()" class="btn btn-primary">add</button>
-                                    <button class="btn" (click)="toAdd=null" class="btn btn-outline">cancel</button>
-                                </td>
-                            </tr>
-                        }
-                        @for (entry of selected; track entry) {
+                <div class="flex-1">
+                    <div class="overflow-x-auto">
+                        <table class="table w-full">
+                            <thead>
+                                <tr>
+                                    <th class="text-left"><span>German</span></th>
+                                    <th class="text-left">English</th>
+                                    <th class="text-left">Section</th>
+                                    <th class="text-left">Phase</th>
+                                    <th class="text-center">Score</th>
+                                    <th class="text-center">Image</th>
+                                    <th class="text-left"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (toAdd) {
+                                    <tr class="border-b-4 border-green-500">
+                                        <td class="!p-0"><input type="text" [(ngModel)]="toAdd.german" (keydown)="onAddKeypress($event)" #addGermanInput class="w-full border-0 m-0 p-3"></td>
+                                        <td class="!p-0"><input type="text" [(ngModel)]="toAdd.english" (keydown)="onAddKeypress($event)" class="w-full border-0 m-0 p-3"></td>
+                                        <td class="!p-0"><input type="text" [(ngModel)]="toAdd.section" (keydown)="onAddKeypress($event)" class="w-full border-0 m-0 p-3"></td>
+                                        <td class="!p-0"></td>
+                                        <td class="!p-0"></td>
+                                        <td class="!p-0"></td>
+                                        <td class="!p-0 text-left">
+                                            <button class="btn btn-primary" (click)="addSave()">add</button>
+                                            <button class="btn btn-outline" (click)="toAdd=null">cancel</button>
+                                        </td>
+                                    </tr>
+                                }
+                                @for (entry of selected; track entry) {
+                                    <tr>
+                                        <td class="!p-0"><input type="text" [(ngModel)]="entry.german" class="w-full border-0 m-0 p-3"></td>
+                                        <td class="!p-0"><input type="text" [(ngModel)]="entry.english" class="w-full border-0 m-0 p-3"></td>
+                                        <td class="!p-0"><input type="text" [(ngModel)]="entry.section" class="w-full border-0 m-0 p-3"></td>
+                                        <td class="!p-0 text-left !pl-3 !pt-2">
+                                            {{entry.g2ePhase}} &rarr;<br />
+                                            {{entry.e2gPhase}} &larr;
+                                        </td>
+                                        <td [title]="entry.example" class="text-center !p-3"
+                                            [ngStyle]="{
+                                            'color': 'rgb(' + (230 - 10 * (entry.score||0)) + ',0,' + (230 - 10 * (entry.score||0)) + ')',
+                                            'font-weight': 300 + 40 * (entry.score||0)
+                                            }">
+                                            {{entry.score}}
+                                        </td>
+                                        <td class="text-center !p-3">
+                                            @if (hasImage(entry)) {
+                                                <span class="badge badge-success !p-2">Bild</span>
+                                            } @else {
+                                                <span class="badge badge-outline !p-2">kein Bild</span>
+                                            }
+                                        </td>
+                                        <td class="!p-0 !pt-1 text-left">
+                                            <audio #audio></audio>
+                                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="audio.src=playUrl(entry.english);audio.play()">
+                                                <cds-icon shape="play"></cds-icon>
+                                            </button>
+                                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="reset(entry)">
+                                                <cds-icon shape="refresh" direction="down"></cds-icon>
+                                            </button>
+                                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="openImageModal(entry)" [disabled]="!canManageImage(entry)" title="Bild verwalten">
+                                                <cds-icon shape="image"></cds-icon>
+                                            </button>
+                                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="delete(entry)">
+                                                <cds-icon shape="trash"></cds-icon>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-center mt-4">
+                        <table class="border border-gray-300">
                             <tr>
-                                <td><input type="text" [(ngModel)]="entry.german"></td>
-                                <td><input type="text" [(ngModel)]="entry.english"></td>
-                                <td><input type="text" [(ngModel)]="entry.section"></td>
-                                <td class="left phase">
-                                    {{entry.g2ePhase}} &rarr;<br />
-                                    {{entry.e2gPhase}} &larr;
-                                </td>
-                                <td title="{{entry.example}}"
-                                [ngStyle]="{
-                                'color': 'rgb(' + (230 - 10 * (entry.score||0)) + ',0,' + (230 - 10 * (entry.score||0)) + ')',
-                                'font-weight': 300 + 40 * (entry.score||0)
-                                }">
-                                    {{entry.score}}
-                                </td>
-                                <td class="centered image-status">
-                                    @if (hasImage(entry)) {
-                                        <span class="badge badge-success">Bild</span>
-                                    } @else {
-                                        <span class="badge badge-outline">kein Bild</span>
-                                    }
-                                </td>
-                                <td class="left">
-                                    <audio #audio></audio>
-                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src=playUrl(entry.english);audio.play()">
-                                        <cds-icon shape="play"></cds-icon>
-                                    </button>
-                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="reset(entry)">
-                                        <cds-icon shape="refresh" direction="down"></cds-icon>
-                                    </button>
-                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="openImageModal(entry)" [disabled]="!canManageImage(entry)" title="Bild verwalten">
-                                        <cds-icon shape="image"></cds-icon>
-                                    </button>
-                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="delete(entry)">
-                                        <cds-icon shape="trash"></cds-icon>
-                                    </button>
-                                </td>
+                                @for (page of pages; track page) {
+                                    <td (click)="selectPage(page)" [ngClass]="{'bg-gray-300': currentPage==page, 'bg-white': currentPage!=page}" class="border border-gray-300 px-3 py-1 cursor-pointer hover:bg-gray-100">{{page}}</td>
+                                }
                             </tr>
-                        }
-                    </tbody>
-                    </table>
-                    <div class="centered">
-                    <table class="pagination">
-                        <tr>
-                        @for (page of pages; track page) {
-                            <td (click)="selectPage(page)" [ngClass]="{'selected': currentPage==page}">{{page}}</td>
-                        }
-                        </tr>
-                    </table>
-                    </div>
-                </div>
-                </div>
-            </div>
-        }
-
-        <app-vocabulary-exercise-result [result]="exerciseResult" (finished)="exerciseResult = null"></app-vocabulary-exercise-result>
-
-        @if (imageModalEntry) {
-            <div class="modal-backdrop" aria-hidden="true"></div>
-        }
-
-        @if (imageModalEntry) {
-            <div class="modal">
-                <div class="modal-dialog" role="dialog" aria-hidden="true">
-                    <div class="modal-content image-modal">
-                        <div class="modal-header">
-                            <button aria-label="Close" class="close" type="button" (click)="cancelImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy()">
-                                <cds-icon aria-hidden="true" shape="close"></cds-icon>
-                            </button>
-                            <h3 class="modal-title">Set Image</h3>
-                        </div>
-                        <div class="modal-body">
-                            <app-vocabulary-image
-                                [vocabulary]="imageModalVocabulary ?? ''"
-                                (imageUpdated)="onVocabularyImageUpdated($event)">
-                            </app-vocabulary-image>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-outline" type="button" (click)="cancelImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy()">cancel</button>
-                            <button class="btn btn-danger" type="button" (click)="saveImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy() || !imageModalComponent?.hasPendingChanges()">save</button>
-                        </div>
+                        </table>
                     </div>
                 </div>
             </div>
         }
 
+        @if (imageModalEntry) {
+            <div class="fixed inset-0 bg-black/60 z-40" aria-hidden="true"></div>
+            <div class="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-hidden="true">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
+                    <div class="flex items-center justify-between p-4 ">
+                        <h3 class="!m-0 text-lg font-semibold">Image</h3>
+                        <button aria-label="Close" class="close" type="button" (click)="cancelImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy()">
+                            <cds-icon aria-hidden="true" shape="close"></cds-icon>
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-4 pt-0">
+                        <app-vocabulary-image
+                            [vocabulary]="imageModalVocabulary ?? ''"
+                            (imageUpdated)="onVocabularyImageUpdated($event)">
+                        </app-vocabulary-image>
+                    </div>
+                    <div class="flex justify-end gap-2 p-4 border-gray-300">
+                        <button class="btn btn-outline" type="button" (click)="cancelImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy()">cancel</button>
+                        <button class="btn btn-danger" type="button" (click)="saveImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy() || !imageModalComponent?.hasPendingChanges()">save</button>
+                    </div>
+                </div>
+            </div>
+        }
     `,
-    styles: [`
-        h1 {
-            margin-top:0;
-            margin-bottom:0.5em;
-            margin-left:0;
-        }
-
-        .top {
-            display:flex;
-        }
-
-        .top h1 {
-            flex: 1;
-        }
-
-        input {
-            font-size: 1.1em;
-            border-radius: 0.1em;
-            margin-right:0.3em;
-            padding: 0.3em;
-            vertical-align: middle;
-            border: 1px solid #ebebebff;
-            width: 100%;
-        }
-
-        .table th {
-            vertical-align: middle;
-        } 
-
-        .table th:first-child {
-            padding-left:2px;
-        }
-
-        .search {
-            font-weight: normal;
-        }
-
-        .add {
-            margin-top:0;
-            text-align: left;
-        }
-
-        .success {
-            color:green;
-            padding-right: 10px;
-        }
-
-        .add td {
-            border-bottom:3px green solid !important;
-        }
-
-        input {
-            border:0;
-            margin:0;
-            padding:0.7rem;
-        }
-
-        td {
-            vertical-align: middle;
-            padding:0;
-        }
-
-        th span {
-            padding-left:0.5rem;
-        }
-
-        td.phase {
-            padding-left:0.8rem;
-        }
-
-        h1 {
-            margin-bottom:0;
-        }
-
-        h4 {
-            margin-bottom: 0.5rem;
-        }
-
-        .search {
-            border-bottom:1px solid black;
-        }
-
-        .centered {
-            text-align: center;
-        }
-
-        .centered:not(td):not(th) {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .pagination {
-            margin-top:0.8rem;
-        }
-
-        .pagination td {
-            background:white;
-            border:1px solid #eee;
-            padding:0.4rem 0.8rem 0.4rem 0.8rem;
-            cursor: pointer;
-        }
-
-        .pagination td.selected {
-            background:#eee;
-        }
-
-        .image-status .badge {
-            display: inline-block;
-            min-width: 4.5rem;
-            text-transform: none;
-        }
-
-        .image-status .badge-outline {
-            border: 1px solid #ccc;
-            color: #fff;
-            background: #777;
-        }
-
-        .image-modal {
-            max-width: none;
-            width: 100%;
-        }
-
-        .image-modal .modal-body {
-            padding: 1.5rem;
-            max-height: calc(80vh - 3rem);
-            overflow-y: auto;
-        }
-
-    `]
 })
 export class VocabularyListComponent implements OnInit {
 
@@ -339,10 +191,6 @@ export class VocabularyListComponent implements OnInit {
 
     successSave: boolean = false;
     
-    train: VocabularyCard[] = [];
-
-    exerciseResult: VocabularyExerciseResult | null = null;
-
     imagePresence: Record<string, boolean> = {};
     imageModalEntry: VocabularyEntry | null = null;
     imageModalVocabulary: string | null = null;
@@ -398,9 +246,9 @@ export class VocabularyListComponent implements OnInit {
     }
 
     @HostListener('document:keydown.control.s', ['$event'])
-    onCtrlSKey(event: KeyboardEvent): void {
+    onCtrlSKey(event: Event): void {
         this.save(() => this.enrich());
-        event.preventDefault();
+        (event as KeyboardEvent).preventDefault();
     }
 
     add() {
@@ -591,18 +439,6 @@ export class VocabularyListComponent implements OnInit {
             return german;
         }
         return '';
-    }
-
-    exercise() {
-        const train: VocabularyCard[] = [];
-        this.selected.forEach(vocabulary => {
-            train.push(new VocabularyCard(vocabulary, false));
-            train.push(new VocabularyCard(vocabulary, true));
-        });
-        if (train.length == 0) {
-            return;
-        }
-        this.train = train;
     }
 
     saveClick() {

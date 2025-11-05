@@ -16,116 +16,126 @@ import { PasswordEntry } from 'src/app/models/password-entry';
     selector: 'app-passwords',
     imports: [AlertComponent, ClarityModule, CommonModule, RouterModule, FormsModule],
     template: `
-        <h1>Passwords</h1>
+        <h1 class="!mt-0 text-3xl font-bold">Passwords</h1>
         @if (!page && !error) {
-        <span class="spinner spinner-inline">Loading...</span>
+            <span class="spinner spinner-inline">Loading...</span>
         }
         <app-alert [error]="error"></app-alert>
 
-        <table class="table">
-            @if (hasEntries()) {
-                <thead>
-                    <tr>
-                        <th>Service</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                        <th>
-                        <input placeholder="search" name="input" class="search" [(ngModel)]="q" #search />
-                        <button type="button" class="btn btn-icon btn-sm btn-link add" (click)="add()">
-                            <cds-icon shape="add-text"></cds-icon> add
-                        </button>
-                        </th>
+        <div class="overflow-x-auto">
+            <table class="table w-full">
+                @if (hasEntries()) {
+                    <thead>
+                        <tr>
+                            <th class="w-1/5">Service</th>
+                            <th class="w-1/5">Username</th>
+                            <th class="w-1/5">Password</th>
+                            <th class="w-2/5">
+                                <div class="flex gap-2 items-center">
+                                    <input placeholder="search" name="input" class="flex-1 p-2 border border-gray-300 !rounded-lg font-normal text-sm bg-white" [(ngModel)]="q" #search />
+                                    <button type="button" class="btn btn-icon btn-sm btn-link" (click)="add()">
+                                        <cds-icon shape="add-text"></cds-icon> add
+                                    </button>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                }
+                <tbody>
+                    @for (entry of getEntries(); track $index; let i = $index) {
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3">
+                            <div class="flex items-center justify-center min-h-10">
+                                @if (!entry.edit) {
+                                    <span class="inline-block">{{entry.service}}</span>
+                                } @else {
+                                    <input type="text" [(ngModel)]="entry.service" #service class="w-full px-2 py-1 border border-gray-300 !p-2 !rounded text-base bg-white">
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <div class="flex items-center justify-center min-h-10">
+                                @if (!entry.edit) {
+                                    <span class="inline-block">{{entry.username}}</span>
+                                } @else {
+                                    <input type="text" [(ngModel)]="entry.username" class="w-full px-2 py-1 border border-gray-300 !p-2 !rounded text-base bg-white">
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <div class="flex items-center justify-center min-h-10">
+                                @if (!entry.edit) {
+                                    <span class="inline-block">{{entry.passwordShow || entry.edit ? entry.decryptedPassword : '********'}}</span>
+                                } @else {
+                                    <clr-password-container class="!m-0">
+                                        <input [type]="entry.passwordShow ? 'text' : 'password'" clrPassword [(ngModel)]="entry.decryptedPassword" (input)="encryptPasswordFromUi($event.target, entry)" class="w-full px-2 py-1 border border-gray-300 rounded text-base bg-white">
+                                    </clr-password-container>
+                                }
+                                @if (!entry.passwordShow && !entry.edit) {
+                                    <cds-icon class="ml-1 cursor-pointer" shape="eye" size="16" (click)="togglePasswordVisibility(entry)"></cds-icon>
+                                }
+                                @if (entry.passwordShow && !entry.edit) {
+                                    <cds-icon class="ml-1 cursor-pointer" shape="eye-hide" size="16" (click)="togglePasswordVisibility(entry)"></cds-icon>
+                                }
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <div class="flex items-center min-h-10">
+                            @if (entry.edit) {
+                                <button type="button" class="btn btn-icon btn-sm" (click)="random(i)"><cds-icon shape="wand"></cds-icon></button>
+                                <button type="button" class="btn btn-icon btn-sm btn-success" (click)="stopEditingEntry(entry)"><cds-icon shape="check"></cds-icon></button>
+                                <button type="button" class="btn btn-icon btn-sm btn-danger" (click)="entryToDelete=i"><cds-icon shape="trash"></cds-icon></button>
+                            } @else {
+                                <button class="btn btn-icon btn-sm" (click)="startEditingEntry(entry)"><cds-icon shape="pencil"></cds-icon> edit</button>
+                                <button class="btn btn-icon btn-sm btn-primary" (click)="clipboard(i)"><cds-icon shape="copy-to-clipboard"></cds-icon> copy password</button>
+                            }
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-            }
-        <tbody>
-            @for (entry of getEntries(); track $index; let i = $index) {
-            <tr>
-                <td>
-                    @if (!entry.edit) {
-                        <span>{{entry.service}}</span>
-                    } @else {
-                        <input type="text" [(ngModel)]="entry.service" #service>
                     }
-                </td>
-                <td>
-                    @if (!entry.edit) {
-                        <span>{{entry.username}}</span>
-                    } @else {
-                        <input type="text" [(ngModel)]="entry.username">
+                    @if (!entries && page) {
+                        <tr>
+                            <td colspan="4" class="px-4 py-12 text-center">
+                            <input type="password" class="px-3 py-2 border border-gray-300 rounded text-base inline-block mr-2 w-60" placeholder="master password" (keyup.enter)="unlock(unlockPasswordInput.value);unlockPasswordInput.value=''" #unlockPasswordInput>
+                            <button class="btn btn-primary !ml-2" (click)="unlock(unlockPasswordInput.value);unlockPasswordInput.value=''">unlock</button>
+                            </td>
+                        </tr>
                     }
-                </td>
-                <td>
-                    @if (!entry.edit) {
-                        <span>{{entry.passwordShow || entry.edit ? entry.decryptedPassword : '********'}}</span>
-                    } @else {
-                        <clr-password-container>
-                        <input [type]="entry.passwordShow ? 'text' : 'password'" clrPassword [(ngModel)]="entry.decryptedPassword" (input)="encryptPasswordFromUi($event.target, entry)">
-                        </clr-password-container>
+                    @if (entries) {
+                        <tr>
+                            <td colspan="4" class="px-4 py-2">
+                                <div class="flex items-center justify-start">
+                                    <button type="button" class="btn btn-icon btn-sm btn-link" (click)="add()">
+                                        <cds-icon shape="add-text"></cds-icon> add
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     }
-                    @if (!entry.passwordShow && !entry.edit) {
-                        <cds-icon class="showhide" shape="eye" size="20" (click)="togglePasswordVisibility(entry)"></cds-icon>
-                    }
-                    @if (entry.passwordShow && !entry.edit) {
-                        <cds-icon class="showhide" shape="eye-hide" size="20" (click)="togglePasswordVisibility(entry)"></cds-icon>
-                    }
-                </td>
-                <td class="last">
-                    @if (entry.edit) {
-                        <button type="button" class="btn btn-icon btn-sm" (click)="random(i)"><cds-icon shape="wand"></cds-icon></button>
-                        <button type="button" class="btn btn-icon btn-sm btn-success" (click)="stopEditingEntry(entry)"><cds-icon shape="check"></cds-icon></button>
-                        <button type="button" class="btn btn-icon btn-sm btn-danger" (click)="entryToDelete=i"><cds-icon shape="trash"></cds-icon></button>
-                    } @else {
-                        <button class="btn btn-icon btn-sm" (click)="startEditingEntry(entry)"><cds-icon shape="pencil"></cds-icon> edit</button>
-                        <button class="btn btn-icon btn-sm btn-primary" (click)="clipboard(i)"><cds-icon shape="copy-to-clipboard"></cds-icon> copy password</button>
-                    }
-                </td>
-            </tr>
-            }
-            @if (!entries && page) {
-                <tr>
-                    <td colspan="4" class="unlock">
-                    <input type="password" class="password" placeholder="master password" (keyup.enter)="unlock(unlockPasswordInput.value);unlockPasswordInput.value=''" #unlockPasswordInput>
-                    <button class="btn btn-primary" (click)="unlock(unlockPasswordInput.value);unlockPasswordInput.value=''">unlock</button>
-                    </td>
-                </tr>
-            }
-            @if (entries) {
-                <tr>
-                    <td colspan="4" class="add">
-                    <button type="button" class="btn btn-icon btn-sm btn-link" (click)="add()">
-                        <cds-icon shape="add-text"></cds-icon> add
-                    </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
 
         @if (entries && page) {
-            <div class="action">
+            <div class="mt-6 space-x-2">
                 <button class="btn" [ngClass]="{'btn-success-outline': success, 'btn-primary': !success}" (click)="showAskPassword()">save</button>
                 <button class="btn btn-info-outline" (click)="showExport()">export</button>
                 <button class="btn btn-warning-outline" (click)="f.click()">import</button>
                 <button class="btn btn-link" [routerLink]="['/']">cancel</button>
                 <input type="file" name="file" (change)="import($event)" class="hidden" #f>
                 @if (success || successImport || successExport) {
-                    <div class="alert alert-success" role="alert">
-                        <div class="alert-items">
-                        <div class="alert-item static">
-                            <div class="alert-icon-wrapper">
-                            <cds-icon class="alert-icon" shape="check-circle"></cds-icon>
-                            </div>
+                    <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded" role="alert">
+                        <div class="flex items-center gap-2">
+                            <cds-icon class="text-green-600" shape="check-circle"></cds-icon>
                             @if (success) {
-                            <span class="alert-text">successfully saved</span>
+                            <span>successfully saved</span>
                             }
                             @if (successImport) {
-                            <span class="alert-text">successfully imported</span>
+                            <span>successfully imported</span>
                             }
                             @if (successExport) {
-                            <span class="alert-text">successfully saved to clipboard</span>
+                            <span>successfully saved to clipboard</span>
                             }
-                        </div>
                         </div>
                     </div>
                 }
@@ -133,167 +143,70 @@ import { PasswordEntry } from 'src/app/models/password-entry';
         }
 
         @if (entryToDelete!==null) {
-            <div class="modal">
-                <div class="modal-dialog" role="dialog" aria-hidden="true">
-                <div class="modal-content">
-                    <div class="modal-body">
-                    <p>Really delete {{entries![entryToDelete].service}}?</p>
-                    </div>
-                    <div class="modal-footer">
+            <div class="fixed inset-0 z-40 bg-black bg-opacity-50"></div>
+            <div class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4" role="dialog" aria-hidden="true">
+                <div class="p-6">
+                    <p class="text-lg">Really delete {{entries![entryToDelete].service}}?</p>
+                </div>
+                <div class="flex justify-end gap-2 p-4 border-t border-gray-200">
                     <button class="btn btn-outline" type="button" (click)="entryToDelete=null">cancel</button>
                     <button class="btn btn-danger" type="button" (click)="delete(entryToDelete); entryToDelete = null;">delete</button>
-                    </div>
                 </div>
                 </div>
             </div>
         }
 
         @if (askPassword) {
-            <div class="modal">
-                <div class="modal-dialog" role="dialog" aria-hidden="true">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button aria-label="Close" class="close" type="button" (click)="askPassword=false;password.value='';password2.value=''">
-                                <cds-icon aria-hidden="true" shape="close"></cds-icon>
-                            </button>
-                            <h3 class="modal-title">Please enter your master password</h3>
-                        </div>
-                        <div class="modal-body savepassword">
-                            @if(saving) {
+            <div class="fixed inset-0 z-40 bg-black bg-opacity-50"></div>
+            <div class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" role="dialog" aria-hidden="true">
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                        <h3 class="text-lg font-bold">Please enter your master password</h3>
+                        <button aria-label="Close" class="text-gray-500 hover:text-gray-700" type="button" (click)="askPassword=false;password.value='';password2.value=''">
+                            <cds-icon aria-hidden="true" shape="close"></cds-icon>
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        @if(saving) {
+                            <div class="text-center">
                                 <span class="spinner spinner-inline"></span>
-                            }
-                            <app-alert [error]="errorPassword"></app-alert>
-                            <input type="password" class="password" placeholder="master password" #password [hidden]="saving">
-                            <input type="password" class="password" placeholder="master password again" #password2 (keyup.enter)="save(password.value, password2.value);password.value='';password2.value=''" [hidden]="saving">
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-outline" type="button" (click)="askPassword=false;password.value='';password2.value=''" [disabled]="saving">cancel</button>
-                            <button class="btn btn-danger" type="button" (click)="save(password.value, password2.value);password.value='';password2.value=''" [disabled]="saving">save</button>
-                        </div>
+                            </div>
+                        }
+                        <app-alert [error]="errorPassword"></app-alert>
+                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded text-base !mb-3" placeholder="master password" #password [hidden]="saving">
+                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded text-base" placeholder="master password again" #password2 (keyup.enter)="save(password.value, password2.value);password.value='';password2.value=''" [hidden]="saving">
+                    </div>
+                    <div class="flex justify-end gap-2 p-4 border-t border-gray-200">
+                        <button class="btn btn-outline" type="button" (click)="askPassword=false;password.value='';password2.value=''" [disabled]="saving">cancel</button>
+                        <button class="btn btn-danger" type="button" (click)="save(password.value, password2.value);password.value='';password2.value=''" [disabled]="saving">save</button>
                     </div>
                 </div>
             </div>
         }
 
         @if (export) {
-            <div class="modal">
-                <div class="modal-dialog" role="dialog" aria-hidden="true">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button aria-label="Close" class="close" type="button" (click)="export=false;exportPassword.value=''">
+            <div class="fixed inset-0 z-40 bg-black bg-opacity-50"></div>
+            <div class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4" role="dialog" aria-hidden="true">
+                    <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                        <h3 class="text-lg font-bold">Please enter your master password</h3>
+                        <button aria-label="Close" class="text-gray-500 hover:text-gray-700" type="button" (click)="export=false;exportPassword.value=''">
                             <cds-icon aria-hidden="true" shape="close"></cds-icon>
                         </button>
-                        <h3 class="modal-title">Please enter your master password</h3>
                     </div>
-                    <div class="modal-body savepassword">
+                    <div class="p-6">
                         <app-alert [error]="errorExport"></app-alert>
-                        <input type="password" class="password" placeholder="master password" #exportPassword (keyup.enter)="exportToClipboard(exportPassword.value);exportPassword.value='';">
+                        <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded text-base mt-4" placeholder="master password" #exportPassword (keyup.enter)="exportToClipboard(exportPassword.value);exportPassword.value='';">
                     </div>
-                    <div class="modal-footer">
+                    <div class="flex justify-end gap-2 p-4 border-t border-gray-200">
                         <button class="btn btn-outline" type="button" (click)="export=false;exportPassword.value=''">cancel</button>
                         <button class="btn btn-danger" type="button" (click)="exportToClipboard(exportPassword.value);exportPassword.value='';">export</button>
                     </div>
                 </div>
-                </div>
             </div>
         }
-
-        @if (entryToDelete!==null || askPassword || export) {
-            <div class="modal-backdrop" aria-hidden="true"></div>
-        }
-    `,
-    styles: [`
-        h1 {
-            margin-top:0;
-        }
-
-        .table th {
-            vertical-align: middle;
-        } 
-
-        .search {
-            font-weight: normal;
-        }
-
-        th .add {
-            margin-top:0;
-        }
-
-        .unlock {
-            text-align: center;
-            padding:50px;
-        }
-
-        input {
-            font-size: 1.1em;
-            border-radius: 0.1em;
-            margin-right:0.3em;
-            padding: 0.3em;
-            vertical-align: middle;
-            border: 1px solid #aaa;
-        }
-
-        .unlock .btn {
-            margin:0;
-        }
-
-        input:focus{
-            outline: none;
-        }
-
-        .savepassword .password {
-            display:block;
-            margin-top: 1em;
-            width: 60%;
-        }
-
-        .add {
-            text-align: left;
-        }
-
-        table button {
-            margin-top:0.2em;
-            margin-bottom: 0;
-        }
-
-        th, td {
-            width:20%;
-            font-size:1.15em;
-        }
-
-        td.last {
-            width:40%;
-        }
-
-        td span {
-            display: inline-block;
-            margin-top:1em;
-        }
-
-        .action {
-            margin-top:1.5em;
-        }
-
-        .modal-body {
-            overflow-y: hidden;
-        }
-
-        cds-icon {
-            cursor: pointer;
-        }
-
-        td clr-password-container {
-            margin-top:5px;
-        }
-
-        .showhide {
-            margin-left:0.7em;
-        }
-
-        .hidden {
-            display: none;
-        }
-    `]
+    `
 })
 export class PasswordsComponent implements OnInit, OnDestroy, AfterViewInit {
     

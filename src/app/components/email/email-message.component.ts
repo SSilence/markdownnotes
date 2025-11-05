@@ -29,56 +29,57 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
       </div>
     }
     @if (!selectedMessage) {
-      <div class="empty-state">
+      <div class="flex justify-center items-center flex-1 flex-col text-[var(--clr-color-neutral-600)] text-center h-full">
         <cds-icon shape="envelope" size="48"></cds-icon>
-        <p class="empty-text">Select a message to view details</p>
+        <p class="mt-4 text-[var(--clr-color-neutral-600)] italic">Select a message to view details</p>
       </div>
     } @else {
       @if (loadingMessageDetails) {
-        <div class="loading-center">
+        <div class="flex justify-center items-center h-[200px]">
           <clr-spinner clrSmall>Loading message details...</clr-spinner>
         </div>
       } @else if (messageDetails) {
-        <div class="message-header-section" #headerSection>
-            <div class="subject-line-container">
-              <h4 class="info-title">{{ messageDetails.subject || '(No Subject)' }}</h4>
+        <div class="flex-shrink-0 p-4" #headerSection>
+            <div class="flex items-center gap-3 mb-3">
+              <h4 class="!m-0 text-base font-semibold text-[var(--clr-color-neutral-700)] flex-1">{{ messageDetails.subject || '(No Subject)' }}</h4>
               <button 
-                class="read-status-button" 
+                class="w-3 h-3 !rounded-full border-2 border-[#6b46c1] bg-transparent cursor-pointer transition-all duration-200 ease-out p-0 m-0 flex-shrink-0 hover:scale-110 hover:shadow-[0_2px_4px_rgba(107,70,193,0.3)] active:scale-95" 
+                [class.bg-[#6b46c1]]="!messageDetails.isSeen"
+                [class.bg-transparent]="messageDetails.isSeen"
+                [class.hover:bg-[rgba(107,70,193,0.1)]]="messageDetails.isSeen"
                 (click)="toggleReadStatus()"
-                [class.unread]="!messageDetails.isSeen"
-                [class.read]="messageDetails.isSeen"
                 [title]="messageDetails.isSeen ? 'Mark as unread' : 'Mark as read'"
               >
               </button>
             </div>
-            <div class="message-meta-container">
-              <div class="message-meta-grid">
-                <div class="meta-item">
-                    <label class="meta-label">From:</label>
-                    <span class="meta-value">{{ (messageDetails.from.name || messageDetails.from.email) + ' <' + messageDetails.from.email + '>' }}</span>
+            <div class="flex flex-wrap gap-4 items-start">
+              <div class="grid gap-0.5 flex-1 min-w-[250px]">
+                <div class="grid grid-cols-[auto_1fr] gap-2 items-baseline">
+                    <label class="font-semibold text-[var(--clr-color-neutral-700)] min-w-[4rem]">From:</label>
+                    <span class="text-[var(--clr-color-neutral-800)] break-words">{{ (messageDetails.from.name || messageDetails.from.email) + ' <' + messageDetails.from.email + '>' }}</span>
                 </div>
-                <div class="meta-item">
-                    <label class="meta-label">To:</label>
-                    <span class="meta-value">{{ getToDisplayText() }}</span>
+                <div class="grid grid-cols-[auto_1fr] gap-2 items-baseline">
+                    <label class="font-semibold text-[var(--clr-color-neutral-700)] min-w-[4rem]">To:</label>
+                    <span class="text-[var(--clr-color-neutral-800)] break-words">{{ getToDisplayText() }}</span>
                 </div>
                 @if (messageDetails.cc && messageDetails.cc.length > 0) {
-                    <div class="meta-item">
-                    <label class="meta-label">CC:</label>
-                    <span class="meta-value">{{ getCcDisplayText() }}</span>
+                    <div class="grid grid-cols-[auto_1fr] gap-2 items-baseline">
+                    <label class="font-semibold text-[var(--clr-color-neutral-700)] min-w-[4rem]">CC:</label>
+                    <span class="text-[var(--clr-color-neutral-800)] break-words">{{ getCcDisplayText() }}</span>
                     </div>
                 }
-                <div class="meta-item">
-                    <label class="meta-label">Date:</label>
-                    <span class="meta-value">{{ formatFullDate(messageDetails.date) }}</span>
+                <div class="grid grid-cols-[auto_1fr] gap-2 items-baseline">
+                    <label class="font-semibold text-[var(--clr-color-neutral-700)] min-w-[4rem]">Date:</label>
+                    <span class="text-[var(--clr-color-neutral-800)] break-words">{{ formatFullDate(messageDetails.date) }}</span>
                 </div>
               </div>
 
               <!-- Email Action Buttons -->
-              <div class="email-actions">
-                <clr-button-group>
+              <div class="flex-shrink-0 min-w-fit self-start">
+                <clr-button-group class="flex gap-0">
                   @if (messageDetails.isDraft) {
                     <clr-button 
-                      class="btn btn-sm btn-primary"
+                      class="btn btn-sm btn-primary flex items-center justify-center p-1.5 min-w-[32px] h-8 text-xs rounded-none first:rounded-l last:rounded-r [&+clr-button]:border-l-0"
                       (click)="editDraft()"
                       title="Edit Draft"
                     >
@@ -88,21 +89,21 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
                   }
                   @if (!messageDetails.isDraft) {
                     <clr-button 
-                      class="btn btn-sm btn-outline"
+                      class="btn btn-sm btn-outline flex items-center justify-center p-1.5 min-w-[32px] h-8 text-xs rounded-none first:rounded-l last:rounded-r [&+clr-button]:border-l-0"
                       (click)="replyToEmail()"
                       title="Reply"
                     >
                       <span class="material-symbols-outlined">reply</span>
                     </clr-button>
                     <clr-button 
-                      class="btn btn-sm btn-outline"
+                      class="btn btn-sm btn-outline flex items-center justify-center p-1.5 min-w-[32px] h-8 text-xs rounded-none first:rounded-l last:rounded-r [&+clr-button]:border-l-0"
                       (click)="replyAllToEmail()"
                       title="Reply All"
                     >
                       <span class="material-symbols-outlined">reply_all</span>
                     </clr-button>
                     <clr-button 
-                      class="btn btn-sm btn-outline"
+                      class="btn btn-sm btn-outline flex items-center justify-center p-1.5 min-w-[32px] h-8 text-xs rounded-none first:rounded-l last:rounded-r [&+clr-button]:border-l-0"
                       (click)="forwardEmail()"
                       title="Forward"
                     >
@@ -110,29 +111,29 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
                     </clr-button>
                   }
                   <clr-button 
-                    class="btn btn-sm btn-danger-outline"
+                    class="btn btn-sm btn-danger-outline flex items-center justify-center p-1.5 min-w-[32px] h-8 text-xs rounded-none first:rounded-l last:rounded-r [&+clr-button]:border-l-0"
                     (click)="deleteEmail()"
                     title="Delete"
                   >
-                    <span class="material-symbols-outlined btn-danger">delete</span>
+                    <span class="material-symbols-outlined text-[var(--clr-color-danger-700)]">delete</span>
                   </clr-button>
                 </clr-button-group>
               </div>
             </div>
             
             @if (messageDetails.attachments && messageDetails.attachments.length > 0) {
-              <div class="attachments-section">
-                <div class="attachment-grid">
+              <div class="mt-4 pt-3 border-t border-[var(--clr-color-neutral-300)]">
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-2">
                   @for (attachment of messageDetails.attachments; track attachment.name; let i = $index) {
-                    <div class="attachment-card clickable" 
+                    <div class="flex items-center p-2 bg-[var(--clr-color-neutral-100)] rounded border border-transparent transition-all duration-200 ease-out gap-2 cursor-pointer hover:bg-[var(--clr-color-neutral-200)] hover:border-[var(--clr-color-action-400)] hover:translate-y-[-1px] hover:shadow-[0_2px_4px_rgba(0,0,0,0.1)] active:translate-y-0 active:shadow-[0_1px_2px_rgba(0,0,0,0.1)]" 
                           (click)="viewAttachment(i)"
                           [title]="'Click to view ' + attachment.name">
-                      <cds-icon shape="paperclip" class="attachment-icon"></cds-icon>
-                      <div class="attachment-info">
-                        <span class="attachment-name">{{ attachment.name }}</span>
-                        <span class="attachment-size">{{ fileUtils.formatFileSize(attachment.size) }}</span>
+                      <cds-icon shape="paperclip" class="text-[var(--clr-color-action-600)] flex-shrink-0"></cds-icon>
+                      <div class="flex-1 min-w-0">
+                        <span class="block font-medium text-[var(--clr-color-neutral-800)] truncate">{{ attachment.name }}</span>
+                        <span class="block text-xs text-[var(--clr-color-neutral-600)]">{{ fileUtils.formatFileSize(attachment.size) }}</span>
                       </div>
-                      <cds-icon shape="eye" class="view-icon"></cds-icon>
+                      <cds-icon shape="eye" class="text-[var(--clr-color-action-600)] flex-shrink-0 opacity-70 transition-opacity duration-200 ease-out group-hover:opacity-100"></cds-icon>
                     </div>
                   }
                 </div>
@@ -148,307 +149,19 @@ import { EmailMessageContentComponent } from "./email-message-content.component"
             [headerAreaHeightInPx]="headerAreaHeightInPx()">
           </app-email-message-content>
         } @else {
-          <div class="empty-state">
+          <div class="flex justify-center items-center flex-1 flex-col text-[var(--clr-color-neutral-600)] text-center h-full">
             <cds-icon shape="warning-standard" size="36"></cds-icon>
-            <p class="empty-text">No content available</p>
+            <p class="mt-4 text-[var(--clr-color-neutral-600)] italic">No content available</p>
           </div>
         }
       } @else {
-        <div class="empty-state">
+        <div class="flex justify-center items-center flex-1 flex-col text-[var(--clr-color-neutral-600)] text-center h-full">
           <cds-icon shape="warning-standard" size="36"></cds-icon>
-          <p class="empty-text">Failed to load message details</p>
+          <p class="mt-4 text-[var(--clr-color-neutral-600)] italic">Failed to load message details</p>
         </div>
       }
     }
-  `,
-  styles: [`
-    clr-card {
-      margin: 0;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    clr-card-content {
-      flex: 1;
-      padding: 0;
-    }
-
-    .loading-center {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 200px;
-    }
-
-    .empty-state {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex: 1;
-      flex-direction: column;
-      color: var(--clr-color-neutral-600);
-      text-align: center;
-      height: 100%;
-    }
-
-    .empty-text {
-      margin-top: 1rem;
-      color: var(--clr-color-neutral-600);
-      font-style: italic;
-    }
-
-    .detail-panel {
-      flex: 1;
-    }
-
-    .detail-content {
-      overflow-y: auto;
-      box-sizing: border-box;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .message-header-section {
-      flex-shrink: 0;
-      padding: 1rem;
-    }
-
-    /* Email Action Buttons */
-    .email-actions {
-      flex-shrink: 0;
-      min-width: fit-content;
-      align-self: flex-start;
-    }
-
-    .email-actions clr-button-group {
-      display: flex;
-      gap: 0;
-    }
-
-    .email-actions clr-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.375rem;
-      min-width: 32px;
-      height: 32px;
-      font-size: 0.75rem;
-      border-radius: 0;
-    }
-
-    .email-actions clr-button:first-child {
-      border-top-left-radius: var(--clr-border-radius);
-      border-bottom-left-radius: var(--clr-border-radius);
-    }
-
-    .email-actions clr-button:last-child {
-      border-top-right-radius: var(--clr-border-radius);
-      border-bottom-right-radius: var(--clr-border-radius);
-    }
-
-    .email-actions clr-button + clr-button {
-      border-left: none;
-    }
-
-    .email-actions .btn-danger {
-      color: var(--clr-color-danger-700);
-      border-color: var(--clr-color-danger-300);
-    }
-
-    .email-actions .btn-danger:hover {
-      background-color: var(--clr-color-danger-50);
-      border-color: var(--clr-color-danger-400);
-    }
-
-    /* Attachment responsiveness for very small screens */
-    @media (max-width: 480px) {
-      .attachment-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .attachment-card {
-        min-width: 0;
-      }
-    }
-
-    .info-title {
-      margin: 0 0 0.75rem 0;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--clr-color-neutral-700);
-    }
-
-    .attachments-section {
-      margin-top: 1rem;
-      padding-top: 0.75rem;
-      border-top: 1px solid var(--clr-color-neutral-300);
-    }
-
-    .attachments-title {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--clr-color-neutral-700);
-    }
-
-    .message-meta-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: flex-start;
-    }
-
-    .message-meta-grid {
-      display: grid;
-      gap: 0.1rem;
-      flex: 1;
-      min-width: 250px; /* Minimum width before wrapping */
-    }
-
-    .meta-item {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.5rem;
-      align-items: baseline;
-    }
-
-    .meta-label {
-      font-weight: 600;
-      color: var(--clr-color-neutral-700);
-      min-width: 4rem;
-    }
-
-    .meta-value {
-      color: var(--clr-color-neutral-800);
-      word-break: break-word;
-    }
-
-    .attachment-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 0.5rem;
-    }
-
-    .attachment-card {
-      display: flex;
-      align-items: center;
-      padding: 0.5rem;
-      background-color: var(--clr-color-neutral-100);
-      border-radius: var(--clr-border-radius);
-      gap: 0.5rem;
-      border: 1px solid transparent;
-      transition: all 0.2s ease;
-    }
-
-    .attachment-card.clickable {
-      cursor: pointer;
-    }
-
-    .attachment-card.clickable:hover {
-      background-color: var(--clr-color-neutral-200);
-      border-color: var(--clr-color-action-400);
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .attachment-card.clickable:active {
-      transform: translateY(0);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-
-    .attachment-icon {
-      color: var(--clr-color-action-600);
-      flex-shrink: 0;
-    }
-
-    .attachment-info {
-      flex: 1;
-    }
-
-    .attachment-name {
-      display: block;
-      font-weight: 500;
-      color: var(--clr-color-neutral-800);
-    }
-
-    .attachment-size {
-      display: block;
-      font-size: 0.75rem;
-      color: var(--clr-color-neutral-600);
-    }
-
-    .view-icon {
-      color: var(--clr-color-action-600);
-      flex-shrink: 0;
-      opacity: 0.7;
-      transition: opacity 0.2s ease;
-    }
-
-    .attachment-card:hover .view-icon {
-      opacity: 1;
-    }
-
-    /* Subject line container with read/unread button */
-    .subject-line-container {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .subject-line-container .info-title {
-      margin: 0;
-      flex: 1;
-    }
-
-    /* Purple circle read/unread button */
-    .read-status-button {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      border: 2px solid #6b46c1;
-      background: transparent;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      padding: 0;
-      margin: 0;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .read-status-button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 2px 4px rgba(107, 70, 193, 0.3);
-    }
-
-    .read-status-button:active {
-      transform: scale(0.95);
-    }
-
-    /* Filled purple circle for unread messages */
-    .read-status-button.unread {
-      background-color: #6b46c1;
-    }
-
-    /* Empty purple circle for read messages */
-    .read-status-button.read {
-      background-color: transparent;
-    }
-
-    /* Add a subtle inner shadow for the read state */
-    .read-status-button.read:hover {
-      background-color: rgba(107, 70, 193, 0.1);
-    }
-
-    @media (max-width: 768px) {
-      .detail-panel {
-        flex: 1;
-        min-height: 300px;
-      }
-    }
-  `]
+  `
 })
 export class EmailMessageComponent implements OnChanges, AfterViewChecked {
   @Input() selectedMessage: MessageDto | null = null;

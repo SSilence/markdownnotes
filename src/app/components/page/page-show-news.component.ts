@@ -14,92 +14,20 @@ interface NewsItem {
     imports: [CommonModule, CdsModule],
     template: `
         @if (newsItems && newsItems.length > 0) {
-            <div class="news-container">
+            <div class="grid grid-cols-2 max-md:grid-cols-1">
                 @for (item of newsItems; track item.url) {
-                    <a [href]="item.url" target="_blank" class="news-item">
-                        <div class="news-header">
-                            <h3 class="news-title">{{ item.title }}</h3>
-                            <span class="news-date">{{ formatDate(item.timestamp) }}</span>
-                        </div>
-                        <p class="news-summary">{{ item.summary }}</p>
-                        <span class="news-url">{{ shortenUrl(item.url) }}</span>
+                    <a [href]="item.url" target="_blank" class="block p-3 pt-2 border-b border-border-default no-underline text-inherit transition-colors duration-200 hover:bg-bg-hover">
+                        <span class="text-[0.6rem] text-text-muted whitespace-nowrap flex-shrink-0">{{ formatDate(item.timestamp) }}</span>
+                        <h4 class="!m-0 !mt-1 text-sm font-semibold text-text-primary leading-[1.3] flex-1">{{ item.title }}</h4>
+                        <p class="!m-0 !mt-2 text-text-secondary leading-[1.5] text-[0.85rem]">{{ item.summary }}</p>
+                        <span class="block text-[0.7rem] text-text-subtle mt-2">{{ shortenUrl(item.url) }}</span>
                     </a>
                 }
             </div>
         } @else {
-            <p class="no-news">Keine Nachrichten verfügbar.</p>
+            <p class="text-center text-text-muted p-8 italic">No news available.</p>
         }
-    `,
-    styles: [`
-        .news-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            margin-top: 1rem;
-        }
-
-        .news-item {
-            display: block;
-            padding: 0.75rem;
-            padding-top: 1.5rem;
-            border-bottom: 1px solid #e0e0e0;
-            text-decoration: none;
-            color: inherit;
-            transition: background-color 0.2s ease;
-        }
-
-        .news-item:hover {
-            background-color: #f5f5f5;
-        }
-
-        .news-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .news-title {
-            margin: 0;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #333;
-            line-height: 1.3;
-            flex: 1;
-        }
-
-        .news-date {
-            font-size: 0.75rem;
-            color: #999;
-            white-space: nowrap;
-        }
-
-        .news-summary {
-            margin: 0 0 0.5rem 0;
-            color: #666;
-            line-height: 1.5;
-            font-size: 0.85rem;
-        }
-
-        .news-url {
-            display: block;
-            font-size: 0.7rem;
-            color: #aaa;
-        }
-
-        .no-news {
-            text-align: center;
-            color: #999;
-            padding: 2rem;
-            font-style: italic;
-        }
-
-        @media (max-width: 768px) {
-            .news-container {
-                grid-template-columns: 1fr;
-            }
-        }
-    `]
+    `
 })
 export class PageShowNewsComponent implements OnChanges {
     @Input() content: string = '';
@@ -138,13 +66,13 @@ export class PageShowNewsComponent implements OnChanges {
         const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
         if (diffInHours < 1) {
-            return 'Vor wenigen Minuten';
+            return 'a few minutes ago';
         } else if (diffInHours < 24) {
-            return `Vor ${diffInHours} Stunde${diffInHours !== 1 ? 'n' : ''}`;
+            return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
         } else if (diffInHours < 48) {
-            return 'Gestern';
+            return 'yesterday';
         } else {
-            return date.toLocaleDateString('de-DE', {
+            return date.toLocaleDateString('en-US', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',

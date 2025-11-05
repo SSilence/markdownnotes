@@ -1,3 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+    /* Semantic colors for text */
+    --color-text-primary: #333;
+    --color-text-secondary: #666;
+    --color-text-muted: #999;
+    --color-text-subtle: #aaa;
+    --color-success: #2f8400;
+    
+    /* Semantic colors for borders */
+    --color-border-default: #e0e0e0;
+    --color-border-gray: #d7d7d7;
+    --color-border-light: #ddd;
+    
+    /* Semantic colors for backgrounds */
+    --color-bg-hover: #f5f5f5;
+    --color-bg-code: #eeeeee;
+
+    /* Gray palette for Tailwind */
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+
+    /* Animations */
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    
+    @keyframes slide-in-right {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.3s var(--ease-out);
+}
+
 button:focus {
     outline:0;
 }

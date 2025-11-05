@@ -20,14 +20,21 @@ export interface Contact {
   selector: 'app-recipient-input',
   imports: [CommonModule, ClarityModule],
   template: `
-    <div class="recipient-field">
-      <div class="recipient-chips">
+    <div class="flex-1 relative">
+      <div class="flex flex-wrap gap-1 p-1 px-2 min-h-8 border-0 items-center bg-white">
         @for (recipient of recipients; track recipient.email) {
-          <div class="recipient-chip" [class.invalid]="!recipient.isValid">
-            <span class="recipient-text">{{ recipient.displayText }}</span>
+          <div class="inline-flex items-center bg-[var(--clr-color-primary-100,#e3f2fd)] border border-[var(--clr-color-primary-300,#81c784)] rounded-2xl px-2.5 py-0.5 text-xs text-[var(--clr-color-primary-800,#1976d2)] max-w-[300px] select-none transition-all duration-200 ease-out hover:bg-[var(--clr-color-primary-200,#bbdefb)] hover:border-[var(--clr-color-primary-400,#42a5f5)]"
+               [class.bg-[var(--clr-color-danger-100,#ffeaea)]]="!recipient.isValid"
+               [class.border-[var(--clr-color-danger-300,#ff6b6b)]]="!recipient.isValid"
+               [class.text-[var(--clr-color-danger-700,#d63031)]]="!recipient.isValid"
+               [class.hover:bg-[var(--clr-color-danger-200,#ffb3b3)]]="!recipient.isValid"
+               [class.hover:border-[var(--clr-color-danger-400,#ff5252)]]="!recipient.isValid">
+            <span class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap mr-1 font-medium">{{ recipient.displayText }}</span>
             <button 
               type="button" 
-              class="remove-chip"
+              class="bg-transparent border-0 text-[var(--clr-color-primary-600,#1976d2)] cursor-pointer p-0 m-0 w-4 h-4 rounded-full flex items-center justify-center transition-all duration-200 ease-out flex-shrink-0 hover:bg-[var(--clr-color-primary-300,#64b5f6)] hover:text-white"
+              [class.text-[var(--clr-color-danger-600,#d32f2f)]]="!recipient.isValid"
+              [class.hover:bg-[var(--clr-color-danger-400,#ff5252)]]="!recipient.isValid"
               (click)="removeRecipient($index)"
               tabindex="-1">
               <cds-icon shape="times" size="12"></cds-icon>
@@ -37,7 +44,7 @@ export interface Contact {
         <input 
           #recipientInput
           type="text"
-          class="recipient-input"
+          class="border-0 outline-0 text-[0.70rem] bg-transparent flex-1 min-w-[300px] h-8 leading-8 p-0 placeholder:text-[var(--clr-color-neutral-500,#999)]"
           autocomplete="off"
           [placeholder]="placeholder"
           (input)="onInput($event)"
@@ -48,193 +55,22 @@ export interface Contact {
       </div>
       
       @if (showSuggestions && filteredContacts.length > 0) {
-        <div class="suggestions-dropdown">
+        <div class="absolute top-full left-0 right-0 bg-white border border-[var(--clr-color-neutral-300,#e0e0e0)] rounded shadow-[0_2px_8px_rgba(0,0,0,0.15)] z-[1000] max-h-[200px] overflow-y-auto">
           @for (contact of filteredContacts; track contact.email) {
             <div 
-              class="suggestion-item"
-              [class.selected]="$index === selectedSuggestionIndex"
+              class="p-2 px-3 cursor-pointer border-b border-[var(--clr-color-neutral-200,#f0f0f0)] transition-colors duration-150 ease-out last:border-b-0 hover:bg-[var(--clr-color-primary-50,#f3f9ff)]"
+              [class.bg-[var(--clr-color-primary-50,#f3f9ff)]]="$index === selectedSuggestionIndex"
               (mousedown)="selectSuggestion(contact)">
-              <div class="suggestion-name">{{ contact.name || contact.email }}</div>
+              <div class="font-medium text-[var(--clr-color-neutral-900,#000)] text-[0.8rem]">{{ contact.name || contact.email }}</div>
               @if (contact.name && contact.name !== contact.email) {
-                <div class="suggestion-email">{{ contact.email }}</div>
+                <div class="text-[0.7rem] text-[var(--clr-color-neutral-600,#666)] mt-0.5">{{ contact.email }}</div>
               }
             </div>
           }
         </div>
       }
     </div>
-  `,
-  styles: [`
-    .recipient-field {
-      flex: 1;
-      position: relative;
-    }
-
-    .recipient-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem;
-      padding: 0.25rem 0.5rem;
-      min-height: 2rem;
-      border: none;
-      align-items: center;
-      background: white;
-    }
-
-    .recipient-chip {
-      display: inline-flex;
-      align-items: center;
-      background: var(--clr-color-primary-100, #e3f2fd);
-      border: 1px solid var(--clr-color-primary-300, #81c784);
-      border-radius: 16px;
-      padding: 0.2rem 0.6rem;
-      font-size: 0.75rem;
-      color: var(--clr-color-primary-800, #1976d2);
-      max-width: 300px;
-      user-select: none;
-      transition: all 0.2s ease;
-    }
-
-    .recipient-chip.invalid {
-      background: var(--clr-color-danger-100, #ffeaea);
-      border-color: var(--clr-color-danger-300, #ff6b6b);
-      color: var(--clr-color-danger-700, #d63031);
-    }
-
-    .recipient-chip:hover {
-      background: var(--clr-color-primary-200, #bbdefb);
-      border-color: var(--clr-color-primary-400, #42a5f5);
-    }
-
-    .recipient-chip.invalid:hover {
-      background: var(--clr-color-danger-200, #ffb3b3);
-      border-color: var(--clr-color-danger-400, #ff5252);
-    }
-
-    .recipient-text {
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-right: 0.3rem;
-      font-weight: 500;
-    }
-
-    .remove-chip {
-      background: none;
-      border: none;
-      color: var(--clr-color-primary-600, #1976d2);
-      cursor: pointer;
-      padding: 0;
-      margin: 0;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
-    }
-
-    .remove-chip:hover {
-      background: var(--clr-color-primary-300, #64b5f6);
-      color: white;
-    }
-
-    .recipient-chip.invalid .remove-chip {
-      color: var(--clr-color-danger-600, #d32f2f);
-    }
-
-    .recipient-chip.invalid .remove-chip:hover {
-      background: var(--clr-color-danger-400, #ff5252);
-      color: white;
-    }
-
-    .recipient-input {
-      border: none;
-      outline: none;
-      font-size: 0.70rem;
-      background: transparent;
-      flex: 1;
-      min-width: 120px;
-      height: 1.5rem;
-      line-height: 1.5rem;
-      padding:0;
-    }
-
-    .recipient-input::placeholder {
-      color: var(--clr-color-neutral-500, #999);
-    }
-
-    .suggestions-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: white;
-      border: 1px solid var(--clr-color-neutral-300, #e0e0e0);
-      border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .suggestion-item {
-      padding: 0.5rem 0.75rem;
-      cursor: pointer;
-      border-bottom: 1px solid var(--clr-color-neutral-200, #f0f0f0);
-      transition: background-color 0.15s ease;
-    }
-
-    .suggestion-item:last-child {
-      border-bottom: none;
-    }
-
-    .suggestion-item:hover,
-    .suggestion-item.selected {
-      background: var(--clr-color-primary-50, #f3f9ff);
-    }
-
-    .suggestion-name {
-      font-weight: 500;
-      color: var(--clr-color-neutral-900, #000);
-      font-size: 0.8rem;
-    }
-
-    .suggestion-email {
-      font-size: 0.7rem;
-      color: var(--clr-color-neutral-600, #666);
-      margin-top: 0.1rem;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .recipient-chips {
-        min-height: 3rem;
-        padding: 0.5rem;
-      }
-
-      .recipient-chip {
-        font-size: 0.7rem;
-        padding: 0.3rem 0.8rem;
-        margin-bottom: 0.2rem;
-      }
-
-      .recipient-input {
-        min-width: 100px;
-        font-size: 0.8rem;
-      }
-
-      .suggestions-dropdown {
-        position: fixed;
-        left: 1rem;
-        right: 1rem;
-        max-height: 150px;
-      }
-    }
-  `]
+  `
 })
 export class RecipientInputComponent implements OnInit {
   @Input() recipients: RecipientChip[] = [];

@@ -32,19 +32,19 @@ import { AlertComponent } from '../shared/alert.component';
             <app-alert message="successfully saved" [sticky]="true" [type]="'success'"></app-alert>
         }
         @if (page) {
-            <div class="edit">
+            <div class="relative">
                 <div>
-                <div class="top">
+                <div class="flex items-center gap-2">
                     <button type="button" class="selectedIcon btn btn-icon" (click)="openIconDialog()"><cds-icon [attr.shape]="page!.icon" size="24"></cds-icon></button>
-                    <input type="text" id="basic" placeholder="title for the page" class="clr-input" name="title" [(ngModel)]="page!.title">
+                    <input type="text" id="basic" placeholder="title for the page" class="clr-input !text-xl flex-grow" name="title" [(ngModel)]="page!.title">
                     <div class="btn-group btn-primary">
                         <button class="btn btn-success" (click)="save(false)">save</button>
                         <button class="btn btn-primary" (click)="save(true)">save & show</button>
                     </div>
                 </div>
                 <markdown-editor [(content)]="page.content"></markdown-editor>
-                <div class="parent">
-                    <span>Parent Page:</span>
+                <div class="mt-4 mb-4 rounded-sm border border-border-gray bg-white p-3 inline-block">
+                    <span class="block float-left mr-2.5">Parent Page:</span>
                     <select name="options" [(ngModel)]="page.parent">
                     <option [ngValue]="null">no parent</option>
                     @for (page of flattenPages(); track page) {
@@ -62,10 +62,10 @@ import { AlertComponent } from '../shared/alert.component';
                     <button class="btn btn-link" [routerLink]="['/']">cancel</button>
                 }
                 @if (page.id) {
-                    <button class="btn btn-danger-outline" (click)="showDeleteConfirmation=true" style="float:right">delete</button>
+                    <button class="btn btn-danger-outline float-right" (click)="showDeleteConfirmation=true">delete</button>
                 }
                 @if (success) {
-                    <div class="success">page successfully saved</div>
+                    <div class="text-success">page successfully saved</div>
                 }
             </div>
         }
@@ -98,53 +98,7 @@ import { AlertComponent } from '../shared/alert.component';
         @if (showDeleteConfirmation) {
             <div class="modal-backdrop" aria-hidden="true"></div>
         }    
-    `,
-    styles: [`
-        .top {
-            display:flex;
-        }   
-
-        .dropdown-menu {
-            top:auto;
-            left:-5.6em;
-        }
-
-        input {
-            margin-top:0.5em;
-            margin-bottom:1em;
-            margin-right:1.4em;
-            font-size:1.5em;
-            flex-grow: 1;
-        }
-
-        .parent {
-            margin-top:1em;
-            margin-bottom:1em;
-            border-radius: .125rem;
-            border: 1px solid #d7d7d7;
-            background-color: #fff;
-            padding:1em;
-            display:inline-block;
-        }
-
-        .parent span {
-            display:block;
-            float:left;
-            margin-right:10px;
-        }
-
-        .clr-form {
-            padding-left:0;
-        }
-
-        .success {
-            color:#2f8400;
-        }
-
-        .edit {
-            position: relative;
-        }
-    `]
+    `
 })
 export class PageEditComponent implements OnInit {
 

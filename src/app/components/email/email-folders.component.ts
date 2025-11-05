@@ -9,12 +9,12 @@ import { BackendService } from 'src/app/services/backend.service';
   imports: [CommonModule, ClarityModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <clr-card class="folder-panel">
-      <clr-card-header>
-        <clr-card-title>
-          <span>Folders</span>
+    <div class="w-full h-full flex flex-col border-r border-gray-300">
+      <clr-card-header class="p-2 border-b border-gray-300">
+        <clr-card-title class="flex justify-between items-center w-full">
+          <span class="text-sm">Folders</span>
           <button 
-            class="btn btn-sm btn-link refresh-btn-header" 
+            class="p-1.5 border-0 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-70 rounded"
             (click)="loadFolders()" 
             [disabled]="loadingFolders">
             <cds-icon shape="refresh"></cds-icon>
@@ -22,200 +22,53 @@ import { BackendService } from 'src/app/services/backend.service';
         </clr-card-title>
       </clr-card-header>
       
-      <clr-card-content class="folder-content">
-        <div class="compose-section">
+      <div class="flex-1 overflow-hidden flex flex-col">
+        <div class="px-2 py-2 border-b border-gray-300">
           <button 
-            class="btn btn-primary btn-block compose-btn"
+            class="btn btn-primary w-full flex items-center justify-center gap-2"
             (click)="composeEmail()"
             title="Compose new email">
-            <span class="material-symbols-outlined">edit</span>
+            <cds-icon shape="envelope"></cds-icon>
             Compose
           </button>
         </div>
         @if (loadingFolders) {
-          <div class="loading-center">
+          <div class="flex justify-center items-center flex-1 mt-4">
             <clr-spinner clrSmall>Loading folders...</clr-spinner>
           </div>
         } @else {
-          <div class="folder-list">
+          <div class="flex-1 overflow-y-auto overflow-x-hidden">
             @for (folder of folders; track folder.name) {
               <div 
-                class="folder-item nav-link" 
-                [class.active]="selectedFolder?.name === folder.name"
-                [class.drag-over]="isDragOver && dragOverFolder?.name === folder.name"
+                class="flex justify-between items-center px-4 py-3 cursor-pointer transition-colors border-l-4"
+                [class.bg-blue-50]="selectedFolder?.name === folder.name"
+                [class.border-blue-600]="selectedFolder?.name === folder.name"
+                [class.border-transparent]="selectedFolder?.name !== folder.name"
+                [class.hover:bg-gray-100]="selectedFolder?.name !== folder.name"
+                [class.bg-green-50]="isDragOver && dragOverFolder?.name === folder.name"
+                [class.border-green-600]="isDragOver && dragOverFolder?.name === folder.name"
                 (click)="selectFolder(folder)"
                 (dragover)="onDragOver($event, folder)"
                 (dragleave)="onDragLeave($event)"
                 (drop)="onDrop($event, folder)">
-                <div class="folder-info">
+                <div class="flex items-center gap-2">
                   <cds-icon [shape]="getFolderIcon(folder)"></cds-icon>
-                  <span class="folder-name">{{ folder.name }} <sub><span class="total-count">{{ folder.total }}</span></sub></span>
-                  
+                  <span class="font-medium text-gray-800">{{ folder.name }} <sub class="text-xs text-gray-400 font-normal">{{ folder.total }}</sub></span>
                 </div>
-                <div class="folder-actions">
-                  <div class="folder-counts">
-                    @if (folder.unread > 0) {
-                      <span class="badge badge-purple">
-                          {{ folder.unread }}
-                          <span class="clr-sr-only">items in a blue badge</span>
-                      </span>
-                    }
-                  </div>
+                <div class="flex items-center gap-1">
+                  @if (folder.unread > 0) {
+                    <span class="inline-flex items-center justify-center w-4 h-4 text-[0.65em] font-semibold text-white bg-purple-600 rounded-full">
+                        {{ folder.unread }}
+                    </span>
+                  }
                 </div>
               </div>
             }
           </div>
         }
-      </clr-card-content>
-    </clr-card>
-  `,
-  styles: [`
-    clr-card {
-      margin: 0;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--clr-color-neutral-300);
-    }
-
-    clr-card-header {
-      padding: 0.5em;
-      border-bottom: 1px solid var(--clr-color-neutral-300);
-      margin-bottom: 0.5em;
-    }
-
-    clr-card-content {
-      flex: 1;
-      overflow: hidden;
-      padding: 0;
-    }
-
-    .compose-section {
-      padding: 0.2rem 0.5rem 0.6rem 0.5rem;
-      border-bottom: 1px solid var(--clr-color-neutral-300);
-    }
-
-    .compose-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin: 0;
-      font-weight: 600;
-      background-color: var(--clr-color-action-600);
-      border-color: var(--clr-color-action-600);
-    }
-
-    .compose-btn:hover {
-      background-color: var(--clr-color-action-700);
-      border-color: var(--clr-color-action-700);
-    }
-
-    .compose-btn .material-symbols-outlined {
-      font-size: 18px;
-    }
-
-    clr-card-title {
-      display: flex !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      width: 100% !important;
-      margin-left: 10px;
-    }
-
-    .refresh-btn-header {
-      margin-left: auto;
-      padding: 0.25rem;
-    }
-
-    .loading-center {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 200px;
-    }
-
-    .folder-panel {
-      width: 100%;
-      height: 100%;
-    }
-
-    .folder-list {
-      overflow-y: auto;
-      overflow-x: hidden;
-      max-height: calc(100vh - 200px);
-    }
-
-    .folder-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      border-left: 3px solid transparent;
-    }
-
-    .folder-item:hover {
-      background-color: var(--clr-color-neutral-100);
-    }
-
-    .folder-item.active {
-      background-color: var(--clr-color-action-50);
-      border-left: 3px solid var(--clr-color-action-600);
-    }
-
-    .folder-item.drag-over {
-      background-color: var(--clr-color-success-50);
-      border-left: 3px solid var(--clr-color-success-600);
-      transform: scale(1.02);
-      transition: all 0.2s ease;
-    }
-
-    .folder-info {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .folder-name {
-      font-weight: 500;
-      color: var(--clr-color-neutral-800);
-    }
-
-    .folder-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .folder-counts {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-
-    .total-count {
-      display: inline-block;
-      color: var(--clr-color-neutral-600);
-      font-size: 0.6rem;
-    }
-
-    @media (max-width: 1200px) {
-      .folder-panel {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .folder-panel {
-        width: 100%;
-        height: 250px;
-      }
-    }
-  `]
+      </div>
+    </div>
+  `
 })
 export class EmailFoldersComponent implements OnInit {
   @Input() selectedFolder: FolderDto | null = null;

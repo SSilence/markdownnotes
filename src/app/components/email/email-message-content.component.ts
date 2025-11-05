@@ -11,54 +11,23 @@ import { firstValueFrom } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div #emailContent class="email-content">
+    <div #emailContent class="w-full">
       @if (message && message.bodyHtml) {
         <iframe
           #emailFrame
           [src]="htmlContentUrl"
           frameborder="0"
           sandbox="allow-popups"
-          class="email-iframe"
+          class="w-full border-0 overflow-hidden px-4"
           [style.height]="iframeHeight()">
         </iframe>
       } @else if (message && message.bodyText) {
-        <div class="email-text-content">
-          <pre>{{ getSanitizedText() }}</pre>
+        <div class="w-full p-0 bg-white rounded">
+          <pre class="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed m-0 text-[#333] border-0 p-4">{{ getSanitizedText() }}</pre>
         </div>
       }
     </div>
-  `,
-  styles: [`
-    .email-content {
-      width: 100%;
-    }
-
-    .email-iframe {
-      width: 100%;
-      border: none;
-      overflow: hidden;
-      padding: 0 1rem 0 1rem;
-    }
-
-    .email-text-content {
-      width: 100%;
-      padding: 0;
-      background: #fff;
-      border-radius: 4px;
-    }
-
-    .email-text-content pre {
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
-      line-height: 1.5;
-      margin: 0;
-      color: #333;
-      border: none;
-      padding: 1rem;
-    }
-  `]
+  `
 })
 export class EmailMessageContentComponent implements AfterViewInit, OnChanges, OnDestroy {
 

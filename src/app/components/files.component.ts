@@ -14,107 +14,81 @@ import { FileSizePipe } from 'src/app/pipes/file-size.pipe';
     selector: 'app-files',
     imports: [CdsModule, NgxFileDropModule, AlertComponent, CommonModule, FileSizePipe, ClipboardModule],
     template: `
-        <h1>Files</h1>
+        <h1 class="text-4xl font-bold !mt-0 !mb-2">Files</h1>
 
         @if (!files$) {
             <span class="spinner spinner-inline">Loading...</span>
         }
 
         <app-alert [error]="error"></app-alert>
-        <ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" dropZoneClassName="filedrop">
-        <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-            <button class="btn" type="button" (click)="openFileSelector()">Browse Files</button>
-        </ng-template>
+        <ngx-file-drop dropZoneLabel="Drop files here" (onFileDrop)="dropped($event)" dropZoneClassName="filedrop border-2 border-dashed border-gray-300 rounded-md p-6 text-center flex flex-col items-center justify-center min-h-32">
+            <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+                <button class="btn btn-primary" type="button" (click)="openFileSelector()">Browse Files</button>
+            </ng-template>
         </ngx-file-drop>
 
         @if (uploading) {
-            <div class="progress loop"><progress></progress></div>
+            <div class="mt-6"><progress class="w-full"></progress></div>
         }
 
         @if (files$) {
-            <table class="table">
-                <thead>
-                <tr>
-                    <th (click)="sort('name')">Filename 
-                    @if (sortField=='name' && sortAsc) {
-                        <cds-icon shape="angle"></cds-icon>
-                    } @if (sortField=='name' && !sortAsc) {
-                        <cds-icon shape="angle" flip="vertical"></cds-icon>
-                    }
-                    </th>
-                    <th (click)="sort('size')">Size 
-                    @if (sortField=='size' && sortAsc) {
-                        <cds-icon shape="angle"></cds-icon>
-                    } @if (sortField=='size' && !sortAsc) {
-                        <cds-icon shape="angle" flip="vertical"></cds-icon>
-                    }
-                    </th>
-                    <th (click)="sort('date')">Date 
-                    @if (sortField=='date' && sortAsc) {
-                        <cds-icon shape="angle"></cds-icon>
-                    } 
-                    @if (sortField=='date' && !sortAsc) {
-                        <cds-icon shape="angle" flip="vertical"></cds-icon>
-                    }
-                    </th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                @for (file of files$ | async; track file) {
-                    <tr>
-                    <td class="left"><a href="data/files/{{file.name}}" target="_blank">{{file.name}}</a></td>
-                    <td>{{file.size | fileSize}}</td>
-                    <td>{{file.date | date:'medium'}}</td>
-                    <td>
-                        <cds-icon shape="copy-to-clipboard" size="20" ngxClipboard [cbContent]="'[' + file.name + '](data/files/' + file.name + ')'"></cds-icon>
-                        &nbsp;
-                        @if (!file.loading && !file.delete) {
-                            <cds-icon shape="trash" size="20" (click)="file.delete = true"></cds-icon>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left cursor-pointer" (click)="sort('name')">Filename 
+                                @if (sortField=='name' && sortAsc) {
+                                    <cds-icon shape="angle"></cds-icon>
+                                } @if (sortField=='name' && !sortAsc) {
+                                    <cds-icon shape="angle" flip="vertical"></cds-icon>
+                                }
+                            </th>
+                            <th class="text-left cursor-pointer" (click)="sort('size')">Size 
+                                @if (sortField=='size' && sortAsc) {
+                                    <cds-icon shape="angle"></cds-icon>
+                                } @if (sortField=='size' && !sortAsc) {
+                                    <cds-icon shape="angle" flip="vertical"></cds-icon>
+                                }
+                            </th>
+                            <th class="text-left cursor-pointer" (click)="sort('date')">Date 
+                                @if (sortField=='date' && sortAsc) {
+                                    <cds-icon shape="angle"></cds-icon>
+                                } 
+                                @if (sortField=='date' && !sortAsc) {
+                                    <cds-icon shape="angle" flip="vertical"></cds-icon>
+                                }
+                            </th>
+                            <th class="text-left"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for (file of files$ | async; track file) {
+                        <tr>
+                            <td class="text-left"><a href="data/files/{{file.name}}" target="_blank" class="text-blue-600 hover:text-blue-800">{{file.name}}</a></td>
+                            <td>{{file.size | fileSize}}</td>
+                            <td>{{file.date | date:'medium'}}</td>
+                            <td class="text-left">
+                                <cds-icon shape="copy-to-clipboard" size="20" ngxClipboard [cbContent]="'[' + file.name + '](data/files/' + file.name + ')'" class="cursor-pointer mr-2"></cds-icon>
+                                @if (!file.loading && !file.delete) {
+                                    <cds-icon shape="trash" size="20" (click)="file.delete = true" class="cursor-pointer"></cds-icon>
+                                }
+                                @if (!file.loading && file.delete) {
+                                    <button class="btn btn-danger btn-sm" type="button" (click)="delete(file)">delete</button>
+                                }
+                                @if (!file.loading && file.delete) {
+                                    <button class="btn btn-outline btn-sm btn-link" type="button" (click)="file.delete = false">cancel</button>
+                                }
+                                @if (file.loading) {
+                                    <span class="spinner spinner-inline ml-2"></span>
+                                }
+                            </td>
+                        </tr>
                         }
-                        @if (!file.loading && file.delete) {
-                            <button class="btn btn-danger btn-sm" type="button" (click)="delete(file)">delete</button>
-                        }
-                        @if (!file.loading && file.delete) {
-                            <button class="btn btn-outline btn-sm btn-link" type="button" (click)="file.delete = false">cancel</button>
-                        }
-                        &nbsp;
-                        @if (file.loading) {
-                            <span class="spinner spinner-inline"></span>
-                        }</td>
-                    </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         }
-    `,
-    styles: [`
-        .progress {
-            margin-top:1.5em;
-        }
-
-        cds-icon {
-            cursor: pointer;
-        }
-
-        h1 {
-            margin-top:0;
-            margin-bottom:0.5em;
-        }
-
-        th {
-            cursor: pointer;
-        }
-
-        td {
-            width:25%;
-        }
-
-        button {
-            margin:0;
-        }
-    `]
-
+    `
 })
 export class FilesComponent implements OnInit {
 

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ElementRef, ContentChild, TemplateRef } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StorageService, PanelWidths } from 'src/app/services/storage.service';
 

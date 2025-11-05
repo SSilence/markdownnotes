@@ -18,13 +18,13 @@ type PendingAction = "none" | "select" | "remove";
         FormsModule
     ],
     template: `
-        <div class="vocabulary-image-card">
+        <div class="w-full">
             @if (previewImageUrl) {
-                <div class="current-image">
-                    <img [src]="previewImageUrl" [alt]="vocabulary" />
-                    <div class="current-image-actions">
+                <div class="flex flex-col gap-3 items-center">
+                    <img [src]="previewImageUrl" [alt]="vocabulary" class="max-h-[60vh] max-w-[60vh] object-contain" />
+                    <div class="flex justify-center gap-3">
                         @if (canRemoveImage) {
-                            <button type="button" class="btn btn-danger-outline btn-sm current-image-delete" (click)="removeImage()" [disabled]="isBusy()" [attr.title]="removeButtonTitle">
+                            <button type="button" class="btn btn-danger-outline btn-sm inline-flex items-center gap-1" (click)="removeImage()" [disabled]="isBusy()" [attr.title]="removeButtonTitle">
                                 <cds-icon shape="trash"></cds-icon>
                                 <span>{{ removeButtonLabel }}</span>
                             </button>
@@ -32,52 +32,52 @@ type PendingAction = "none" | "select" | "remove";
                     </div>
                 </div>
             } @else {
-                <div class="selector">
+                <div class="flex flex-col gap-3 w-full">
                     <input
                         id="vocabulary-image-search-{{instanceId}}"
-                        class="search-input"
                         type="text"
                         placeholder="Search images"
                         [(ngModel)]="searchTerm"
                         (ngModelChange)="onSearchTermChange($event)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md font-base bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     />
 
                     @if (loadingSuggestions) {
-                        <div class="state">
+                        <div class="flex items-center gap-2 text-sm text-gray-700">
                             <span class="spinner spinner-sm spinner-inline"></span>
                             <span>Searching for images...</span>
                         </div>
                     }
 
                     @if (errorMessage) {
-                        <div class="state error">
+                        <div class="text-sm text-red-700">
                             {{ errorMessage }}
                         </div>
                     }
 
                     @if (!loadingSuggestions && suggestions.length === 0 && !errorMessage) {
-                        <div class="state empty">
+                        <div class="text-sm text-gray-600">
                             No matching images found. Adjust your search.
                         </div>
                     }
 
-                    <div class="suggestions" [class.loading]="selectionProcessing || saving">
+                    <div class="grid grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-1" [class.opacity-60]="selectionProcessing || saving" [class.pointer-events-none]="selectionProcessing || saving">
                         @for (url of suggestions; track url) {
-                            <button type="button" class="suggestion" (click)="selectImage(url)" [disabled]="selectionProcessing || saving">
-                                <img [src]="url" alt="Image suggestion" />
+                            <button type="button" class="overflow-hidden rounded-lg transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" (click)="selectImage(url)" [disabled]="selectionProcessing || saving">
+                                <img [src]="url" alt="Image suggestion" class="w-full h-full object-cover" />
                             </button>
                         }
                     </div>
 
                     @if (selectionProcessing) {
-                        <div class="state uploading">
+                        <div class="flex items-center gap-2 text-sm text-blue-600">
                             <span class="spinner spinner-sm spinner-inline"></span>
                             <span>Preparing image...</span>
                         </div>
                     }
 
                     @if (saving) {
-                        <div class="state uploading">
+                        <div class="flex items-center gap-2 text-sm text-blue-600">
                             <span class="spinner spinner-sm spinner-inline"></span>
                             <span>Saving image...</span>
                         </div>
@@ -85,150 +85,12 @@ type PendingAction = "none" | "select" | "remove";
                 </div>
             }
             @if (removalPlanned) {
-                <div class="state notice">
+                <div class="text-sm text-gray-600 italic">
                     Image will be removed after saving.
                 </div>
             }
         </div>
-    `,
-    styles: [`
-        :host {
-            display: block;
-            width: 100%;
-        }
-
-        .vocabulary-image-card {
-            padding: 0;
-            width: 100%;
-        }
-
-        .current-image {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            align-items: stretch;
-        }
-
-        .current-image img {
-            width: 100%;
-            max-height: 60vh;
-            object-fit: contain;
-        }
-
-        .no-image {
-            border: 1px dashed #c9c9c9;
-            padding: 1.5rem;
-            text-align: center;
-            color: #666;
-            font-style: italic;
-        }
-
-        .selector {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            width: 100%;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #c9c9c9;
-            border-radius: 4px;
-            font-size: 1rem;
-            background: #fff;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #0b5fff;
-            box-shadow: 0 0 0 2px rgba(11, 95, 255, 0.15);
-        }
-
-        .current-image-actions {
-            display: flex;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .current-image-delete {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            text-transform: lowercase;
-        }
-
-        .current-image-delete cds-icon {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .selector button.suggestion {
-            width: 100%;
-        }
-
-        .state {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: #555;
-        }
-
-        .state.error {
-            color: #b20000;
-        }
-
-        .state.empty {
-            color: #666;
-        }
-
-        .state.notice {
-            color: #666;
-            font-style: italic;
-        }
-
-        .suggestions {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 0.75rem;
-            max-height: 18rem;
-            overflow-y: auto;
-            padding-right: 0.25rem;
-        }
-
-        .suggestions.loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .suggestion {
-            padding: 0;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            border-radius: 6px;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .suggestion:hover,
-        .suggestion:focus {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .suggestion img {
-            width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: cover;
-        }
-
-        .uploading {
-            color: #0b5fff;
-        }
-    `]
+    `
 })
 export class VocabularyImageComponent implements OnInit, OnChanges, OnDestroy {
 
