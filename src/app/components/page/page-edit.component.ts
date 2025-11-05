@@ -43,9 +43,9 @@ import { AlertComponent } from '../shared/alert.component';
                     </div>
                 </div>
                 <markdown-editor [(content)]="page.content"></markdown-editor>
-                <div class="mt-4 mb-4 rounded-sm border border-border-gray bg-white p-3 inline-block">
-                    <span class="block float-left mr-2.5">Parent Page:</span>
-                    <select name="options" [(ngModel)]="page.parent">
+                <div class="mt-4 mb-4 rounded-sm border border-border-gray bg-white p-3 inline-block flex items-center">
+                    <span class="mr-2.5">Parent Page:</span>
+                    <select name="options" [(ngModel)]="page.parent" class="bg-white p-1 !rounded-sm border border-border-gray">
                     <option [ngValue]="null">no parent</option>
                     @for (page of flattenPages(); track page) {
                         <option [ngValue]="page" [textContent]="flattenPageTitle(page)"></option>
