@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StorageService } from 'src/app/services/storage.service';
 
@@ -6,56 +6,28 @@ import { StorageService } from 'src/app/services/storage.service';
   selector: 'app-resizable-sidebar',
   imports: [CommonModule],
   template: `
-    <div class="resizable-sidebar-container" [style]="containerStyles">
-      <div class="sidebar-content">
+    <div
+      class="flex relative"
+      [style.minWidth.px]="minWidth"
+      [style.maxWidth.px]="maxWidth"
+      [style.width.px]="currentWidth"
+      [ngClass]="{ 'select-none': resizing }"
+    >
+      <div
+        class="flex-1 overflow-auto h-[calc(100vh-var(--clr-header-height))]"
+        [ngClass]="{ 'pointer-events-none': resizing }"
+      >
         <ng-content></ng-content>
       </div>
-      <div class="sidebar-resizer"
-           (mousedown)="startResize($event)"
-           title="Drag to resize sidebar">
+      <div
+        class="w-1 bg-[var(--clr-color-neutral-200)] cursor-col-resize relative transition-colors duration-200 ease-out flex-shrink-0 hover:bg-[var(--clr-color-action-600)]"
+        [ngClass]="{ 'bg-[var(--clr-color-action-600)]': resizing }"
+        (mousedown)="startResize($event)"
+        title="Drag to resize sidebar"
+      >
       </div>
     </div>
-  `,
-  styles: [`
-    .resizable-sidebar-container {
-      display: flex;
-      position: relative;
-      min-width: var(--min-width, 200px);
-      max-width: var(--max-width, 500px);
-      width: var(--sidebar-width, 300px);
-    }
-
-    .sidebar-content {
-      flex: 1;
-      overflow: auto;
-      height: calc(100vh - var(--clr-header-height));
-    }
-
-    .sidebar-resizer {
-      width: 4px;
-      background: var(--clr-color-neutral-200);
-      cursor: col-resize;
-      position: relative;
-      transition: background-color 0.2s ease;
-      flex-shrink: 0;
-    }
-
-    .sidebar-resizer:hover {
-      background: var(--clr-color-action-600);
-    }
-
-    .sidebar-resizer.resizing {
-      background: var(--clr-color-action-600);
-    }
-
-    :host.resizing {
-      user-select: none;
-    }
-
-    :host.resizing * {
-      pointer-events: none;
-    }
-  `]
+  `
 })
 export class ResizableSidebarComponent implements OnInit, OnDestroy {
   @Input() minWidth: number = 200;
@@ -65,9 +37,8 @@ export class ResizableSidebarComponent implements OnInit, OnDestroy {
 
   @Output() widthChanged = new EventEmitter<number>();
 
-  containerStyles = '';
-  private currentWidth: number = this.defaultWidth;
-  private resizing = false;
+  currentWidth: number = this.defaultWidth;
+  resizing = false;
   private startX = 0;
   private startWidth = 0;
 
@@ -75,13 +46,12 @@ export class ResizableSidebarComponent implements OnInit, OnDestroy {
   private mouseUpListener?: (event: MouseEvent) => void;
 
   constructor(
-    private storageService: StorageService,
-    private elementRef: ElementRef
+    private storageService: StorageService
   ) {}
 
   ngOnInit(): void {
     this.loadWidth();
-    this.updateStyles();
+    this.emitWidth();
   }
 
   ngOnDestroy(): void {
@@ -108,12 +78,7 @@ export class ResizableSidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateStyles(): void {
-    this.containerStyles = `
-      --sidebar-width: ${this.currentWidth}px;
-      --min-width: ${this.minWidth}px;
-      --max-width: ${this.maxWidth}px;
-    `;
+  private emitWidth(): void {
     this.widthChanged.emit(this.currentWidth);
   }
 
@@ -124,12 +89,6 @@ export class ResizableSidebarComponent implements OnInit, OnDestroy {
     this.resizing = true;
     this.startX = event.clientX;
     this.startWidth = this.currentWidth;
-
-    const hostElement = this.elementRef.nativeElement;
-    hostElement.classList.add('resizing');
-
-    const resizer = event.target as HTMLElement;
-    resizer.classList.add('resizing');
 
     this.mouseMoveListener = this.onMouseMove.bind(this);
     this.mouseUpListener = this.onMouseUp.bind(this);
@@ -149,21 +108,13 @@ export class ResizableSidebarComponent implements OnInit, OnDestroy {
     );
 
     this.currentWidth = newWidth;
-    this.updateStyles();
+    this.emitWidth();
   }
 
-  private onMouseUp(event: MouseEvent): void {
+  private onMouseUp(): void {
     if (!this.resizing) return;
 
     this.resizing = false;
-
-    const hostElement = this.elementRef.nativeElement;
-    hostElement.classList.remove('resizing');
-
-    const resizers = this.elementRef.nativeElement.querySelectorAll('.sidebar-resizer');
-    resizers.forEach((resizer: HTMLElement) => {
-      resizer.classList.remove('resizing');
-    });
 
     this.saveWidth();
     this.removeEventListeners();
@@ -182,7 +133,7 @@ export class ResizableSidebarComponent implements OnInit, OnDestroy {
 
   resetWidth(): void {
     this.currentWidth = this.defaultWidth;
-    this.updateStyles();
+    this.emitWidth();
 
     if (this.storageKey === 'sidebar_width') {
       this.storageService.deleteSidebarWidth();

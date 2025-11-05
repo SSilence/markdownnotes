@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit, OnDestroy, ElementRef } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StorageService, PanelWidths } from 'src/app/services/storage.service';
 
@@ -6,132 +6,72 @@ import { StorageService, PanelWidths } from 'src/app/services/storage.service';
   selector: 'app-resizable-email-panels',
   imports: [CommonModule],
   template: `
-    <div class="email-panels" [style]="panelStyles" [class.resizing]="resizing">
-      <!-- Left Panel: Folders -->
-      <div class="panel-container folder-panel-container">
-        <ng-content select="[slot=folders]"></ng-content>
+    <div
+      class="flex h-full flex-col gap-1 p-1 bg-[var(--clr-global-app-background)] md:relative md:flex-row md:gap-0 md:p-0"
+      [ngClass]="{ 'cursor-col-resize': resizing, 'select-none': resizing }"
+    >
+      <div
+        class="flex w-full flex-col overflow-hidden border-b border-[var(--clr-color-neutral-300)] md:w-auto md:border-b-0 md:border-r"
+        [ngClass]="{ 'pointer-events-none': resizing }"
+        [style.minWidth.px]="FOLDER_MIN_WIDTH"
+        [style.maxWidth.px]="FOLDER_MAX_WIDTH"
+        [style.width.px]="panelWidths.folderPanel"
+      >
+        <div class="flex-1 h-full">
+          <ng-content select="[slot=folders]"></ng-content>
+        </div>
       </div>
 
-      <!-- Resizer between folders and messages -->
-      <div class="panel-resizer"
-           (mousedown)="startResize($event, 'folder-message')"
-           title="Drag to resize panels">
+      <div
+        class="hidden md:block w-1 bg-[var(--clr-color-neutral-200)] cursor-col-resize relative transition-colors duration-200 ease-out flex-shrink-0 hover:bg-[var(--clr-color-action-600)]"
+        [ngClass]="{ 'bg-[var(--clr-color-action-600)]': activeResizer === 'folder-message' }"
+        (mousedown)="startResize($event, 'folder-message')"
+        title="Drag to resize panels"
+      ></div>
+
+      <div
+        class="flex w-full flex-col overflow-hidden border-b border-[var(--clr-color-neutral-300)] md:w-auto md:border-b-0 md:border-r"
+        [ngClass]="{ 'pointer-events-none': resizing }"
+        [style.minWidth.px]="MESSAGE_MIN_WIDTH"
+        [style.maxWidth.px]="MESSAGE_MAX_WIDTH"
+        [style.width.px]="panelWidths.messagePanel"
+      >
+        <div class="flex-1 h-full">
+          <ng-content select="[slot=messages]"></ng-content>
+        </div>
       </div>
 
-      <!-- Middle Panel: Messages -->
-      <div class="panel-container message-panel-container">
-        <ng-content select="[slot=messages]"></ng-content>
-      </div>
+      <div
+        class="hidden md:block w-1 bg-[var(--clr-color-neutral-200)] cursor-col-resize relative transition-colors duration-200 ease-out flex-shrink-0 hover:bg-[var(--clr-color-action-600)]"
+        [ngClass]="{ 'bg-[var(--clr-color-action-600)]': activeResizer === 'message-detail' }"
+        (mousedown)="startResize($event, 'message-detail')"
+        title="Drag to resize panels"
+      ></div>
 
-      <!-- Resizer between messages and message detail -->
-      <div class="panel-resizer"
-           (mousedown)="startResize($event, 'message-detail')"
-           title="Drag to resize panels">
-      </div>
-
-      <!-- Right Panel: Message Detail -->
-      <div class="panel-container message-detail-panel-container">
-        <ng-content select="[slot=message-detail]"></ng-content>
+      <div
+        class="flex flex-1 flex-col overflow-auto border-b border-[var(--clr-color-neutral-300)] md:border-b-0"
+        [ngClass]="{ 'pointer-events-none': resizing }"
+        [style.minWidth.px]="DETAIL_MIN_WIDTH"
+      >
+        <div class="flex-1 h-full">
+          <ng-content select="[slot=message-detail]"></ng-content>
+        </div>
       </div>
     </div>
-  `,
-  styles: [`
-    .email-panels {
-      display: flex;
-      height: 100%;
-      background-color: var(--clr-global-app-background);
-      position: relative;
-    }
-
-    .panel-container {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .folder-panel-container,
-    .message-panel-container {
-      border-right: 1px solid var(--clr-color-neutral-300);
-    }
-
-    .folder-panel-container {
-      width: var(--folder-panel-width, 300px);
-      min-width: 200px;
-      max-width: 500px;
-    }
-
-    .message-panel-container {
-      width: var(--message-panel-width, 400px);
-      min-width: 300px;
-      max-width: 600px;
-    }
-
-    .message-detail-panel-container {
-      flex: 1;
-      min-width: 300px;
-      overflow: scroll;
-    }
-
-    .panel-container > :ng-deep * {
-      flex: 1;
-      height: 100%;
-    }
-
-    .panel-resizer {
-      width: 4px;
-      background: var(--clr-color-neutral-200);
-      cursor: col-resize;
-      position: relative;
-      transition: background-color 0.2s ease;
-      flex-shrink: 0;
-    }
-
-    .panel-resizer:hover {
-      background: var(--clr-color-action-600);
-    }
-
-    .panel-resizer.resizing {
-      background: var(--clr-color-action-600);
-    }
-
-    .email-panels.resizing {
-      cursor: col-resize;
-      user-select: none;
-    }
-
-    .email-panels.resizing * {
-      pointer-events: none;
-    }
-
-    @media (max-width: 768px) {
-      .email-panels {
-        flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.25rem;
-      }
-
-      .panel-resizer {
-        display: none;
-      }
-
-      .folder-panel-container,
-      .message-panel-container,
-      .message-detail-panel-container {
-        width: 100% !important;
-        min-width: unset !important;
-        max-width: unset !important;
-        border-right: none;
-        border-bottom: 1px solid var(--clr-color-neutral-300);
-      }
-    }
-  `]
+  `
 })
 export class ResizableEmailPanelsComponent implements OnInit, OnDestroy {
   @Output() panelWidthsChanged = new EventEmitter<PanelWidths>();
 
-  private panelWidths: PanelWidths = { folderPanel: 300, messagePanel: 400, messageDetailPanel: -1 };
-  panelStyles = '';
+  readonly FOLDER_MIN_WIDTH = 200;
+  readonly FOLDER_MAX_WIDTH = 500;
+  readonly MESSAGE_MIN_WIDTH = 300;
+  readonly MESSAGE_MAX_WIDTH = 600;
+  readonly DETAIL_MIN_WIDTH = 300;
+
+  panelWidths: PanelWidths = { folderPanel: 300, messagePanel: 400, messageDetailPanel: -1 };
   resizing = false;
+  activeResizer: 'folder-message' | 'message-detail' | null = null;
   private resizeType: 'folder-message' | 'message-detail' | null = null;
   private startX = 0;
   private startWidths = { folder: 0, message: 0 };
@@ -140,24 +80,19 @@ export class ResizableEmailPanelsComponent implements OnInit, OnDestroy {
   private mouseUpListener?: (event: MouseEvent) => void;
 
   constructor(
-    private storageService: StorageService,
-    private elementRef: ElementRef
+    private storageService: StorageService
   ) {}
 
   ngOnInit(): void {
     this.panelWidths = this.storageService.getPanelWidths();
-    this.updatePanelStyles();
+    this.emitPanelWidths();
   }
 
   ngOnDestroy(): void {
     this.removeEventListeners();
   }
 
-  private updatePanelStyles(): void {
-    this.panelStyles = `
-      --folder-panel-width: ${this.panelWidths.folderPanel}px;
-      --message-panel-width: ${this.panelWidths.messagePanel}px;
-    `;
+  private emitPanelWidths(): void {
     this.panelWidthsChanged.emit(this.panelWidths);
   }
 
@@ -167,13 +102,11 @@ export class ResizableEmailPanelsComponent implements OnInit, OnDestroy {
 
     this.resizing = true;
     this.resizeType = type;
+    this.activeResizer = type;
     this.startX = event.clientX;
 
     this.startWidths.folder = this.panelWidths.folderPanel;
     this.startWidths.message = this.panelWidths.messagePanel;
-
-    const target = event.target as HTMLElement;
-    target.classList.add('resizing');
 
     this.mouseMoveListener = this.onMouseMove.bind(this);
     this.mouseUpListener = this.onMouseUp.bind(this);
@@ -189,26 +122,28 @@ export class ResizableEmailPanelsComponent implements OnInit, OnDestroy {
     const deltaX = event.clientX - this.startX;
 
     if (this.resizeType === 'folder-message') {
-      const newFolderWidth = Math.max(200, Math.min(500, this.startWidths.folder + deltaX));
+      const newFolderWidth = Math.max(
+        this.FOLDER_MIN_WIDTH,
+        Math.min(this.FOLDER_MAX_WIDTH, this.startWidths.folder + deltaX)
+      );
       this.panelWidths.folderPanel = newFolderWidth;
     } else if (this.resizeType === 'message-detail') {
-      const newMessageWidth = Math.max(300, Math.min(600, this.startWidths.message + deltaX));
+      const newMessageWidth = Math.max(
+        this.MESSAGE_MIN_WIDTH,
+        Math.min(this.MESSAGE_MAX_WIDTH, this.startWidths.message + deltaX)
+      );
       this.panelWidths.messagePanel = newMessageWidth;
     }
 
-    this.updatePanelStyles();
+    this.emitPanelWidths();
   }
 
-  private onMouseUp(event: MouseEvent): void {
+  private onMouseUp(): void {
     if (!this.resizing) return;
 
     this.resizing = false;
     this.resizeType = null;
-
-    const resizers = this.elementRef.nativeElement.querySelectorAll('.panel-resizer');
-    resizers.forEach((resizer: HTMLElement) => {
-      resizer.classList.remove('resizing');
-    });
+    this.activeResizer = null;
 
     this.storageService.setPanelWidths(this.panelWidths);
     this.removeEventListeners();
@@ -228,6 +163,6 @@ export class ResizableEmailPanelsComponent implements OnInit, OnDestroy {
   resetPanelWidths(): void {
     this.storageService.deletePanelWidths();
     this.panelWidths = this.storageService.getPanelWidths();
-    this.updatePanelStyles();
+    this.emitPanelWidths();
   }
 }
