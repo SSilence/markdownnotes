@@ -6,6 +6,7 @@ require_once("vendor/autoload.php");
 define("CONFIG_DATA_PATH", __DIR__ . "/data/pages/");
 define("CONFIG_FILES_PATH", __DIR__ . "/data/files/");
 define("CONFIG_AUDIO_PATH", __DIR__ . "/data/audio/");
+define("CONFIG_IMAGES_PATH", __DIR__ . "/data/images/");
 define("CONFIG_ATTACHMENT_PATH", __DIR__ . "/data/attachments/");
 define("CONFIG_META_SEPARATOR", "------------------------------------");
 
@@ -19,6 +20,10 @@ if (!file_exists(CONFIG_FILES_PATH)) {
 
 if (!file_exists(CONFIG_AUDIO_PATH)) {
     mkdir(CONFIG_AUDIO_PATH, 0777);
+}
+
+if (!file_exists(CONFIG_IMAGES_PATH)) {
+    mkdir(CONFIG_IMAGES_PATH, 0777);
 }
 
 function endsWith($haystack, $needle) {

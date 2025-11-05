@@ -173,6 +173,37 @@ export class BackendService {
         return this.http.get<EnrichResponse>(BackendService.BASE_URL + 'vocabulary/enrich', { params: params });
     }
 
+    getVocabularyImages(query: string, perPage?: number): Observable<string[]> {
+        let params = new HttpParams().set('q', query ? query : '');
+        if (perPage !== undefined && perPage !== null) {
+            params = params.set('per_page', perPage.toString());
+        }
+        return this.http.get<string[]>(BackendService.BASE_URL + 'images', { params: params });
+    }
+
+    uploadVocabularyImage(vocabulary: string, imageBase64: string): Observable<{ success: boolean; filename: string }> {
+        return this.http.post<{ success: boolean; filename: string }>(BackendService.BASE_URL + 'image', {
+            vocabulary: vocabulary,
+            image: imageBase64
+        });
+    }
+
+    getVocabularyImageUrl(vocabulary: string): string {
+        return BackendService.BASE_URL + 'image/' + encodeURIComponent(vocabulary);
+    }
+
+    getVocabularyImage(vocabulary: string): Observable<Blob> {
+        return this.http.get(this.getVocabularyImageUrl(vocabulary), { responseType: 'blob' });
+    }
+
+    getVocabularyImagePresence(vocabularyList: string[]): Observable<Record<string, boolean>> {
+        return this.http.post<Record<string, boolean>>(BackendService.BASE_URL + 'image_has', vocabularyList);
+    }
+
+    deleteVocabularyImage(vocabulary: string): Observable<{ success: boolean }> {
+        return this.http.delete<{ success: boolean }>(BackendService.BASE_URL + 'image/' + encodeURIComponent(vocabulary));
+    }
+
     
     
 

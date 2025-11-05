@@ -1,11 +1,11 @@
-import { Component, HostListener, inject, OnInit, ViewChildren } from "@angular/core";
+import { Component, HostListener, inject, OnInit, ViewChild, ViewChildren } from "@angular/core";
 import { Page } from "src/app/models/page";
 import { BackendService } from "src/app/services/backend.service";
 import { ClarityModule } from "@clr/angular";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, RouterModule } from "@angular/router";
-import { switchMap, map, tap, concatMap, catchError } from 'rxjs/operators';
+import { switchMap, map, tap, concatMap, catchError, finalize } from 'rxjs/operators';
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 import { from, of, timer } from "rxjs";
 import { VocabularyCard } from "src/app/models/vocabulary-card";
@@ -13,6 +13,7 @@ import { VocabularyExerciseComponent } from "./vocabulary-exercise.component";
 import { AlertComponent } from "../shared/alert.component";
 import { VocabularyExerciseResultComponent } from "./vocabulary-exercise-result.component";
 import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-result";
+import { VocabularyImageComponent } from "./vocabulary-image.component";
 
 @Component({
     selector: 'app-vocabulary-list',
@@ -23,7 +24,8 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
         FormsModule,
         RouterModule,
         VocabularyExerciseComponent,
-        VocabularyExerciseResultComponent
+        VocabularyExerciseResultComponent,
+        VocabularyImageComponent
     ],
     template: `
         @if (loading) {
@@ -79,6 +81,7 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
                         <th class="left">Section</th>
                         <th class="left">Phase</th>
                         <th class="centered">Score</th>
+                        <th class="centered">Image</th>
                         <th class="left"></th>
                         </tr>
                     </thead>
@@ -90,9 +93,10 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
                                 <td><input type="text" [(ngModel)]="toAdd.section" (keydown)="onAddKeypress($event)"></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
                                 <td class="left">
-                                <button class="btn" (click)="addSave()" class="btn btn-primary">add</button>
-                                <button class="btn" (click)="toAdd=null" class="btn btn-outline">cancel</button>
+                                    <button class="btn" (click)="addSave()" class="btn btn-primary">add</button>
+                                    <button class="btn" (click)="toAdd=null" class="btn btn-outline">cancel</button>
                                 </td>
                             </tr>
                         }
@@ -102,25 +106,37 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
                                 <td><input type="text" [(ngModel)]="entry.english"></td>
                                 <td><input type="text" [(ngModel)]="entry.section"></td>
                                 <td class="left phase">
-                                {{entry.g2ePhase}} &rarr;<br />
-                                {{entry.e2gPhase}} &larr;
+                                    {{entry.g2ePhase}} &rarr;<br />
+                                    {{entry.e2gPhase}} &larr;
                                 </td>
                                 <td title="{{entry.example}}"
                                 [ngStyle]="{
                                 'color': 'rgb(' + (230 - 10 * (entry.score||0)) + ',0,' + (230 - 10 * (entry.score||0)) + ')',
                                 'font-weight': 300 + 40 * (entry.score||0)
-                                }">{{entry.score}}</td>
+                                }">
+                                    {{entry.score}}
+                                </td>
+                                <td class="centered image-status">
+                                    @if (hasImage(entry)) {
+                                        <span class="badge badge-success">Bild</span>
+                                    } @else {
+                                        <span class="badge badge-outline">kein Bild</span>
+                                    }
+                                </td>
                                 <td class="left">
-                                <audio #audio></audio>
-                                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src=playUrl(entry.english);audio.play()">
-                                    <cds-icon shape="play"></cds-icon>
-                                </button>
-                                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="reset(entry)">
-                                    <cds-icon shape="refresh" direction="down"></cds-icon>
-                                </button>
-                                <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="delete(entry)">
-                                    <cds-icon shape="trash"></cds-icon>
-                                </button>
+                                    <audio #audio></audio>
+                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="audio.src=playUrl(entry.english);audio.play()">
+                                        <cds-icon shape="play"></cds-icon>
+                                    </button>
+                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="reset(entry)">
+                                        <cds-icon shape="refresh" direction="down"></cds-icon>
+                                    </button>
+                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="openImageModal(entry)" [disabled]="!canManageImage(entry)" title="Bild verwalten">
+                                        <cds-icon shape="image"></cds-icon>
+                                    </button>
+                                    <button type="button" class="btn btn-icon btn-sm btn-link btn-cell" (click)="delete(entry)">
+                                        <cds-icon shape="trash"></cds-icon>
+                                    </button>
                                 </td>
                             </tr>
                         }
@@ -141,6 +157,36 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
         }
 
         <app-vocabulary-exercise-result [result]="exerciseResult" (finished)="exerciseResult = null"></app-vocabulary-exercise-result>
+
+        @if (imageModalEntry) {
+            <div class="modal-backdrop" aria-hidden="true"></div>
+        }
+
+        @if (imageModalEntry) {
+            <div class="modal">
+                <div class="modal-dialog" role="dialog" aria-hidden="true">
+                    <div class="modal-content image-modal">
+                        <div class="modal-header">
+                            <button aria-label="Close" class="close" type="button" (click)="cancelImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy()">
+                                <cds-icon aria-hidden="true" shape="close"></cds-icon>
+                            </button>
+                            <h3 class="modal-title">Set Image</h3>
+                        </div>
+                        <div class="modal-body">
+                            <app-vocabulary-image
+                                [vocabulary]="imageModalVocabulary ?? ''"
+                                (imageUpdated)="onVocabularyImageUpdated($event)">
+                            </app-vocabulary-image>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-outline" type="button" (click)="cancelImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy()">cancel</button>
+                            <button class="btn btn-danger" type="button" (click)="saveImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy() || !imageModalComponent?.hasPendingChanges()">save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
     `,
     styles: [`
         h1 {
@@ -225,6 +271,10 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
         }
 
         .centered {
+            text-align: center;
+        }
+
+        .centered:not(td):not(th) {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -244,6 +294,30 @@ import { VocabularyExerciseResult } from "src/app/models/vocabulary-exercise-res
         .pagination td.selected {
             background:#eee;
         }
+
+        .image-status .badge {
+            display: inline-block;
+            min-width: 4.5rem;
+            text-transform: none;
+        }
+
+        .image-status .badge-outline {
+            border: 1px solid #ccc;
+            color: #fff;
+            background: #777;
+        }
+
+        .image-modal {
+            max-width: none;
+            width: 100%;
+        }
+
+        .image-modal .modal-body {
+            padding: 1.5rem;
+            max-height: calc(80vh - 3rem);
+            overflow-y: auto;
+        }
+
     `]
 })
 export class VocabularyListComponent implements OnInit {
@@ -269,6 +343,20 @@ export class VocabularyListComponent implements OnInit {
 
     exerciseResult: VocabularyExerciseResult | null = null;
 
+    imagePresence: Record<string, boolean> = {};
+    imageModalEntry: VocabularyEntry | null = null;
+    imageModalVocabulary: string | null = null;
+    imageModalSaving: boolean = false;
+
+    hasImage(entry: VocabularyEntry): boolean {
+        const key = this.vocabularyKeyFromEntry(entry);
+        return key.length > 0 && this.imagePresence[key] === true;
+    }
+
+    canManageImage(entry: VocabularyEntry): boolean {
+        return this.vocabularyKeyFromEntry(entry).length > 0;
+    }
+
     get sections(): string[] {
         return structuredClone(this.vocabulary)
                                 .map(v => v.section)
@@ -282,6 +370,7 @@ export class VocabularyListComponent implements OnInit {
     }
 
     @ViewChildren('addGermanInput') addGermanInput: any;
+    @ViewChild(VocabularyImageComponent) imageModalComponent?: VocabularyImageComponent;
 
     private backendService = inject(BackendService);
     private route = inject(ActivatedRoute);
@@ -289,7 +378,12 @@ export class VocabularyListComponent implements OnInit {
     ngOnInit(): void {
         this.route.params.pipe(
             map(params => params['id']),
-            tap(_ => {this.page = null; this.loading = true; }),
+            tap(_ => {
+                this.page = null;
+                this.loading = true;
+                this.imagePresence = {};
+                this.cancelImageModal();
+            }),
             switchMap(id => this.backendService.getPage(id)),
             tap(_ => this.loading = false)
         ).subscribe({
@@ -297,6 +391,7 @@ export class VocabularyListComponent implements OnInit {
                 this.page = page;
                 this.vocabulary = VocabularyEntry.parseVocabulary(this.page!!.content).reverse();
                 this.refresh();
+                this.fetchImagePresence();
             },
             error: error => { this.error = error; this.loading = false; }
         });
@@ -404,6 +499,100 @@ export class VocabularyListComponent implements OnInit {
         this.selected = filtered.slice(startIndex, endIndex);
     }
 
+    openImageModal(entry: VocabularyEntry) {
+        const key = this.vocabularyKeyFromEntry(entry);
+        if (key.length === 0) {
+            return;
+        }
+        this.imageModalSaving = false;
+        this.imageModalEntry = entry;
+        this.imageModalVocabulary = key;
+    }
+
+    cancelImageModal() {
+        this.imageModalComponent?.cancelChanges();
+        this.closeImageModalInternal();
+    }
+
+    saveImageModal() {
+        const component = this.imageModalComponent;
+        if (!component) {
+            this.closeImageModalInternal();
+            return;
+        }
+        if (!component.hasPendingChanges()) {
+            this.closeImageModalInternal();
+            return;
+        }
+        this.imageModalSaving = true;
+        component.saveChanges().pipe(
+            finalize(() => this.imageModalSaving = false)
+        ).subscribe({
+            next: () => {
+                this.fetchImagePresence();
+                this.closeImageModalInternal();
+            },
+            error: () => {
+                // keep dialog open, component displays error
+            }
+        });
+    }
+
+    private closeImageModalInternal() {
+        this.imageModalEntry = null;
+        this.imageModalVocabulary = null;
+        this.imageModalSaving = false;
+    }
+
+    onVocabularyImageUpdated(hasImage: boolean) {
+        if (!this.imageModalEntry) {
+            return;
+        }
+        if (this.imageModalVocabulary) {
+            this.imagePresence[this.imageModalVocabulary] = hasImage;
+        }
+        const currentKey = this.vocabularyKeyFromEntry(this.imageModalEntry);
+        if (currentKey.length > 0) {
+            this.imagePresence[currentKey] = hasImage;
+        }
+    }
+
+    private fetchImagePresence(): void {
+        const keys = Array.from(new Set(this.vocabulary
+            .map(entry => this.vocabularyKeyFromEntry(entry))
+            .filter(key => key.length > 0)));
+
+        if (keys.length === 0) {
+            this.imagePresence = {};
+            return;
+        }
+
+        this.backendService.getVocabularyImagePresence(keys).subscribe({
+            next: presence => {
+                const updated: Record<string, boolean> = {};
+                keys.forEach(key => {
+                    updated[key] = presence ? presence[key] === true : false;
+                });
+                this.imagePresence = updated;
+            },
+            error: () => {
+                // ignore presence errors to keep editing flow smooth
+            }
+        });
+    }
+
+    private vocabularyKeyFromEntry(entry: VocabularyEntry): string {
+        const english = (entry.english ?? '').trim();
+        if (english.length > 0) {
+            return english;
+        }
+        const german = (entry.german ?? '').trim();
+        if (german.length > 0) {
+            return german;
+        }
+        return '';
+    }
+
     exercise() {
         const train: VocabularyCard[] = [];
         this.selected.forEach(vocabulary => {
@@ -426,6 +615,7 @@ export class VocabularyListComponent implements OnInit {
             next: () => {
                 this.successSave = true;
                 timer(3000).subscribe(() => this.successSave = false);
+                this.fetchImagePresence();
                 finished?.();
             },
             error: error => { this.error = error; }
@@ -433,8 +623,15 @@ export class VocabularyListComponent implements OnInit {
     }
 
     delete(entry: VocabularyEntry) {
+        const key = this.vocabularyKeyFromEntry(entry);
         const index = this.vocabulary.indexOf(entry);
         this.vocabulary.splice(index, 1);
+        if (key.length > 0) {
+            delete this.imagePresence[key];
+        }
+        if (this.imageModalEntry === entry) {
+            this.cancelImageModal();
+        }
         this.refresh();
     }
 

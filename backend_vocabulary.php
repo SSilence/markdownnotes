@@ -47,6 +47,95 @@ function chatgptStory($words) {
     return $response;
 }
 
+function fetchPexelsImages($query, $perPage) {
+    $url = "https://api.pexels.com/v1/search?query=" . urlencode($query) . "&per_page=" . $perPage;
+
+    $context = stream_context_create([
+        'http' => [
+            'header' => "Authorization: " . CONFIG_PEXELS_API_KEY . "\r\nAccept: application/json",
+            'method' => 'GET'
+        ],
+    ]);
+
+    try {
+        $result = file_get_contents($url, false, $context);
+    } catch (Exception $e) {
+        error(500, "images error: " . $e->getMessage());
+    }
+
+    if ($result === false) {
+        error(500, "images error");
+    }
+
+    $response = json_decode($result, true);
+    if ($response === null || !isset($response['photos']) || !is_array($response['photos'])) {
+        return [];
+    }
+
+    $images = [];
+    foreach ($response['photos'] as $photo) {
+        if (!is_array($photo) || !isset($photo['src']) || !is_array($photo['src'])) {
+            continue;
+        }
+
+        $src = $photo['src'];
+        $chosen = isset($src['large']) ? $src['large'] : (isset($src['medium']) ? $src['medium'] : (isset($src['original']) ? $src['original'] : null));
+        if ($chosen === null && isset($photo['url'])) {
+            $chosen = $photo['url'];
+        }
+
+        if ($chosen !== null) {
+            $images[] = $chosen;
+        }
+    }
+
+    return $images;
+}
+
+function fetchUnsplashImages($query, $perPage) {
+    if (!defined("CONFIG_UNSPLASH_ACCESS_KEY") || CONFIG_UNSPLASH_ACCESS_KEY === "") {
+        return [];
+    }
+
+    $url = "https://api.unsplash.com/search/photos?query=" . urlencode($query) . "&per_page=" . $perPage;
+    $context = stream_context_create([
+        'http' => [
+            'header' => "Authorization: Client-ID " . CONFIG_UNSPLASH_ACCESS_KEY . "\r\nAccept: application/json",
+            'method' => 'GET'
+        ],
+    ]);
+
+    try {
+        $result = file_get_contents($url, false, $context);
+    } catch (Exception $e) {
+        error(500, "images unsplash error: " . $e->getMessage());
+    }
+
+    if ($result === false) {
+        error(500, "images unsplash error");
+    }
+
+    $response = json_decode($result, true);
+    if ($response === null || !isset($response['results']) || !is_array($response['results'])) {
+        return [];
+    }
+
+    $images = [];
+    foreach ($response['results'] as $photo) {
+        if (!is_array($photo) || !isset($photo['urls']) || !is_array($photo['urls'])) {
+            continue;
+        }
+
+        $urls = $photo['urls'];
+        $chosen = isset($urls['regular']) ? $urls['regular'] : (isset($urls['small']) ? $urls['small'] : (isset($urls['full']) ? $urls['full'] : null));
+        if ($chosen !== null) {
+            $images[] = $chosen;
+        }
+    }
+
+    return $images;
+}
+
 // text2speech
 router('GET', '/text2speech$', function() {
     $text = htmlspecialchars($_GET["text"]);
@@ -153,4 +242,134 @@ router('GET', '/vocabulary/dictionary$', function() {
     } else {
         json([]);
     }    
+});
+
+router('GET', '/images$', function() {
+    $qParam = isset($_GET["q"]) ? trim($_GET["q"]) : "";
+    if ($qParam === "") {
+        json([]);
+    }
+    $q = htmlspecialchars($qParam);
+
+    $perPage = isset($_GET["per_page"]) ? (int)$_GET["per_page"] : 20;
+    if ($perPage < 1) {
+        $perPage = 1;
+    } else if ($perPage > 80) {
+        $perPage = 80;
+    }
+
+    $pexelsImages = fetchPexelsImages($q, $perPage);
+    $unsplashImages = fetchUnsplashImages($q, $perPage);
+
+    $merged = [];
+    $maxCount = max(count($pexelsImages), count($unsplashImages));
+    for ($i = 0; $i < $maxCount; $i++) {
+        if (isset($pexelsImages[$i])) {
+            $merged[] = $pexelsImages[$i];
+        }
+        if (isset($unsplashImages[$i])) {
+            $merged[] = $unsplashImages[$i];
+        }
+    }
+
+    $images = array_values(array_unique($merged));
+
+    json($images);
+});
+
+router('POST', '/image$', function() {
+    $data = body();
+    $vocabulary = isset($data['vocabulary']) ? trim($data['vocabulary']) : "";
+    $imageBase64 = isset($data['image']) ? $data['image'] : "";
+
+    if ($vocabulary === "" || $imageBase64 === "") {
+        error(400, "invalid payload");
+    }
+
+    $sanitizedName = sanitizeFilename($vocabulary);
+    if ($sanitizedName === "") {
+        error(400, "invalid vocabulary");
+    }
+
+    $imageBase64 = preg_replace('/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/', '', $imageBase64);
+    $imageData = base64_decode($imageBase64, true);
+    if ($imageData === false) {
+        error(400, "invalid image");
+    }
+
+    if (!file_exists(CONFIG_IMAGES_PATH)) {
+        mkdir(CONFIG_IMAGES_PATH, 0777, true);
+    }
+
+    $filename = CONFIG_IMAGES_PATH . $sanitizedName . ".jpg";
+    if (file_put_contents($filename, $imageData) === false) {
+        error(500, "unable to save image");
+    }
+
+    json(array(
+        "success" => true,
+        "filename" => basename($filename)
+    ));
+});
+
+router('GET', '/image/(?<vocabulary>.+)$', function($params) {
+    $vocabulary = isset($params['vocabulary']) ? urldecode($params['vocabulary']) : "";
+    $sanitizedName = sanitizeFilename($vocabulary);
+    if ($sanitizedName === "") {
+        error(404, "image not found");
+    }
+
+    $filename = CONFIG_IMAGES_PATH . $sanitizedName . ".jpg";
+    if (!file_exists($filename)) {
+        error(404, "image not found");
+    }
+
+    header('Content-Type: image/jpeg');
+    readfile($filename);
+});
+
+router('DELETE', '/image/(?<vocabulary>.+)$', function($params) {
+    $vocabulary = isset($params['vocabulary']) ? urldecode($params['vocabulary']) : "";
+    $sanitizedName = sanitizeFilename($vocabulary);
+    if ($sanitizedName === "") {
+        error(404, "image not found");
+    }
+
+    $filename = CONFIG_IMAGES_PATH . $sanitizedName . ".jpg";
+    if (!file_exists($filename)) {
+        error(404, "image not found");
+    }
+
+    if (!unlink($filename)) {
+        error(500, "unable to delete image");
+    }
+
+    json(array(
+        "success" => true
+    ));
+});
+
+router('POST', '/image_has$', function() {
+    $data = body();
+    if (!is_array($data)) {
+        error(400, "invalid payload");
+    }
+
+    $result = array();
+    foreach ($data as $item) {
+        if (!is_string($item)) {
+            continue;
+        }
+
+        $sanitizedName = sanitizeFilename($item);
+        if ($sanitizedName === "") {
+            $result[$item] = false;
+            continue;
+        }
+
+        $filename = CONFIG_IMAGES_PATH . $sanitizedName . ".jpg";
+        $result[$item] = file_exists($filename);
+    }
+
+    json($result);
 });
