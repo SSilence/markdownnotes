@@ -3,11 +3,11 @@ import { HomeComponent } from './components/home.component';
 import { PageEditComponent } from './components/page/page-edit.component';
 import { PageShowComponent } from './components/page/page-show.component';
 import { FilesComponent } from './components/files.component';
-import { PasswordsComponent } from './components/passwords.component';
 import { SearchComponent } from './components/page/search.component';
 import { VocabularyComponent } from './components/vocabulary/vocabulary.component';
 import { VocabularyListComponent } from './components/vocabulary/vocabulary-list.component';
 import { EmailComponent } from './components/email/email.component';
+import { PasswordsComponent } from './components/passwords/passwords.component';
 
 export const routes: Routes = [
       {
