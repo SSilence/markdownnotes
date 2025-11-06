@@ -56,7 +56,23 @@ export class PasswordManagementService {
 
     generateRandomPassword(): string {
         const alphabet = "123456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
-        return Array.from({ length: 20 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+        const length = 20;
+        const result: string[] = new Array(length);
+        const alphabetLen = alphabet.length; // 57
+        const maxUnbiased = 256 - (256 % alphabetLen);
+        let i = 0;
+        while (i < length) {
+            const randomBytes = new Uint8Array(32);
+            crypto.getRandomValues(randomBytes);
+            for (let b of randomBytes) {
+                if (b < maxUnbiased) {
+                    const idx = b % alphabetLen;
+                    result[i++] = alphabet[idx];
+                    if (i === length) break;
+                }
+            }
+        }
+        return result.join('');
     }
 
     encryptEntries(entries: PasswordEntry[], password: string): Observable<string> {
