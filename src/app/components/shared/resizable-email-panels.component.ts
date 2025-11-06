@@ -159,10 +159,4 @@ export class ResizableEmailPanelsComponent implements OnInit, OnDestroy {
       this.mouseUpListener = undefined;
     }
   }
-
-  resetPanelWidths(): void {
-    this.storageService.deletePanelWidths();
-    this.panelWidths = this.storageService.getPanelWidths();
-    this.emitPanelWidths();
-  }
 }

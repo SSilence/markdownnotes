@@ -27,17 +27,4 @@ export class FileUtilsService {
     );
   }
 
-  /**
-   * Validate file size against a limit
-   */
-  isFileSizeValid(file: File, maxSizeBytes: number): boolean {
-    return maxSizeBytes === 0 || file.size <= maxSizeBytes;
-  }
-
-  /**
-   * Calculate total size of files
-   */
-  getTotalFileSize(files: File[]): number {
-    return files.reduce((total, file) => total + file.size, 0);
-  }
 }

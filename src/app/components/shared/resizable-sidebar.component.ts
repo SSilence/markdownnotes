@@ -130,15 +130,4 @@ export class ResizableSidebarComponent implements OnInit, OnDestroy {
       this.mouseUpListener = undefined;
     }
   }
-
-  resetWidth(): void {
-    this.currentWidth = this.defaultWidth;
-    this.emitWidth();
-
-    if (this.storageKey === 'sidebar_width') {
-      this.storageService.deleteSidebarWidth();
-    } else {
-      localStorage.removeItem(this.storageKey);
-    }
-  }
 }

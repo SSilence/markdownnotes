@@ -4,12 +4,6 @@ import { ClipboardService } from 'ngx-clipboard';
 import { PasswordEntry } from '../models/password-entry';
 import { PasswordManagementService } from './password-management.service';
 
-export interface DecryptedPasswordEntry {
-    service: string;
-    username: string;
-    password: string;
-}
-
 @Injectable({
     providedIn: 'root'
 })

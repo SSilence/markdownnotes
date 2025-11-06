@@ -74,13 +74,6 @@ export class StorageService {
   }
 
   /**
-   * Check if panel widths are stored in cookie
-   */
-  hasPanelWidths(): boolean {
-    return this.cookieService.check(this.PANEL_WIDTHS_KEY);
-  }
-
-  /**
    * Get sidebar width from cookie, or return default value if not found
    */
   getSidebarWidth(): number {

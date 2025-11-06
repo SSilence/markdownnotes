@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, forwardRef, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, forwardRef, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
@@ -20,22 +20,15 @@ import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/f
         [(ngModel)]="value"
         (input)="onInput()"
         (blur)="onTouched()"
-        (click)="onClicked()"
         [attr.rows]="minRows"
         [ngClass]="['resize-none overflow-hidden min-h-[1.5em]', styleClass]">
       </textarea>
   `
 })
 export class AutoTextareaComponent implements ControlValueAccessor, AfterViewInit {
-  @Input() label: string = '';
   @Input() placeholder: string = '';
   @Input() minRows: number = 1;
   @Input() styleClass: string = '';
-  @Output() clicked = new EventEmitter<void>();
-  
-  onClicked(): void {
-    this.clicked.emit();
-  }
 
   @ViewChild('plainTextarea') plainTextarea?: ElementRef<HTMLTextAreaElement>;
 

@@ -9,7 +9,6 @@ import { FormsModule } from "@angular/forms";
 import { VocabularyEditComponent } from "./vocabulary-edit.component";
 import { RouterModule } from "@angular/router";
 import { VocabularyEntry } from "src/app/models/vocabulary-entry";
-import { VocabularyCard } from "src/app/models/vocabulary-card";
 
 @Component({
     selector: 'app-vocabulary',
@@ -220,13 +219,7 @@ export class VocabularyComponent implements OnInit {
             ...page,
             edit: edit,
             vocabularyCount: null,
-            phases: null,
-            newVocabularyCount: null,
-            exerciseVocabularyCount: null,
-            exercise: false,
-            exerciseVocabulary: [],
-            start: false,
-            startVocabulary: []
+            phases: null
         }
     }
 
@@ -236,12 +229,6 @@ interface PageEditable extends Page {
     edit: boolean;
     vocabularyCount: number | null;
     phases: PhaseStats[] | null;
-    newVocabularyCount: number | null;
-    exerciseVocabularyCount: number | null;
-    exercise: boolean;
-    exerciseVocabulary: VocabularyCard[];
-    start: boolean;
-    startVocabulary: VocabularyCard[];
 }
 
 interface PhaseStats {

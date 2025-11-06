@@ -108,7 +108,6 @@ export class PageEditComponent implements OnInit {
     showDeleteConfirmation = false;
     selectIconDialog = false;
     success = false;
-    showMenue = false;
 
     private route = inject(ActivatedRoute);
     private router = inject(Router);
