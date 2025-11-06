@@ -108,10 +108,12 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
                                             {{entry.score}}
                                         </td>
                                         <td class="text-center !p-2.5">
-                                            @if (hasImage(entry)) {
-                                                <span class="badge badge-success !p-2">Bild</span>
-                                            } @else {
-                                                <span class="badge badge-outline !p-2">kein Bild</span>
+                                            @if(canManageImage(entry)) {
+                                                <cds-icon shape="image" 
+                                                    [class.text-success]="hasImage(entry)"
+                                                    class="cursor-pointer text-gray-300"
+                                                    title="Image available"
+                                                    (click)="openImageModal(entry)"></cds-icon>
                                             }
                                         </td>
                                         <td class="!p-0 !pt-1 text-left">
@@ -121,9 +123,6 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
                                             </button>
                                             <button type="button" class="btn btn-icon btn-sm btn-link" (click)="reset(entry)">
                                                 <cds-icon shape="refresh" direction="down"></cds-icon>
-                                            </button>
-                                            <button type="button" class="btn btn-icon btn-sm btn-link" (click)="openImageModal(entry)" [disabled]="!canManageImage(entry)" title="Bild verwalten">
-                                                <cds-icon shape="image"></cds-icon>
                                             </button>
                                             <button type="button" class="btn btn-icon btn-sm btn-link" (click)="delete(entry)">
                                                 <cds-icon shape="trash"></cds-icon>
