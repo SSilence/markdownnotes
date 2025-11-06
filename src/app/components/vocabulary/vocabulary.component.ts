@@ -21,7 +21,7 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
         RouterModule
     ],
     template: `
-        <h1 class="text-4xl font-bold mt-0">Vocabulary</h1>
+        <h1 class="text-4xl font-bold !mt-0">Vocabulary</h1>
         @if (!page && !error) {
             <span class="spinner spinner-inline">Loading...</span>
         }
@@ -49,23 +49,22 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 
                             <li class="mt-2">
                             <table class="border-collapse border-0">
-                                <thead>
                                 <tr>
                                     @for (stats of page.phases; track stats) {
-                                    <th class="relative h-16 w-4 align-bottom border-0 inline-block mr-1">
+                                    <td class="relative h-16 w-5 align-bottom border-0 inline-block mr-1">
                                         <div [style.height]="stats.percent+'%'" class="absolute bottom-0 w-full bg-green-700 rounded-sm" [ngClass]="{'bg-gray-400': page.disabled}"></div>
-                                        <div class="absolute bottom-0 w-full text-center text-[0.7em] z-90" [ngClass]="{'text-gray-600': page.disabled}">{{stats.count}}</div>
-                                    </th>
+                                        <div class="absolute bottom-0 w-full text-center text-[0.7em] z-90"
+                                            [class.text-gray-600]="stats.percent===0 || page.disabled"
+                                            [class.text-white]="stats.percent>=10 && !page.disabled"
+                                            >{{stats.count}}</div>
+                                    </td>
                                     }
                                 </tr>
-                                </thead>
-                                <tbody>
                                 <tr>
                                     @for (stats of page.phases; track stats) {
-                                        <td class="border-0 w-4 text-center text-xs inline-block">{{stats.phase}}</td>
+                                        <td class="border-0 w-5 text-center text-xs inline-block mr-1">{{stats.phase}}</td>
                                     }
                                 </tr>
-                                </tbody>
                             </table>
                             </li>
                         }
