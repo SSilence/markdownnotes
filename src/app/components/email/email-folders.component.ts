@@ -116,12 +116,8 @@ export class EmailFoldersComponent implements OnInit {
 
   private sortFolders(folders: FolderDto[]): FolderDto[] {
     return folders.sort((a, b) => {
-      const priA = a.getPriority();
-      const priB = b.getPriority();
-      if (priA !== priB) {
-        return priA - priB;
-      }
-      return a.name.localeCompare(b.name);
+      const priorityDiff = a.getPriority() - b.getPriority();
+      return priorityDiff !== 0 ? priorityDiff : a.name.localeCompare(b.name);
     });
   }
 
@@ -192,23 +188,22 @@ export class EmailFoldersComponent implements OnInit {
     
     try {
       const dragData = event.dataTransfer?.getData('text/plain');
-      if (dragData) {
-        const data = JSON.parse(dragData);
-        const { messageId, sourceFolder, messageSubject, wasUnread } = data;
-        
-        // Don't allow dropping on the same folder
-        if (sourceFolder === targetFolder.name) {
-          return;
-        }
-        
-        // Emit event to parent component to handle the actual move
-        this.messageMovedToFolder.emit({
-          messageId: messageId,
-          sourceFolder: sourceFolder,
-          targetFolder: targetFolder.name,
-          wasUnread: wasUnread || false
-        });
+      if (!dragData) {
+        return;
       }
+
+      const { messageId, sourceFolder, wasUnread = false } = JSON.parse(dragData);
+      
+      if (sourceFolder === targetFolder.name) {
+        return;
+      }
+      
+      this.messageMovedToFolder.emit({
+        messageId,
+        sourceFolder,
+        targetFolder: targetFolder.name,
+        wasUnread
+      });
     } catch (error) {
       console.error('Error parsing drag data:', error);
       this.errorOccurred.emit('Failed to process dropped email');

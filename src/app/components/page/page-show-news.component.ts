@@ -39,21 +39,15 @@ export class PageShowNewsComponent implements OnChanges {
     }
 
     private parseNewsContent(): void {
-        if (!this.content) {
+        const jsonMatch = this.content?.match(/\[([\s\S]*)\]/);
+        if (!jsonMatch) {
             this.newsItems = [];
             return;
         }
 
         try {
-            // Extract JSON from content (it should be the content after the separator)
-            const jsonMatch = this.content.match(/\[([\s\S]*)\]/);
-            if (jsonMatch) {
-                this.newsItems = JSON.parse(jsonMatch[0]);
-                // Sort by timestamp, newest first
-                this.newsItems.sort((a, b) => b.timestamp - a.timestamp);
-            } else {
-                this.newsItems = [];
-            }
+            const items: NewsItem[] = JSON.parse(jsonMatch[0]);
+            this.newsItems = items.sort((a, b) => b.timestamp - a.timestamp);
         } catch (error) {
             console.error('Error parsing news content:', error);
             this.newsItems = [];

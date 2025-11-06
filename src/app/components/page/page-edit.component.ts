@@ -137,42 +137,46 @@ export class PageEditComponent implements OnInit {
     createNewPage() {
         const page = new Page();
         page.icon = 'file';
-        page.children = [];
-        page.parent = null;
-        page.content = '';
         return page;
     }
 
     save(show = false) {
+        if (!this.page) {
+            return;
+        }
         this.error = null;
-        this.backendService.savePage(this.page!).subscribe({
+        this.backendService.savePage(this.page).subscribe({
             next: page => {
                 if (show) {
                     this.router.navigate(['/page', page.id]);
-                } else {
-                    this.router.navigate(['/page', 'edit', page.id]);
-                    this.success = true;
-                    timer(3000).subscribe(() => this.success = false);
+                    return;
                 }
+                this.router.navigate(['/page', 'edit', page.id]);
+                this.success = true;
+                timer(3000).subscribe(() => this.success = false);
             },
             error: error => { this.error = error }
         });
     }
 
     delete() {
+        if (!this.page) {
+            return;
+        }
         this.error = null;
-        this.backendService.deletePage(this.page!).subscribe({
+        this.backendService.deletePage(this.page).subscribe({
             next: () => this.router.navigate(['/']),
             error: error => { this.error = error; this.showDeleteConfirmation = false; this.loading = false; }
         });
     }
 
     flattenPages(): Page[] {
-        return this.backendService.getAllPagesFlatten().filter(p => p.id != this.page!.id);
+        const currentId = this.page?.id;
+        return this.backendService.getAllPagesFlatten().filter(p => p.id !== currentId);
     }
 
     flattenPageTitle(page: Page): string {
-        const depth = Math.max(0, page.id!.split(BackendService.ID_SEPARATOR).length - 1);
+        const depth = Math.max(0, (page.id?.split(BackendService.ID_SEPARATOR).length ?? 1) - 1);
         const indent = depth > 0 ? `${'  '.repeat(depth)}-> ` : '';
         return `${indent}${page.title ?? ''}`;
     }

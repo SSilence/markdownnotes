@@ -1,10 +1,9 @@
-import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, CUSTOM_ELEMENTS_SCHEMA, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClarityModule } from '@clr/angular';
 import { FolderDto } from 'src/app/dtos/folder-dto';
 import { MessageDto } from 'src/app/dtos/message-dto';
 import { BackendService } from 'src/app/services/backend.service';
-import { StorageService } from 'src/app/services/storage.service';
 import { EmailFoldersComponent } from './email-folders.component';
 import { EmailMessagesComponent } from './email-messages.component';
 import { EmailMessageComponent } from './email-message.component';
@@ -140,7 +139,7 @@ export class EmailComponent implements OnInit {
   @ViewChild(EmailMessagesComponent) emailMessagesComponent!: EmailMessagesComponent;
   @ViewChild(EmailFoldersComponent) emailFoldersComponent!: EmailFoldersComponent;
 
-  constructor(private backendService: BackendService, private storageService: StorageService, private elementRef: ElementRef) { }
+  constructor(private backendService: BackendService) { }
 
   ngOnInit(): void {
     this.loadContacts();
@@ -188,41 +187,30 @@ export class EmailComponent implements OnInit {
   }
 
   onMessageStatusChanged(statusChange: {messageId: number, seen: boolean}): void {
-    // Update the selectedMessage status
-    if (this.selectedMessage && this.selectedMessage.id === statusChange.messageId) {
+    if (this.selectedMessage?.id === statusChange.messageId) {
       this.selectedMessage.isSeen = statusChange.seen;
     }
-    
-    // Notify EmailMessagesComponent to update the message in the list
-    if (this.emailMessagesComponent) {
-      this.emailMessagesComponent.updateMessageStatus(statusChange.messageId, statusChange.seen);
-    }
 
-    // Update folder unread count
-    if (this.emailFoldersComponent && this.selectedFolder) {
-      this.emailFoldersComponent.updateFolderCounts();
-    }
-  }
+    this.emailMessagesComponent?.updateMessageStatus(statusChange.messageId, statusChange.seen);
 
-  clearError(): void {
-    this.error = null;
+    if (this.selectedFolder) {
+      this.emailFoldersComponent?.updateFolderCounts();
+    }
   }
 
   onMessageMovedToFolder(event: {messageId: number, sourceFolder: string, targetFolder: string, wasUnread: boolean}): void {
     this.loading = true;
     this.backendService.moveEmail(event.messageId, event.sourceFolder, event.targetFolder).subscribe({
-      next: (response) => {
+      next: () => {
         this.loading = false;
 
-        if (this.emailFoldersComponent) {
-          this.emailFoldersComponent.updateFolderCounts();
+        this.emailFoldersComponent?.updateFolderCounts();
+
+        if (this.selectedFolder?.name === event.sourceFolder) {
+          this.emailMessagesComponent?.refreshMessages();
         }
 
-        if (this.selectedFolder && this.selectedFolder.name === event.sourceFolder && this.emailMessagesComponent) {
-          this.emailMessagesComponent.refreshMessages();
-        }
-
-        if (this.selectedMessage && this.selectedMessage.id === event.messageId) {
+        if (this.selectedMessage?.id === event.messageId) {
           this.selectedMessage = null;
         }
       },
@@ -236,38 +224,37 @@ export class EmailComponent implements OnInit {
   onMessageDeleted(event: {messageId: number, sourceFolder: string, targetFolder: string, wasUnread: boolean}): void {
     let nextMessage: MessageDto | null = null;
 
-    if (this.emailMessagesComponent && this.selectedFolder && this.selectedFolder.name === event.sourceFolder) {
-      const messageIndex = this.emailMessagesComponent.messages.findIndex(msg => msg.id === event.messageId);
+    const messagesComponent = this.emailMessagesComponent;
+    if (messagesComponent && this.selectedFolder?.name === event.sourceFolder) {
+      const messageIndex = messagesComponent.messages.findIndex(msg => msg.id === event.messageId);
       if (messageIndex > -1) {
-        if (this.selectedMessage && this.selectedMessage.id === event.messageId) {
+        if (this.selectedMessage?.id === event.messageId) {
           // Try to select the next message in the list (same index after deletion)
-          if (messageIndex < this.emailMessagesComponent.messages.length - 1) {
-            nextMessage = this.emailMessagesComponent.messages[messageIndex + 1];
+          if (messageIndex < messagesComponent.messages.length - 1) {
+            nextMessage = messagesComponent.messages[messageIndex + 1];
           }
           // If we deleted the last message, select the previous one
           else if (messageIndex > 0) {
-            nextMessage = this.emailMessagesComponent.messages[messageIndex - 1];
+            nextMessage = messagesComponent.messages[messageIndex - 1];
           }
         }
-        this.emailMessagesComponent.removeMessageOptimistically(event.messageId);
+        messagesComponent.removeMessageOptimistically(event.messageId);
       }
     }
 
     // Update selected message - either select next message or clear selection
-    if (this.selectedMessage && this.selectedMessage.id === event.messageId) {
+    if (this.selectedMessage?.id === event.messageId) {
       this.selectedMessage = nextMessage;
 
       // If we selected a new message, trigger selection in the messages component
       // Use skipBackendCall=true to avoid automatically marking as read during auto-selection
-      if (nextMessage && this.emailMessagesComponent) {
-        this.emailMessagesComponent.selectMessage(nextMessage);
+      if (nextMessage) {
+        this.emailMessagesComponent?.selectMessage(nextMessage);
       }
     }
 
     // Update folder counts for both source and target folders
-    if (this.emailFoldersComponent) {
-      this.emailFoldersComponent.updateFolderCounts();
-    }
+    this.emailFoldersComponent?.updateFolderCounts();
   }
 
   onMessageDeleteFailed(event: {messageId: number, sourceFolder: string, error: string}): void {
@@ -303,29 +290,22 @@ export class EmailComponent implements OnInit {
     this.showCompose = false;
     this.composeData = null;
     
-    this.error = null;
-    this.successMessage = 'Email sent successfully!';
+    this.setSuccessMessage('Email sent successfully!');
     
-    setTimeout(() => {
-      this.successMessage = null;
-    }, 5000);
+    this.emailFoldersComponent?.updateFolderCounts();
     
-    if (this.emailFoldersComponent) {
-      this.emailFoldersComponent.updateFolderCounts();
-    }
-    
-    if (this.selectedFolder && this.emailMessagesComponent) {
-      this.emailMessagesComponent.refreshMessages();
+    if (this.selectedFolder) {
+      this.emailMessagesComponent?.refreshMessages();
     }
   }
 
   onDraftSaved(event: { isNew: boolean }): void {
-    if (event.isNew && this.emailFoldersComponent) {
-      this.emailFoldersComponent.updateFolderCounts();
+    if (event.isNew) {
+      this.emailFoldersComponent?.updateFolderCounts();
     }
     
-    if (this.emailFoldersComponent.isDraftFolderSelected()) {
-      this.emailMessagesComponent.refreshMessages();
+    if (this.emailFoldersComponent?.isDraftFolderSelected()) {
+      this.emailMessagesComponent?.refreshMessages();
     }
   }
 
@@ -339,27 +319,23 @@ export class EmailComponent implements OnInit {
   }
 
   onFolderPurged(folderName: string): void {
-    // Update folder counts after purge
-    if (this.emailFoldersComponent) {
-      this.emailFoldersComponent.updateFolderCounts();
-    }
+    this.emailFoldersComponent?.updateFolderCounts();
 
     // Clear selected message since all messages were purged
     this.selectedMessage = null;
 
-    // Show success message
-    this.error = null;
-    this.successMessage = `Successfully purged all emails from "${folderName}" folder.`;
+    this.setSuccessMessage(`Successfully purged all emails from "${folderName}" folder.`);
+  }
 
+  onMarkedAllAsSeen(folderName: string): void {
+    this.emailFoldersComponent?.updateFolderCounts();
+  }
+
+  private setSuccessMessage(message: string): void {
+    this.error = null;
+    this.successMessage = message;
     setTimeout(() => {
       this.successMessage = null;
     }, 5000);
   }
-
-  onMarkedAllAsSeen(folderName: string): void {
-    if (this.emailFoldersComponent) {
-      this.emailFoldersComponent.updateFolderCounts();
-    }
-  }
-
 }

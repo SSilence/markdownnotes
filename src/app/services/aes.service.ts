@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, from, map, switchMap } from 'rxjs';
+import { Observable, from, map, switchMap, of } from 'rxjs';
 
 @Injectable()
 export class AesService {
@@ -10,10 +10,7 @@ export class AesService {
 
     encrypt(text: string, password: string): Observable<string> {
         if (!text) {
-            return new Observable(observer => {
-                observer.next("");
-                observer.complete();
-            });
+            return of("");
         }
 
         const salt = crypto.getRandomValues(new Uint8Array(AesService.SALT_LENGTH));
@@ -46,10 +43,7 @@ export class AesService {
 
     decrypt(secret: string, password: string): Observable<string> {
         if (!secret) {
-            return new Observable(observer => {
-                observer.next("");
-                observer.complete();
-            });
+            return of("");
         }
 
         return new Observable(observer => {

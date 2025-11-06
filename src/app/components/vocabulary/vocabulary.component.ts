@@ -36,7 +36,7 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
                         <img src="{{page.icon}}" class="max-h-44 max-w-32 object-cover mr-4" />
                     }
                     <div class="flex-1">
-                        <h2 class="!m-0 mb-1.5 text-2xl">{{page.title}}</h2>
+                        <h3 class="!m-0 !mb-1.5 text-2xl">{{page.title}}</h3>
                         <ul class="list-none p-0">
                         @if (page.vocabularyCount) {
                             <li><span class="font-bold">{{page.vocabularyCount}}</span> vocabularies</li>
@@ -143,24 +143,29 @@ export class VocabularyComponent implements OnInit {
         
         this.backendService.getAllVocabularyPages().subscribe({
             next: pages => {
-                const sortedPages = pages.map(page => this.toPageEditable(page, false))
-                                         .sort((a,b) => (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0));
-                this.pages = sortedPages.filter(p => !p.disabled).concat(sortedPages.filter(p => p.disabled))
-                this.pages.forEach(page => this.loadFullPage(page));
+                const sortedPages = pages
+                    .map(page => this.toPageEditable(page, false))
+                    .sort((a, b) => (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0));
+
+                const activePages = sortedPages.filter(p => !p.disabled);
+                const disabledPages = sortedPages.filter(p => p.disabled);
+
+                this.pages = [...activePages, ...disabledPages];
+                this.pages.forEach(editablePage => this.loadFullPage(editablePage));
             },
             error: error => this.error = error
         });
     }
 
     delete(page: Page) {
-        if (page.id == null) {
-            this.pages = this.pages.filter(page => page != page)
-        } else {
-            this.backendService.deletePage(page).subscribe({
-                next: () => this.pages = this.pages.filter(p => p.id != page.id),
-                error: error => this.error = error
-            });
+        if (!page.id) {
+            this.pages = this.pages.filter(p => p !== page);
+            return;
         }
+        this.backendService.deletePage(page).subscribe({
+            next: () => this.pages = this.pages.filter(p => p.id !== page.id),
+            error: error => this.error = error
+        });
     }
 
     add() {
@@ -170,38 +175,56 @@ export class VocabularyComponent implements OnInit {
     }
 
     save(page: PageEditable) {
+        const index = this.pages.indexOf(page);
+        if (index === -1) {
+            return;
+        }
         this.backendService.savePage(page).subscribe({
-            next: saved => this.pages[this.pages.indexOf(page)] = this.toPageEditable(saved, false),
+            next: saved => this.pages[index] = this.toPageEditable(saved, false),
             error: error => this.error = error
         });
     }
 
     loadFullPage(page: PageEditable) {
-        this.backendService.getPage(page.id!!).subscribe({
+        const pageId = page.id;
+        if (!pageId) {
+            return;
+        }
+        this.backendService.getPage(pageId).subscribe({
             next: loadedPage => {
                 page.content = loadedPage.content;
                 const vocabulary = VocabularyEntry.parseVocabulary(loadedPage.content);
                 page.vocabularyCount = vocabulary.length;
-                page.phases = [];
-                for(let i=0; i <= 6; i++) {
-                    const count = this.countPhases(vocabulary, i);
-                    page.phases.push({
-                        phase: i,
-                        count: count,
-                        percent: Math.round((count/((vocabulary.length)*2))*100)
-                    });
-                }
+                page.phases = this.buildPhaseStats(vocabulary);
             },
             error: error => this.error = error
-        })
+        });
     }
 
     finished(page: PageEditable): number {
-        return page.phases && page.phases[6] && !isNaN(page.phases[6].percent) ? page.phases[6].percent : 0;
+        const lastPhase = page.phases?.[6];
+        return lastPhase && !isNaN(lastPhase.percent) ? lastPhase.percent : 0;
     }
 
     private countPhases(vocabulary: VocabularyEntry[], phase: number): number {
-        return vocabulary.filter(v => v.e2gPhase == phase).length + vocabulary.filter(v => v.g2ePhase == phase).length;
+        return vocabulary.reduce((total, entry) => {
+            if (entry.e2gPhase === phase) {
+                total++;
+            }
+            if (entry.g2ePhase === phase) {
+                total++;
+            }
+            return total;
+        }, 0);
+    }
+
+    private buildPhaseStats(vocabulary: VocabularyEntry[]): PhaseStats[] {
+        const totalItems = vocabulary.length * 2;
+        return Array.from({ length: 7 }, (_, phase) => {
+            const count = this.countPhases(vocabulary, phase);
+            const percent = totalItems === 0 ? NaN : Math.round((count / totalItems) * 100);
+            return { phase, count, percent };
+        });
     }
 
     private createVocabularyParentPage() {
@@ -217,10 +240,10 @@ export class VocabularyComponent implements OnInit {
     private toPageEditable(page: Page, edit: boolean): PageEditable {
         return {
             ...page,
-            edit: edit,
+            edit,
             vocabularyCount: null,
             phases: null
-        }
+        };
     }
 
 }

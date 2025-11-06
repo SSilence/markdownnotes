@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, switchMap, map } from 'rxjs';
+import { Observable, forkJoin, switchMap, map, of } from 'rxjs';
 import { AesService } from './aes.service';
 import { PasswordEntry } from '../models/password-entry';
 
@@ -55,10 +55,8 @@ export class PasswordManagementService {
     }
 
     generateRandomPassword(): string {
-        return Array(20)
-            .fill("123456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz")
-            .map(x => x[Math.floor(Math.random() * x.length)])
-            .join('');
+        const alphabet = "123456789ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
+        return Array.from({ length: 20 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
     }
 
     encryptEntries(entries: PasswordEntry[], password: string): Observable<string> {
@@ -80,19 +78,15 @@ export class PasswordManagementService {
     private reencryptPassword(entry: PasswordEntry, newHash: string): Observable<PasswordEntry> {
         return this.aesService.decrypt(entry.password, this.currentHash).pipe(
             switchMap((decryptedPassword: string) => {
-                if (decryptedPassword) {
-                    return this.aesService.encrypt(decryptedPassword, newHash).pipe(
-                        map((encrypted: string) => {
-                            entry.password = encrypted;
-                            return entry;
-                        })
-                    );
-                } else {
-                    return new Observable<PasswordEntry>(observer => {
-                        observer.next(entry);
-                        observer.complete();
-                    });
+                if (!decryptedPassword) {
+                    return of(entry);
                 }
+                return this.aesService.encrypt(decryptedPassword, newHash).pipe(
+                    map((encrypted: string) => {
+                        entry.password = encrypted;
+                        return entry;
+                    })
+                );
             })
         );
     }
