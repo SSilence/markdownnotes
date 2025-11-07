@@ -33,14 +33,31 @@ type PendingAction = "none" | "select" | "remove";
                 </div>
             } @else {
                 <div class="flex flex-1 flex-col gap-3 w-full min-h-0">
-                    <input
-                        id="vocabulary-image-search-{{instanceId}}"
-                        type="text"
-                        placeholder="Search images"
-                        [(ngModel)]="searchTerm"
-                        (ngModelChange)="onSearchTermChange($event)"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md font-base bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    />
+                    <div class="flex gap-2 w-full items-stretch">
+                        <input
+                            id="vocabulary-image-search-{{instanceId}}"
+                            type="text"
+                            placeholder="Search images"
+                            [(ngModel)]="searchTerm"
+                            (ngModelChange)="onSearchTermChange($event)"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-md font-base bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                        />
+                        <input
+                            #uploadInput
+                            type="file"
+                            accept="image/*"
+                            class="hidden"
+                            (change)="onUploadSelected($event)"
+                        />
+                        <button
+                            type="button"
+                            class="btn btn-outline whitespace-nowrap"
+                            (click)="uploadInput.click()"
+                            [disabled]="isBusy()"
+                        >
+                            upload
+                        </button>
+                    </div>
 
                     <div class="flex flex-col gap-3 flex-1 min-h-0">
                         @if (loadingSuggestions) {
@@ -208,6 +225,42 @@ export class VocabularyImageComponent implements OnInit, OnChanges, OnDestroy {
                 this.errorMessage = "Could not prepare image.";
             }
         });
+    }
+
+    onUploadSelected(event: Event): void {
+        const input = event.target as HTMLInputElement | null;
+        const file = input?.files?.[0];
+
+        if (!file) {
+            return;
+        }
+        if (this.isBusy()) {
+            if (input) {
+                input.value = "";
+            }
+            return;
+        }
+        if (!file.type.startsWith("image/")) {
+            this.errorMessage = "Please select an image file.";
+            input.value = "";
+            return;
+        }
+
+        this.selectionProcessing = true;
+        this.errorMessage = null;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = typeof reader.result === "string" ? reader.result : "";
+            const base64 = result.includes(",") ? result.split(",")[1] : result;
+            this.planSelection(result, base64);
+            this.selectionProcessing = false;
+        };
+        reader.onerror = () => {
+            this.errorMessage = "Could not read selected file.";
+            this.selectionProcessing = false;
+        };
+        reader.readAsDataURL(file);
+        input.value = "";
     }
 
     removeImage(): void {
