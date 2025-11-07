@@ -21,7 +21,7 @@ type PendingAction = "none" | "select" | "remove";
         <div class="w-full">
             @if (previewImageUrl) {
                 <div class="flex flex-col gap-3 items-center">
-                    <img [src]="previewImageUrl" [alt]="vocabulary" class="max-h-[60vh] max-w-[60vh] object-contain" />
+                    <img [src]="previewImageUrl" [alt]="vocabulary" class="w-[60vh] h-[60vh] object-cover" />
                     <div class="flex justify-center gap-3">
                         @if (canRemoveImage) {
                             <button type="button" class="btn btn-danger-outline btn-sm inline-flex items-center gap-1" (click)="removeImage()" [disabled]="isBusy()" [attr.title]="removeButtonTitle">

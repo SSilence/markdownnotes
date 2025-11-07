@@ -149,7 +149,7 @@ import { VocabularyImageComponent } from "./vocabulary-image.component";
         @if (imageModalEntry) {
             <div class="fixed inset-0 bg-black/60 z-40" aria-hidden="true"></div>
             <div class="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-hidden="true">
-                <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[80vh] flex flex-col">
+                <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl !h-[95vh] flex flex-col">
                     <div class="flex items-center justify-between p-4 ">
                         <h3 class="!m-0 text-lg font-semibold">Image</h3>
                         <button aria-label="Close" class="close" type="button" (click)="cancelImageModal()" [disabled]="imageModalSaving || imageModalComponent?.isBusy()">
@@ -248,6 +248,14 @@ export class VocabularyListComponent implements OnInit {
     onCtrlSKey(event: Event): void {
         this.save(() => this.enrich());
         (event as KeyboardEvent).preventDefault();
+    }
+
+    @HostListener('document:keydown.escape', ['$event'])
+    onEscapeKey(event: Event): void {
+        if (this.imageModalEntry) {
+            this.cancelImageModal();
+            (event as KeyboardEvent).preventDefault();
+        }
     }
 
     add() {

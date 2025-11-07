@@ -33,7 +33,7 @@ import { BackendService } from 'src/app/services/backend.service';
           </button>
         </div>
         @if (loadingFolders) {
-          <div class="flex justify-center items-center flex-1 mt-4">
+          <div class="flex justify-center flex-1 mt-4">
             <clr-spinner clrSmall>Loading folders...</clr-spinner>
           </div>
         } @else {

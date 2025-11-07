@@ -53,18 +53,19 @@ function fetchPexelsImages($query, $perPage) {
     $context = stream_context_create([
         'http' => [
             'header' => "Authorization: " . CONFIG_PEXELS_API_KEY . "\r\nAccept: application/json",
-            'method' => 'GET'
+            'method' => 'GET',
+            // don't emit warnings on HTTP 4xx/5xx; allow reading error body
+            'ignore_errors' => true
         ],
     ]);
 
-    try {
-        $result = file_get_contents($url, false, $context);
-    } catch (Exception $e) {
-        error(500, "images error: " . $e->getMessage());
-    }
+    // suppress warnings from file_get_contents (e.g., 403) and handle via headers
+    $result = @file_get_contents($url, false, $context);
 
-    if ($result === false) {
-        error(500, "images error");
+    // Check HTTP status code if available
+    if ($result === false || (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $m) && (int)$m[1] >= 400)) {
+        // Gracefully degrade: no images from this provider
+        return [];
     }
 
     $response = json_decode($result, true);
@@ -101,18 +102,19 @@ function fetchUnsplashImages($query, $perPage) {
     $context = stream_context_create([
         'http' => [
             'header' => "Authorization: Client-ID " . CONFIG_UNSPLASH_ACCESS_KEY . "\r\nAccept: application/json",
-            'method' => 'GET'
+            'method' => 'GET',
+            // don't emit warnings on HTTP 4xx/5xx; allow reading error body
+            'ignore_errors' => true
         ],
     ]);
 
-    try {
-        $result = file_get_contents($url, false, $context);
-    } catch (Exception $e) {
-        error(500, "images unsplash error: " . $e->getMessage());
-    }
+    // suppress warnings from file_get_contents (e.g., 403) and handle via headers
+    $result = @file_get_contents($url, false, $context);
 
-    if ($result === false) {
-        error(500, "images unsplash error");
+    // Check HTTP status code if available
+    if ($result === false || (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $m) && (int)$m[1] >= 400)) {
+        // Gracefully degrade: no images from this provider
+        return [];
     }
 
     $response = json_decode($result, true);
@@ -251,15 +253,24 @@ router('GET', '/images$', function() {
     }
     $q = htmlspecialchars($qParam);
 
-    $perPage = isset($_GET["per_page"]) ? (int)$_GET["per_page"] : 20;
+    $perPage = isset($_GET["per_page"]) ? (int)$_GET["per_page"] : 40;
     if ($perPage < 1) {
         $perPage = 1;
     } else if ($perPage > 80) {
         $perPage = 80;
     }
 
-    $pexelsImages = fetchPexelsImages($q, $perPage);
-    $unsplashImages = fetchUnsplashImages($q, $perPage);
+    try {
+        $pexelsImages = fetchPexelsImages($q, $perPage);
+    } catch (Exception $e) {
+        $pexelsImages = [];    
+    }
+
+    try {
+        $unsplashImages = fetchUnsplashImages($q, $perPage);
+    } catch (Exception $e) {
+        $unsplashImages = [];
+    }
 
     $merged = [];
     $maxCount = max(count($pexelsImages), count($unsplashImages));

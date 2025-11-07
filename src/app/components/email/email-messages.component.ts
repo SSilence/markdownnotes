@@ -32,7 +32,7 @@ import { FormatDateAgoPipe } from 'src/app/pipes/format-date-ago.pipe';
                 [disabled]="markingAllAsSeen"
                 title="Mark all emails as read">
                 @if (markingAllAsSeen) {
-                  <clr-spinner clrInline clrSmall>Marking...</clr-spinner>
+                  <clr-spinner clrInline clrSmall class="!m-0">Marking...</clr-spinner>
                 } @else {
                   <cds-icon shape="eye"></cds-icon>
                 }
@@ -45,7 +45,7 @@ import { FormatDateAgoPipe } from 'src/app/pipes/format-date-ago.pipe';
                 [disabled]="purgingFolder"
                 title="Purge all emails from this folder">
                 @if (purgingFolder) {
-                  <clr-spinner clrInline clrSmall>Purging...</clr-spinner>
+                  <clr-spinner clrInline clrSmall class="!m-0">Purging...</clr-spinner>
                 } @else {
                   <cds-icon shape="trash"></cds-icon>
                 }
