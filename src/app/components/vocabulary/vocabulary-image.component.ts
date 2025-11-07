@@ -18,9 +18,9 @@ type PendingAction = "none" | "select" | "remove";
         FormsModule
     ],
     template: `
-        <div class="w-full">
+        <div class="w-full h-full flex flex-col gap-3">
             @if (previewImageUrl) {
-                <div class="flex flex-col gap-3 items-center">
+                <div class="flex flex-1 flex-col gap-3 items-center justify-center">
                     <img [src]="previewImageUrl" [alt]="vocabulary" class="w-[60vh] h-[60vh] object-cover" />
                     <div class="flex justify-center gap-3">
                         @if (canRemoveImage) {
@@ -32,7 +32,7 @@ type PendingAction = "none" | "select" | "remove";
                     </div>
                 </div>
             } @else {
-                <div class="flex flex-col gap-3 w-full">
+                <div class="flex flex-1 flex-col gap-3 w-full min-h-0">
                     <input
                         id="vocabulary-image-search-{{instanceId}}"
                         type="text"
@@ -42,31 +42,33 @@ type PendingAction = "none" | "select" | "remove";
                         class="w-full px-3 py-2 border border-gray-300 rounded-md font-base bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     />
 
-                    @if (loadingSuggestions) {
-                        <div class="flex items-center gap-2 text-sm text-gray-700">
-                            <span class="spinner spinner-sm spinner-inline"></span>
-                            <span>Searching for images...</span>
-                        </div>
-                    }
-
-                    @if (errorMessage) {
-                        <div class="text-sm text-red-700">
-                            {{ errorMessage }}
-                        </div>
-                    }
-
-                    @if (!loadingSuggestions && suggestions.length === 0 && !errorMessage) {
-                        <div class="text-sm text-gray-600">
-                            No matching images found. Adjust your search.
-                        </div>
-                    }
-
-                    <div class="grid grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-1" [class.opacity-60]="selectionProcessing || saving" [class.pointer-events-none]="selectionProcessing || saving">
-                        @for (url of suggestions; track url) {
-                            <button type="button" class="overflow-hidden rounded-lg transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" (click)="selectImage(url)" [disabled]="selectionProcessing || saving">
-                                <img [src]="url" alt="Image suggestion" class="w-full h-full object-cover" />
-                            </button>
+                    <div class="flex flex-col gap-3 flex-1 min-h-0">
+                        @if (loadingSuggestions) {
+                            <div class="flex items-center gap-2 text-sm text-gray-700">
+                                <span class="spinner spinner-sm spinner-inline"></span>
+                                <span>Searching for images...</span>
+                            </div>
                         }
+
+                        @if (errorMessage) {
+                            <div class="text-sm text-red-700">
+                                {{ errorMessage }}
+                            </div>
+                        }
+
+                        @if (!loadingSuggestions && suggestions.length === 0 && !errorMessage) {
+                            <div class="text-sm text-gray-600">
+                                No matching images found. Adjust your search.
+                            </div>
+                        }
+
+                        <div class="grid grid-cols-4 gap-3 flex-1 min-h-0 overflow-y-auto pr-1" [class.opacity-60]="selectionProcessing || saving" [class.pointer-events-none]="selectionProcessing || saving">
+                            @for (url of suggestions; track url) {
+                                <button type="button" class="overflow-hidden rounded-lg transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5" (click)="selectImage(url)" [disabled]="selectionProcessing || saving">
+                                    <img [src]="url" alt="Image suggestion" class="w-full h-full object-cover" />
+                                </button>
+                            }
+                        </div>
                     </div>
 
                     @if (selectionProcessing) {
