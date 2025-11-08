@@ -138,6 +138,46 @@ function fetchUnsplashImages($query, $perPage) {
     return $images;
 }
 
+function fetchPixabayImages($query, $perPage) {
+    if (!defined("CONFIG_PIXABAY_API_KEY") || CONFIG_PIXABAY_API_KEY === "") {
+        return [];
+    }
+
+    $url = "https://pixabay.com/api/?key=" . urlencode(CONFIG_PIXABAY_API_KEY) . "&q=" . urlencode($query) . "&image_type=photo&per_page=" . $perPage . "&safesearch=true";
+    $context = stream_context_create([
+        'http' => [
+            'header' => "Accept: application/json",
+            'method' => 'GET',
+            'ignore_errors' => true
+        ],
+    ]);
+
+    $result = @file_get_contents($url, false, $context);
+
+    if ($result === false || (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $m) && (int)$m[1] >= 400)) {
+        return [];
+    }
+
+    $response = json_decode($result, true);
+    if ($response === null || !isset($response['hits']) || !is_array($response['hits'])) {
+        return [];
+    }
+
+    $images = [];
+    foreach ($response['hits'] as $hit) {
+        if (!is_array($hit)) {
+            continue;
+        }
+
+        $chosen = isset($hit['largeImageURL']) ? $hit['largeImageURL'] : (isset($hit['webformatURL']) ? $hit['webformatURL'] : (isset($hit['previewURL']) ? $hit['previewURL'] : null));
+        if ($chosen !== null) {
+            $images[] = $chosen;
+        }
+    }
+
+    return $images;
+}
+
 // text2speech
 router('GET', '/text2speech$', function() {
     $text = htmlspecialchars($_GET["text"]);
@@ -253,7 +293,7 @@ router('GET', '/images$', function() {
     }
     $q = htmlspecialchars($qParam);
 
-    $perPage = isset($_GET["per_page"]) ? (int)$_GET["per_page"] : 40;
+    $perPage = isset($_GET["per_page"]) ? (int)$_GET["per_page"] : 30;
     if ($perPage < 1) {
         $perPage = 1;
     } else if ($perPage > 80) {
@@ -272,17 +312,13 @@ router('GET', '/images$', function() {
         $unsplashImages = [];
     }
 
-    $merged = [];
-    $maxCount = max(count($pexelsImages), count($unsplashImages));
-    for ($i = 0; $i < $maxCount; $i++) {
-        if (isset($pexelsImages[$i])) {
-            $merged[] = $pexelsImages[$i];
-        }
-        if (isset($unsplashImages[$i])) {
-            $merged[] = $unsplashImages[$i];
-        }
+    try {
+        $pixabayImages = fetchPixabayImages($q, $perPage);
+    } catch (Exception $e) {
+        $pixabayImages = [];
     }
 
+    $merged = array_merge($pexelsImages, $unsplashImages, $pixabayImages);
     $images = array_values(array_unique($merged));
 
     json($images);

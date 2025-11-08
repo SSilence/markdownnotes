@@ -8,6 +8,7 @@ define("CONFIG_CHATGPT_API_KEY", "");
 define("CONFIG_CHATGPT_MODEL", "");
 define("CONFIG_PONS_API_KEY", "");
 define("CONFIG_PEXELS_API_KEY", "");
+define("CONFIG_PIXABAY_API_KEY", "");
 define("CONFIG_UNSPLASH_ACCESS_KEY", "");
 
 define("CONFIG_IMAP_HOST", "");

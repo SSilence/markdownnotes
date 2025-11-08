@@ -369,7 +369,7 @@ export class VocabularyImageComponent implements OnInit, OnChanges, OnDestroy {
     private setupSearchSubscription(): void {
         this.search$.pipe(
             takeUntil(this.destroy$),
-            debounceTime(300),
+            debounceTime(800),
             switchMap(term => {
                 if (!term) {
                     this.loadingSuggestions = false;
