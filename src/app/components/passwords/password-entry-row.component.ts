@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClarityModule } from '@clr/angular';
@@ -89,8 +89,13 @@ export class PasswordEntryRowComponent {
     @Output() copyPassword = new EventEmitter<void>();
     @Output() togglePassword = new EventEmitter<void>();
     @Output() passwordChange = new EventEmitter<string>();
+    @ViewChild('serviceInput') serviceInput?: ElementRef<HTMLInputElement>;
 
     onPasswordInput(event: any): void {
         this.passwordChange.emit(event.target.value);
+    }
+
+    focusServiceInput(): void {
+        setTimeout(() => this.serviceInput?.nativeElement.focus(), 0);
     }
 }

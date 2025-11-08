@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, HostListener, inject, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ViewChildren, HostListener, inject, ElementRef, QueryList } from '@angular/core';
 import { ClipboardService } from 'ngx-clipboard'
 import { timer, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -193,6 +193,7 @@ export class PasswordsComponent implements OnInit, OnDestroy {
     @ViewChild('passwordInput') passwordInput?: ElementRef;
     @ViewChild('password2Input') password2Input?: ElementRef;
     @ViewChild('exportPasswordInput') exportPasswordInput?: ElementRef;
+    @ViewChildren(PasswordEntryRowComponent) entryRows?: QueryList<PasswordEntryRowComponent>;
     
     state: PasswordsState = { ...initialPasswordsState };
     
@@ -304,6 +305,10 @@ export class PasswordsComponent implements OnInit, OnDestroy {
             .reduce((a: any, b: any, i: any, arr: any) => 
                 (arr.filter((v: any) => v === a).length >= arr.filter((v: any) => v === b).length ? a : b), null);
         this.state.entries!.push(entry.withEditTrue());
+        setTimeout(() => {
+            this.scrollToBottom();
+            this.entryRows?.last?.focusServiceInput();
+        }, 0);
     }
 
     deleteEntry(index: number): void {
@@ -498,5 +503,9 @@ export class PasswordsComponent implements OnInit, OnDestroy {
                 this.state.errors.export = 'password validation error';
             }
         });
+    }
+
+    private scrollToBottom(): void {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     }
 }
