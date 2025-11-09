@@ -29,14 +29,14 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
 
         <div class="flex flex-wrap gap-4 mt-4">
         @for (page of pages; track page) {
-            <div class="border border-gray-400 bg-gray-200 p-4 w-96" [ngClass]="{'opacity-50': page.disabled}">
+            <div class="border border-gray-400 bg-gray-200 p-4 w-80" [ngClass]="{'opacity-50': page.disabled}">
             @if (!page.edit) {
                 <div class="flex">
                     @if (page.icon) {
                         <img src="{{page.icon}}" class="max-h-44 max-w-32 object-cover mr-4" />
                     }
-                    <div class="flex-1">
-                        <h3 class="!m-0 !mb-1.5 text-2xl">{{page.title}}</h3>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="!m-0 !mb-1.5 max-w-full min-w-0 truncate">{{page.title}}</h3>
                         <ul class="list-none p-0">
                         @if (page.vocabularyCount) {
                             <li><span class="font-bold">{{page.vocabularyCount}}</span> vocabularies</li>
