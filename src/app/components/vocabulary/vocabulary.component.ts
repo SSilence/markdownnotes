@@ -51,7 +51,7 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
                             <table class="border-collapse border-0">
                                 <tr>
                                     @for (stats of page.phases; track stats) {
-                                    <td class="relative h-16 w-5 align-bottom border-0 inline-block mr-1">
+                                    <td class="relative h-16 w-4 align-bottom border-0 inline-block mr-1">
                                         <div [style.height]="stats.percent+'%'" class="absolute bottom-0 w-full bg-green-700 rounded-sm" [ngClass]="{'bg-gray-400': page.disabled}"></div>
                                         <div class="absolute bottom-0 w-full text-center text-[0.7em] z-90"
                                             [class.text-gray-600]="stats.percent===0 || page.disabled"
@@ -62,7 +62,7 @@ import { VocabularyEntry } from "src/app/models/vocabulary-entry";
                                 </tr>
                                 <tr>
                                     @for (stats of page.phases; track stats) {
-                                        <td class="border-0 w-5 text-center text-xs inline-block mr-1">{{stats.phase}}</td>
+                                        <td class="border-0 w-4 text-center text-xs inline-block mr-1">{{stats.phase}}</td>
                                     }
                                 </tr>
                             </table>
