@@ -26,7 +26,7 @@ import { Contact } from './recipient-input.component';
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   template: `
-    <div class="h-screen h-[calc(100vh-60px)] bg-[var(--clr-global-app-background)] relative">
+    <div class="h-[calc(100vh-60px)] bg-[var(--clr-global-app-background)] relative">
       <!-- Loading Overlay -->
       @if (loading) {
         <div class="absolute top-0 left-0 right-0 bottom-0 bg-white/80 flex items-center justify-center z-[1000]">
